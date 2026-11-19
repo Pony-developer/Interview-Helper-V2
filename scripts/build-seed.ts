@@ -1,7 +1,7 @@
 /**
  * Builds supabase/seed.sql from the authored content in /content.
  *   npm run seed:build            → validate + write supabase/seed.sql
- *   npx supabase db push --include-seed   → apply to the linked project
+ *   npm run db:push    → supabase db push --remote --include-seed (applies to the linked project)
  * The SQL is idempotent: rows are upserted by slug.
  */
 import { writeFileSync } from "node:fs";

@@ -13,8 +13,8 @@
     "typecheck": "tsc --noEmit",
     "seed:build": "node scripts/register-tasks.mjs && tsx scripts/build-seed.ts",
     "icons": "tsx scripts/generate-icons.ts",
-    "db:push": "supabase db push --include-seed",
-    "db:types": "supabase gen types typescript --linked --schema public > src/lib/supabase/database.types.ts"
+    "db:push": "supabase db push --remote --include-seed",
+    "db:types": "supabase gen types --lang=typescript --remote --schema public > src/lib/supabase/database.types.ts"
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.20.0",

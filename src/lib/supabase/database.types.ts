@@ -1,7 +1,7 @@
 /**
  * Database types for the `public` schema.
  * Hand-maintained to match supabase/migrations. Regenerate with:
- *   npx supabase gen types typescript --linked --schema public > src/lib/supabase/database.types.ts
+ *   npm run db:types   (supabase gen types --lang=typescript --remote --schema public)
  */
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
