@@ -31,7 +31,8 @@
     "closeMenu": "Close menu",
     "signIn": "Sign in",
     "signOut": "Sign out",
-    "account": "Account"
+    "account": "Account",
+    "admin": "Admin"
   },
   "auth": {
     "title": "Sign in to Assay",

@@ -96,6 +96,44 @@ Open http://localhost:3000. The public pages work even without Supabase: lecture
 
 > **Offline UI preview (development only).** `/dev/practice` → `/dev/analyzing` → `/dev/interview` runs the picker, loading screen and interview against local content, with mocked server calls and no sign-in. `/dev/playground` shows one coding ground per framework. These routes return 404 in production.
 
+## User roles
+
+Every user is either `user` (the default) or `admin`. The role lives in `public.profiles.role` and is added by `supabase/migrations/20261119190000_user_roles.sql`.
+
+**Make the first user an admin.** Sign in with Google once, so your account exists, then run:
+
+```bash
+npx supabase db query --remote -f supabase/snippets/make-first-user-admin.sql
+```
+
+Or paste `supabase/snippets/make-first-user-admin.sql` into Supabase Dashboard → SQL Editor. It promotes the earliest sign-up, is safe to run again, and prints the current admins.
+
+**Change roles later.** A signed-in admin calls the `set_user_role` RPC:
+
+```ts
+await supabase.rpc("set_user_role", { p_user_id: userId, p_role: "admin" });
+```
+
+It refuses to demote the last remaining admin.
+
+**Guard admin-only server code** with the helpers in `src/lib/auth/roles.ts`:
+
+```ts
+import { requireAdmin } from "@/lib/auth/roles";
+
+export default async function AdminPage() {
+  await requireAdmin(); // signed out → /login, non-admin → 404
+  // ...
+}
+```
+
+`isAdmin()` returns a boolean, and `getCurrentUser()` returns `{ id, role }` or `null`. Both are cached per request.
+
+**How it is enforced.**
+- Users cannot write the `role` column themselves: `authenticated` may update only `display_name` and `avatar_url`.
+- `public.is_admin()` is available to RLS policies. Admins can read every profile; everyone else sees only their own.
+- The header shows an "Admin" badge, but it is display only. Access is decided by the database and the server helpers.
+
 ## Deploying to Vercel
 
 1. Push the repository to GitHub and import it in Vercel. The framework preset is Next.js; keep the defaults.
@@ -149,6 +187,7 @@ Run `npm run seed:build` after editing content. It fails on duplicate slugs or a
   - DNS is checked at connect time (private, loopback, link-local and metadata ranges are rejected), which also defeats DNS rebinding.
   - Redirects are re-checked on every hop. Responses are capped at 8 s and 1.5 MB.
 - **Login redirects.** The `next` parameter must be a same-origin relative path.
+- **Roles.** Users cannot change their own role. Promotions go through the admin-only `set_user_role` RPC, which keeps at least one admin (see [User roles](#user-roles)).
 - **Trust model for coding tasks.** Test results are reported by the browser, which is fine for a self-preparation tool.
 
 ## Design

@@ -13,7 +13,9 @@ export function HeaderAuth() {
   const t = useTranslations("nav");
   const [user, setUser] = useState<User | null | undefined>(configured ? undefined : null);
   const [open, setOpen] = useState(false);
+  const [role, setRole] = useState<{ userId: string; isAdmin: boolean } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const userId = user?.id;
 
   useEffect(() => {
     if (!configured) return;
@@ -22,6 +24,24 @@ export function HeaderAuth() {
     const { data } = supabase.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null));
     return () => data.subscription.unsubscribe();
   }, []);
+
+  // Role is display-only here; access control happens in the database (RLS) and on the server.
+  useEffect(() => {
+    if (!userId) return;
+    let alive = true;
+    createClient()
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (alive) setRole({ userId, isAdmin: data?.role === "admin" });
+      });
+    return () => {
+      alive = false;
+    };
+  }, [userId]);
+  const isAdmin = role?.userId === userId && role?.isAdmin;
 
   useEffect(() => {
     if (!open) return;
@@ -83,7 +103,12 @@ export function HeaderAuth() {
           role="menu"
           className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-paper-3 bg-white py-2 text-ink shadow-lift"
         >
-          <p className="truncate px-4 pb-2 pt-1 text-xs text-ink-muted">{name}</p>
+          <p className="flex items-center gap-2 px-4 pb-2 pt-1 text-xs text-ink-muted">
+            <span className="truncate">{name}</span>
+            {isAdmin ? (
+              <span className="shrink-0 rounded-full bg-gold-100 px-2 py-0.5 font-semibold text-gold-800">{t("admin")}</span>
+            ) : null}
+          </p>
           <Link role="menuitem" href="/practice" className="block px-4 py-2 text-sm hover:bg-paper" onClick={() => setOpen(false)}>
             {t("practice")}
           </Link>

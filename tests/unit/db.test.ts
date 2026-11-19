@@ -16,11 +16,17 @@ create role anon nologin;
 create role authenticated nologin;
 create role service_role nologin bypassrls;
 grant usage on schema public to anon, authenticated, service_role;
-alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
-alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
-alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+-- Like newer hosted Supabase projects: no default table grants for anon/authenticated,
+-- so the migrations must grant every privilege the app relies on.
+alter default privileges in schema public grant all on tables to service_role;
+alter default privileges in schema public grant all on sequences to service_role;
 create schema auth;
-create table auth.users (id uuid primary key, raw_user_meta_data jsonb not null default '{}'::jsonb);
+create table auth.users (
+  id uuid primary key,
+  email text,
+  raw_user_meta_data jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
 create function auth.uid() returns uuid language sql stable as $$
   select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
 $$;
@@ -48,8 +54,10 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
     const dir = path.resolve("supabase/migrations");
     for (const file of readdirSync(dir).sort()) await db.exec(readFileSync(path.join(dir, file), "utf8"));
     await db.exec(readFileSync(seedPath, "utf8"));
-    await db.exec(`insert into auth.users (id, raw_user_meta_data) values
-      ('${USER_A}', '{"full_name":"Ada"}'), ('${USER_B}', '{"full_name":"Bob"}');`);
+    // Ada signs up first, so she is the one the make-first-user-admin snippet promotes.
+    await db.exec(`insert into auth.users (id, email, raw_user_meta_data, created_at) values
+      ('${USER_A}', 'ada@example.test', '{"full_name":"Ada"}', '2026-01-01T00:00:00Z'),
+      ('${USER_B}', 'bob@example.test', '{"full_name":"Bob"}', '2026-02-01T00:00:00Z');`);
   }, 60_000);
 
   afterAll(async () => db?.close());
@@ -166,6 +174,59 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
       await db.query(`insert into public.interview_items (interview_id, task_id, position) values ($1, $2, 0)`, [iv.rows[0].id, task.id]);
       const res = await db.query<{ r: { score: number; grade: string } }>(`select public.finish_interview($1) as r`, [iv.rows[0].id]);
       expect(res.rows[0].r).toEqual({ score: 0, grade: "ORE" });
+    });
+  });
+
+  describe("user roles", () => {
+    const roleOf = async (id: string) =>
+      (await db.query<{ role: string }>(`select role from public.profiles where id = $1`, [id])).rows[0]?.role;
+
+    it("gives every new user the 'user' role and blocks self-promotion", async () => {
+      expect(await roleOf(USER_A)).toBe("user");
+      expect(await roleOf(USER_B)).toBe("user");
+
+      await asUser(USER_B, async () => {
+        const own = await db.query<{ is_admin: boolean }>(`select public.is_admin() as is_admin`);
+        expect(own.rows[0].is_admin).toBe(false);
+
+        // Profile fields stay editable; the role column does not.
+        await db.query(`update public.profiles set display_name = 'Bobby' where id = $1`, [USER_B]);
+        await expect(db.query(`update public.profiles set role = 'admin' where id = $1`, [USER_B])).rejects.toThrow(/permission denied/);
+        await expect(db.query(`select public.set_user_role($1, 'admin')`, [USER_B])).rejects.toThrow(/Only admins/);
+
+        // Without the admin role, only the user's own profile is visible.
+        const visible = await db.query(`select id from public.profiles`);
+        expect(visible.rows).toHaveLength(1);
+      });
+      expect(await roleOf(USER_B)).toBe("user");
+
+      await asUser(null, async () => {
+        await expect(db.query(`select public.is_admin()`)).rejects.toThrow(/permission denied/);
+      });
+    });
+
+    it("promotes the earliest sign-up with the make-first-user-admin snippet", async () => {
+      const snippet = readFileSync(path.resolve("supabase/snippets/make-first-user-admin.sql"), "utf8");
+      await db.exec(snippet);
+      await db.exec(snippet); // idempotent
+      expect(await roleOf(USER_A)).toBe("admin");
+      expect(await roleOf(USER_B)).toBe("user");
+    });
+
+    it("lets admins read all profiles and manage roles, keeping at least one admin", async () => {
+      await asUser(USER_A, async () => {
+        const all = await db.query(`select id from public.profiles`);
+        expect(all.rows).toHaveLength(2);
+
+        await db.query(`select public.set_user_role($1, 'admin')`, [USER_B]);
+        await db.query(`select public.set_user_role($1, 'user')`, [USER_B]);
+        await expect(db.query(`select public.set_user_role($1, 'user')`, [USER_A])).rejects.toThrow(/At least one admin/);
+        await expect(db.query(`select public.set_user_role($1, 'admin')`, ["00000000-0000-4000-8000-0000000000ff"])).rejects.toThrow(
+          /User not found/,
+        );
+      });
+      expect(await roleOf(USER_A)).toBe("admin");
+      expect(await roleOf(USER_B)).toBe("user");
     });
   });
 });

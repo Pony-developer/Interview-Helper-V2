@@ -76,8 +76,15 @@ export type Database = {
         ];
       };
       profiles: {
-        Row: { id: string; display_name: string | null; avatar_url: string | null; created_at: string };
+        Row: {
+          id: string;
+          display_name: string | null;
+          avatar_url: string | null;
+          role: Database["public"]["Enums"]["app_role"];
+          created_at: string;
+        };
         Insert: never;
+        /** `role` is not updatable by clients: use the `set_user_role` RPC. */
         Update: { display_name?: string | null; avatar_url?: string | null };
         Relationships: [];
       };
@@ -179,6 +186,11 @@ export type Database = {
         Returns: Json;
       };
       mark_help_used: { Args: { p_item_id: string }; Returns: undefined };
+      is_admin: { Args: Record<string, never>; Returns: boolean };
+      set_user_role: {
+        Args: { p_user_id: string; p_role: Database["public"]["Enums"]["app_role"] };
+        Returns: undefined;
+      };
       finish_interview: { Args: { p_interview_id: string }; Returns: Json };
       get_interview_review: {
         Args: { p_interview_id: string };
@@ -201,6 +213,7 @@ export type Database = {
       };
     };
     Enums: {
+      app_role: "user" | "admin";
       task_kind: "quiz" | "practice";
       interview_method: "manual" | "url" | "llm_url" | "llm_text";
       interview_level: "junior" | "middle" | "senior";
