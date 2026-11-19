@@ -2,7 +2,7 @@
 skill: html
 title: "Semantic HTML: structure, forms and the parsing model"
 summary: "Why the right element matters, document landmarks, accessible forms, and how browsers parse and load HTML, scripts and styles."
-readingMinutes: 7
+readingMinutes: 9
 ---
 
 HTML gives content meaning. Browsers, search engines and assistive technology all read that meaning, so choosing the right element is a feature, not decoration.
@@ -65,6 +65,14 @@ Put critical CSS in the head, use `defer` for app scripts, and lazy-load below-t
 ## Metadata that matters
 
 `<html lang>`, `<meta charset="utf-8">`, `<meta name="viewport" content="width=device-width, initial-scale=1">`, a unique `<title>` and meta description, plus `alt` text on every meaningful image (`alt=""` for decorative ones).
+
+## Going deeper
+
+**Native dialogs.** `dialog.showModal()` puts the dialog in the top layer with a `::backdrop`, makes the rest of the page inert and closes on Escape. `show()` opens a plain, non-modal dialog. A `<form method="dialog">` inside closes it on submit.
+
+**Responsive images.** `srcset` lists candidates by width (`hero-960.jpg 960w`) and `sizes` tells the browser how wide the slot will be (`(min-width: 800px) 50vw, 100vw`). The browser multiplies the slot by the device pixel ratio and picks the smallest file that covers it. Without `sizes` it assumes 100vw and over-downloads.
+
+**Loading priority.** Keep the LCP image as a real `<img>` in the HTML so the preload scanner finds it early, and add `fetchpriority="high"`. Use `<link rel="preload">` for critical resources discovered late (such as CSS backgrounds or fonts), and never lazy-load the hero.
 
 ## Interview checklist
 

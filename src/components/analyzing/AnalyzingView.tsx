@@ -215,8 +215,8 @@ export function AnalyzingView({ catalog, deps, interviewPath = (id) => `/intervi
                 ? t.has(`errors.fetch_failed.${error.detail}` as never)
                   ? t(`errors.fetch_failed.${error.detail}` as never)
                   : t("errors.fetch_failed.network")
-                : error.code === "no_content"
-                  ? t("errors.no_content", { detail: error.detail ?? "" })
+                : error.code === "no_content" || error.code === "no_tech_skills"
+                  ? t(`errors.${error.code}`, { detail: error.detail ?? "" })
                   : t(`errors.${error.code}` as never)}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -226,7 +226,7 @@ export function AnalyzingView({ catalog, deps, interviewPath = (id) => `/intervi
                   <span>{t("actions.login")}</span>
                 </Link>
               ) : null}
-              {error.code === "fetch_failed" ? (
+              {error.code === "fetch_failed" || (error.code === "no_tech_skills" && request?.method !== "llm_text") ? (
                 <Link href="/practice?method=llm_text" className={pillClasses("gold")}>
                   <PillArrow />
                   <span>{t("actions.paste")}</span>

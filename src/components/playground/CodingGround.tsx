@@ -91,29 +91,33 @@ export function CodingGround({ practice, storageKey, initialFiles, readOnly, ref
     const draft = typeof window === "undefined" ? null : readDraft(storageKey);
     return { ...practice.files, ...(initialFiles ?? {}), ...(draft ?? {}) };
   });
-  const files = useMemo(() => buildSandpackFiles(practice, startFiles), [practice, startFiles]);
   const cfg = FRAMEWORK_CONFIG[practice.framework];
-  const visible = visibleFilesOf(practice);
+  // SandpackProvider resets its files whenever `files`, `customSetup` or `template` change by reference.
+  // Parents re-render often (the interview timer ticks every second), so these must be stable,
+  // or every re-render throws away the user's edits and triggers a rebuild.
+  const files = useMemo(() => buildSandpackFiles(practice, startFiles), [practice, startFiles]);
+  const customSetup = useMemo(
+    () => ({
+      dependencies: practice.dependencies ?? {},
+      devDependencies: TOOLCHAIN_DEV_DEPENDENCIES[practice.framework],
+    }),
+    [practice.dependencies, practice.framework],
+  );
+  const options = useMemo(() => {
+    const visible = visibleFilesOf(practice);
+    return {
+      visibleFiles: visible,
+      activeFile: practice.activeFile ?? visible[0],
+      recompileMode: "delayed" as const,
+      recompileDelay: 700,
+      autorun: true,
+      initMode: "immediate" as const,
+    };
+  }, [practice]);
 
   return (
     <div className={`overflow-hidden rounded-2xl border border-forest-800 bg-forest-950 shadow-lift ${className ?? ""}`}>
-      <SandpackProvider
-        template={cfg.template}
-        files={files}
-        theme={assayTheme}
-        customSetup={{
-          dependencies: practice.dependencies ?? {},
-          devDependencies: TOOLCHAIN_DEV_DEPENDENCIES[practice.framework],
-        }}
-        options={{
-          visibleFiles: visible,
-          activeFile: practice.activeFile ?? visible[0],
-          recompileMode: "delayed",
-          recompileDelay: 700,
-          autorun: true,
-          initMode: "immediate",
-        }}
-      >
+      <SandpackProvider template={cfg.template} files={files} theme={assayTheme} customSetup={customSetup} options={options}>
         <GroundInner
           ref={ref}
           practice={practice}

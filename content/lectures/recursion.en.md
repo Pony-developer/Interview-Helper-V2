@@ -2,7 +2,7 @@
 skill: recursion
 title: "Recursion: base cases, trees, memoisation and backtracking"
 summary: "How to design recursive functions that terminate, when recursion beats loops, how to avoid exponential blow-ups and stack overflows."
-readingMinutes: 7
+readingMinutes: 9
 ---
 
 A recursive function solves a problem by solving smaller versions of the **same** problem. It's the natural tool for trees, nested data and "try every option" searches.
@@ -75,6 +75,16 @@ function permutations(items) {
 ## Stack depth
 
 Each call uses a stack frame. JavaScript engines have no general tail-call optimisation, so recursion depth is limited (often around 10k frames). For very deep inputs, such as a 100k-long linked list, convert the recursion to a loop with an explicit stack.
+
+## Going deeper
+
+**No tail-call optimisation in practice.** The spec defines proper tail calls in strict mode, but only Safari implements them. In Chrome and Node.js a tail-recursive function still uses one stack frame per call.
+
+**Trampolines.** Instead of calling itself, each step returns a function (a thunk) for the next step, and a loop runs the thunks. The stack depth stays constant, at the cost of one allocation per step.
+
+**Unique permutations.** In backtracking with repeated values, keep a `Set` of the values already tried at the current position and skip repeats. That prunes duplicate branches instead of generating duplicates and filtering them afterwards.
+
+**Output-sensitive cost.** Generating all subsets or permutations can never be cheaper than the output itself: O(n·2ⁿ) for subsets and O(n·n!) for permutations, when each result is materialised as an array.
 
 ## Interview checklist
 

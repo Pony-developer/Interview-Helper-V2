@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
   // and Supabase cookie sessions straightforward. Revisit when Cache Components
   // becomes mandatory in the next major version.
   cacheComponents: false,
+  // Sandpack (2.20) doesn't survive Strict Mode's dev-only double mount: it registers two runtime
+  // clients on the same preview iframe and keeps the one that never receives messages, so edits are
+  // never sent to the bundler and tests don't re-run. Production never double-mounts; this keeps
+  // `next dev` behaving like production for the coding grounds.
+  reactStrictMode: false,
   poweredByHeader: false,
   turbopack: {
     rules: {

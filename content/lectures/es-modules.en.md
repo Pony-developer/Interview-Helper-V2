@@ -2,7 +2,7 @@
 skill: es-modules
 title: "ES modules: import/export, live bindings and code splitting"
 summary: "How ESM differs from CommonJS, named vs default exports, live bindings, evaluation order, circular imports and dynamic import()."
-readingMinutes: 6
+readingMinutes: 8
 ---
 
 ES modules (ESM) are JavaScript's standard module system, used natively by browsers, Node.js and every modern bundler.
@@ -63,6 +63,16 @@ const { Chart } = await import("./chart.js"); // returns a promise of the namesp
 ```
 
 Use it for code splitting (load heavy features on demand) and for conditional loading. Bundlers create a separate chunk for each dynamic import.
+
+## Going deeper
+
+**Evaluation is a depth-first walk.** The loader evaluates dependencies before their importers, in import order, and each module only once. A module that is still loading when it's imported again (a cycle) is skipped, which is why circular imports can see uninitialised bindings.
+
+**Top-level await.** A module that awaits at the top level makes everything that depends on it wait until it finishes evaluating. The thread isn't blocked, and unrelated branches of the graph still run.
+
+**Importing CommonJS from ESM (Node.js).** The default import is always `module.exports`. Named imports work only for names Node can detect statically (`exports.parse = ...`). For dynamically built exports, import the default and destructure it.
+
+**Which format a file is.** `.mjs` is always ESM and `.cjs` always CommonJS. A `.js` file follows the nearest `package.json` `"type"` field.
 
 ## Interview checklist
 

@@ -18,12 +18,17 @@ export type PipelineErrorCode =
   | "fetch_failed"
   | "model_failed"
   | "no_skills"
+  /** Only non-technical skills (English, Jira, mentoring…) were found in a job post. */
+  | "no_tech_skills"
   | "no_content"
   | "server";
 export type PipelineError = { code: PipelineErrorCode; detail?: string; stage: StageId };
 
 export type PipelineState = { stages: Stage[]; found: FoundSkill[]; level?: Level; title?: string | null };
 export type PipelineResult = { ok: true; interviewId: string } | { ok: false; error: PipelineError };
+
+/** Catalogue category for process and soft skills (English, Jira, mentoring, Agile…). */
+const NON_TECHNICAL_CATEGORY = "practices";
 
 const SERVER_STAGES: [StageId, number][] = [
   ["history", 0.08],
@@ -236,7 +241,11 @@ export async function runAnalysis(req: AnalysisRequest, { catalog, locale, onUpd
       seed,
     });
     if (!selection.items.length) {
-      fail("select", "no_content", ranked.map((f) => f.name).slice(0, 6).join(", "));
+      const names = ranked.map((f) => f.name).slice(0, 6).join(", ");
+      // A post that yields only soft/process skills usually means we didn't get the real description
+      // (a listing, login or cookie page), so say that instead of "no exercises for English".
+      const onlyNonTechnical = ranked.every((f) => bySlug.get(f.slug)?.category === NON_TECHNICAL_CATEGORY);
+      fail("select", req.method !== "manual" && onlyNonTechnical ? "no_tech_skills" : "no_content", names);
     }
     const focusNames = selection.focusSkillIds.map((id) => context.skills.find((s) => s.id === id)?.name).filter(Boolean);
     done("select", "selected", { count: selection.items.length, skills: focusNames.join(", ") });

@@ -12,6 +12,7 @@ export type CatalogSkill = {
   aliases?: string[];
   caseSensitiveAliases?: string[];
   popularity?: number;
+  category?: string;
 };
 
 export type SkillMatch = {

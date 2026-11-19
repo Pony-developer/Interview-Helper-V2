@@ -2,7 +2,7 @@
 skill: dom-events
 title: "DOM and events: propagation, delegation and default actions"
 summary: "How events travel through the DOM, how delegation keeps handlers cheap and dynamic, and how to query and update the DOM efficiently."
-readingMinutes: 7
+readingMinutes: 9
 ---
 
 Frameworks hide the DOM, but interviewers still expect you to know what they do underneath, especially how events flow.
@@ -65,6 +65,16 @@ const controller = new AbortController();
 window.addEventListener("resize", onResize, { signal: controller.signal });
 controller.abort(); // removes it
 ```
+
+## Going deeper
+
+**Capture before bubble.** Listeners added with `{ capture: true }` run while the event travels down to the target, before any bubbling listener. That's useful for "click outside" handlers that must run even if something calls `stopPropagation()`.
+
+**Events that don't bubble.** `focus`, `blur`, `mouseenter` and `mouseleave` don't bubble. For delegation, use `focusin`/`focusout` and `mouseover`/`mouseout`, or a capture-phase listener.
+
+**Shadow DOM.** An event dispatched inside a shadow root needs `composed: true` (in addition to `bubbles: true`) to reach listeners outside it. Outside listeners see it retargeted to the host element.
+
+**Cleanup.** `removeEventListener` needs the same function reference and the same `capture` flag. An `AbortController` signal (`{ signal }`) removes many listeners at once.
 
 ## Interview checklist
 
