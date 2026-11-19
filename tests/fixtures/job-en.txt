@@ -1,0 +1,22 @@
+Senior Frontend Engineer (React)
+
+About the project:
+We build a B2B analytics platform used by 2,000 companies. Our stack is Node.js on the backend and React on the frontend.
+
+Requirements:
+- 5+ years of commercial experience with JavaScript and TypeScript
+- Deep knowledge of React (hooks, context) and Redux Toolkit
+- Strong understanding of HTML5, CSS3, Flexbox, CSS Grid
+- Experience with REST APIs and GraphQL
+- Unit testing with Jest and React Testing Library
+- Git, code review culture, CI/CD
+- Upper-Intermediate English
+
+Nice to have:
+- Next.js
+- Experience with Docker and AWS
+- Web accessibility (WCAG)
+
+Responsibilities:
+- Rest of the team relies on you to react quickly to production incidents.
+- Promise to keep the stack modern and go the extra mile.

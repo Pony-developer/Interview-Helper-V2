@@ -1,0 +1,504 @@
+{
+  "meta": {
+    "title": "Assay — mock technical interviews built around your weak spots",
+    "description": "Prepare for IT interviews with adaptive quizzes and live coding tasks in TypeScript, JavaScript, React and Angular. Paste a job post from Djinni, DOU or Glassdoor and get an interview for exactly that role.",
+    "keywords": "technical interview preparation, mock interview, frontend interview questions, JavaScript interview, TypeScript interview, React interview, Angular interview, coding practice, job description skills, Djinni, DOU"
+  },
+  "common": {
+    "skipToContent": "Skip to main content",
+    "brandTagline": "Test your mettle before the interview does.",
+    "opensInNewTab": "(opens in a new tab)",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "back": "Back",
+    "close": "Close",
+    "minutes": "{count, plural, one {# min} other {# min}}",
+    "language": "Language",
+    "languages": {
+      "en": "English",
+      "uk": "Українська"
+    }
+  },
+  "nav": {
+    "main": "Main",
+    "home": "Home",
+    "practice": "Practise",
+    "lectures": "Lectures",
+    "progress": "My progress",
+    "howItWorks": "How it works",
+    "faq": "FAQ",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "account": "Account"
+  },
+  "auth": {
+    "title": "Sign in to Assay",
+    "subtitle": "One click with your Google account. We only use your name and avatar to personalise your progress.",
+    "google": "Continue with Google",
+    "redirecting": "Redirecting to Google…",
+    "notConfigured": "Sign-in is not configured yet. Add the Supabase keys to .env.local.",
+    "errors": {
+      "provider": "Google sign-in was cancelled or failed. Please try again.",
+      "missing_code": "The sign-in link was incomplete. Please try again.",
+      "exchange": "We couldn't complete sign-in. Please try again.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "terms": "By continuing you agree that we store your interview history to tailor future interviews."
+  },
+  "landing": {
+    "hero": {
+      "h1": "Assay: mock technical interviews built around your weak spots",
+      "label": "Highlights",
+      "slide": "Slide {current} of {total}",
+      "pause": "Pause slideshow",
+      "play": "Play slideshow",
+      "prev": "Previous slide",
+      "next": "Next slide",
+      "goTo": "Go to slide {index}",
+      "slides": {
+        "one": {
+          "eyebrow": "Interview preparation for developers",
+          "title": "Assay your skills before the interview does.",
+          "body": "Pick your stack or paste a job post. Assay builds a mock interview around your weak spots: quizzes, live coding and a graded report.",
+          "cta": "Start practising"
+        },
+        "two": {
+          "eyebrow": "Job post → tailored interview",
+          "title": "Paste a job link. Get that exact interview.",
+          "body": "Djinni, DOU or Glassdoor: we read the post, find the skills and test you on precisely those. On-device AI keeps the text in your browser.",
+          "cta": "Try it with a job link"
+        },
+        "three": {
+          "eyebrow": "Live coding grounds",
+          "title": "Code in TypeScript, React and Angular. Live.",
+          "body": "Real editors with instant preview and tests that run before you submit, just like a take-home, without the setup.",
+          "cta": "See how it works"
+        }
+      }
+    },
+    "highlights": {
+      "title": "Assay at a glance",
+      "items": {
+        "skills": {
+          "value": "250+",
+          "label": "Skills recognised in job posts"
+        },
+        "methods": {
+          "value": "4",
+          "label": "Ways to read a job description"
+        },
+        "grounds": {
+          "value": "4",
+          "label": "Live coding grounds: TS, JS, React, Angular"
+        },
+        "privacy": {
+          "value": "0 bytes",
+          "label": "Of job text sent to an AI server"
+        },
+        "grade": {
+          "value": "24K",
+          "label": "Top grade. Results are scored in karats"
+        }
+      }
+    },
+    "how": {
+      "title": "From job post to graded interview in four steps",
+      "intro": "Assay works like an assayer's lab: we take a sample of what the job demands, test your skills against it and tell you exactly how pure the result is.",
+      "steps": {
+        "one": {
+          "title": "Choose the ore",
+          "body": "Pick skills from the catalogue, paste a job link or drop in the description text."
+        },
+        "two": {
+          "title": "We assay the post",
+          "body": "A keyword parser or an on-device language model extracts the skills and seniority."
+        },
+        "three": {
+          "title": "Take the interview",
+          "body": "Quizzes and coding tasks aimed at your weakest skills, with a lecture one click away."
+        },
+        "four": {
+          "title": "Read your grade",
+          "body": "Every answer next to the correct one, a karat grade and what to train next."
+        }
+      },
+      "cta": "Start your first interview"
+    },
+    "map": {
+      "title": "A map of everything an interviewer can ask",
+      "body": "Assay tracks your mastery per skill. Every new interview leans into the areas you haven't proven yet, and skips what you've already nailed.",
+      "cta": "Browse the lecture library",
+      "legend": "Skill categories, sized by the number of skills we recognise",
+      "skills": "{count} skills"
+    },
+    "lectures": {
+      "title": "From the lecture library",
+      "intro": "Stuck on a question? Each task links to a focused lecture that opens in a new tab.",
+      "read": "Read lecture",
+      "all": "View all lectures",
+      "empty": "Lectures will appear here once the content is seeded."
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "items": {
+        "free": {
+          "q": "Is Assay free?",
+          "a": "Yes. Sign in with Google and practise as much as you like."
+        },
+        "ai": {
+          "q": "How does the on-device AI work?",
+          "a": "Your browser downloads a compact language model once (about 1 GB) and runs it on your GPU through WebGPU. The job description is analysed on your device and is never sent to an AI provider."
+        },
+        "sites": {
+          "q": "Which job sites are supported?",
+          "a": "Djinni, DOU and most sites that publish structured job postings. Glassdoor often blocks automated reads. If that happens, paste the description instead."
+        },
+        "grade": {
+          "q": "How is my grade calculated?",
+          "a": "Each task is weighted by its complexity. Opening a lecture for help keeps 85% of the credit. Your percentage maps to a karat grade, from Raw ore up to 24K."
+        },
+        "coding": {
+          "q": "What do I need for the coding tasks?",
+          "a": "Only a modern browser. The coding grounds run TypeScript, JavaScript, React and Angular in a sandbox with an instant preview and automatic tests."
+        },
+        "adaptive": {
+          "q": "How does Assay choose my tasks?",
+          "a": "It estimates your mastery of every skill from past attempts, gives more questions to weaker skills, retries tasks you failed and avoids ones you passed recently."
+        }
+      }
+    }
+  },
+  "footer": {
+    "tagline": "Mock technical interviews that adapt to you. Built for developers preparing for their next role.",
+    "product": "Product",
+    "learn": "Learn",
+    "rights": "© {year} Assay. All rights reserved.",
+    "madeFor": "Made for developers in Ukraine and everywhere else."
+  },
+  "lectures": {
+    "title": "Lecture library",
+    "description": "Focused lectures on JavaScript, TypeScript, React, Angular, algorithms and everything else frontend interviews ask about.",
+    "intro": "Short, focused explainers for every skill Assay tests. Each interview question links to the lecture that covers it.",
+    "readingTime": "{count} min read",
+    "skill": "Skill",
+    "backToLibrary": "All lectures",
+    "practiseThis": "Practise {skill}",
+    "empty": "No lectures yet. Seed the database to populate the library.",
+    "updated": "Updated {date}",
+    "breadcrumb": "Breadcrumb"
+  },
+  "notFound": {
+    "title": "This vein ran dry",
+    "body": "The page you're looking for doesn't exist or has moved.",
+    "home": "Back to home"
+  },
+  "playground": {
+    "results": "Test results",
+    "summary": "{passed} of {total} tests passed",
+    "running": "Running tests…",
+    "waiting": "Waiting for the preview to build…",
+    "error": "The code failed to run",
+    "timeout": "Tests did not report back in time. Check the preview for errors.",
+    "rerun": "Re-run tests",
+    "passed": "Passed",
+    "failed": "Failed",
+    "autoRun": "Tests run automatically after every change."
+  },
+  "categories": {
+    "languages": "Languages",
+    "web-platform": "Web platform",
+    "javascript-core": "JavaScript core",
+    "frontend-frameworks": "Frontend frameworks",
+    "state-and-data": "State & data",
+    "styling": "Styling",
+    "build-tooling": "Build tooling",
+    "cs-fundamentals": "CS fundamentals",
+    "backend": "Backend",
+    "databases": "Databases",
+    "devops-cloud": "DevOps & cloud",
+    "testing": "Testing",
+    "mobile": "Mobile",
+    "data-ml": "Data & ML",
+    "security": "Security",
+    "practices": "Practices"
+  },
+  "practice": {
+    "metaTitle": "Build your interview",
+    "eyebrow": "New interview",
+    "title": "What should we test you on?",
+    "intro": "Pick skills yourself or let Assay read a job post. We'll build an interview around the skills you haven't proven yet.",
+    "methodLegend": "How do you want to choose skills?",
+    "methods": {
+      "manual": {
+        "title": "Pick skills",
+        "body": "Search the catalogue and choose what to train.",
+        "badge": "Fastest"
+      },
+      "url": {
+        "title": "Job link",
+        "body": "Paste a vacancy URL. Our parser finds the skills it mentions.",
+        "badge": "Keyword parser"
+      },
+      "llm_url": {
+        "title": "Job link + on-device AI",
+        "body": "We fetch the post, then a language model in your browser reads it.",
+        "badge": "On-device AI"
+      },
+      "llm_text": {
+        "title": "Paste description + AI",
+        "body": "Paste the job text. A model on your device extracts skills and seniority.",
+        "badge": "Private"
+      }
+    },
+    "skills": {
+      "label": "Skills to train",
+      "placeholder": "Search skills, e.g. React, binary search…",
+      "help": "Choose up to 12 skills. Skills marked with a gold dot have exercises today.",
+      "selected": "Selected skills",
+      "remove": "Remove {name}",
+      "popular": "Popular",
+      "noResults": "No skills match “{query}”",
+      "hasContent": "has exercises",
+      "noContent": "no exercises yet",
+      "empty": "No skills selected yet",
+      "max": "You can choose up to 12 skills"
+    },
+    "url": {
+      "label": "Vacancy URL",
+      "placeholder": "https://djinni.co/jobs/…",
+      "help": "Works best with djinni.co, jobs.dou.ua and sites that publish structured job data. Glassdoor often blocks automated reads; paste the text instead.",
+      "invalid": "Enter a full link that starts with https://"
+    },
+    "text": {
+      "label": "Job description",
+      "placeholder": "Paste the vacancy text here (English or Ukrainian)…",
+      "help": "At least 200 characters. The text stays in your browser.",
+      "tooShort": "Paste at least 200 characters ({count} so far)",
+      "count": "{count} characters"
+    },
+    "device": {
+      "title": "On-device AI",
+      "checking": "Checking WebGPU support…",
+      "supported": "Your device supports WebGPU.",
+      "unsupported": "This browser can't run on-device AI (WebGPU is unavailable). Try a recent Chrome or Edge on a desktop.",
+      "model": "Model",
+      "download": "≈{size} MB download, once",
+      "cached": "Already downloaded",
+      "fallback": "Use the keyword parser instead",
+      "fallbackHelp": "Same privacy, no model: we match skills from the catalogue directly in your browser.",
+      "models": {
+        "balanced": "Balanced: better accuracy",
+        "light": "Light: faster, smaller"
+      }
+    },
+    "level": {
+      "legend": "Common level",
+      "help": "Sets the starting difficulty. Assay adapts it to your history per skill.",
+      "auto": "Auto (from the post)",
+      "junior": "Junior",
+      "middle": "Middle",
+      "senior": "Senior"
+    },
+    "length": {
+      "legend": "Interview length",
+      "short": "Short · 6 tasks",
+      "standard": "Standard · 10 tasks",
+      "long": "Long · 15 tasks"
+    },
+    "start": "Build my interview",
+    "errors": {
+      "noSkills": "Choose at least one skill",
+      "unsupported": "On-device AI isn't available here. Switch to the keyword parser."
+    }
+  },
+  "analyzing": {
+    "metaTitle": "Building your interview",
+    "title": "Assaying your interview",
+    "progress": "Interview preparation progress",
+    "percent": "{value}% complete",
+    "found": "Skills found",
+    "foundNone": "Skills will appear here as we find them",
+    "required": "required",
+    "nice": "nice to have",
+    "level": "Level: {level}",
+    "stages": {
+      "fetch": "Fetching the job post",
+      "extract": "Extracting the description",
+      "match": "Matching against the skill catalogue",
+      "model": "Loading the on-device model",
+      "analyze": "Reading the post with AI",
+      "normalize": "Mapping skills to the catalogue",
+      "history": "Reading your history",
+      "select": "Choosing tasks for your weak spots",
+      "assemble": "Assembling the interview"
+    },
+    "details": {
+      "fetching": "Contacting {host}…",
+      "fetched": "{kb} KB from {host}",
+      "extracting": "Cleaning up the page…",
+      "extracted": "{lines} lines, {chars} characters",
+      "matching": "{count} skills found among {total}",
+      "matched": "{count} skills found",
+      "loading": "{percent}% downloaded",
+      "loaded": "Model ready",
+      "analyzing": "{tokens} tokens generated",
+      "analyzed": "{count} skills mentioned",
+      "normalizing": "Matching names…",
+      "normalized": "{count} catalogue skills",
+      "history": "Loading attempts and mastery…",
+      "historyDone": "{tasks} candidate tasks · {attempts} past attempts",
+      "selecting": "Scoring tasks…",
+      "selected": "{count} tasks · focus: {skills}",
+      "assembling": "Saving your interview…",
+      "assembled": "Ready"
+    },
+    "tipsTitle": "While you wait",
+    "tips": {
+      "one": "Interviewers value thinking out loud more than instant answers.",
+      "two": "State the time and space complexity before you're asked.",
+      "three": "Clarify edge cases first: empty input, duplicates, very large values.",
+      "four": "If you get stuck, explain what you'd try next. That's half the answer.",
+      "five": "Tests in the coding grounds run automatically after every change."
+    },
+    "errors": {
+      "title": "We couldn't build this interview",
+      "unauthenticated": "Your session expired. Sign in again to continue.",
+      "fetch_failed": {
+        "blocked": "The job site blocked our request. Paste the description instead; it works the same.",
+        "not_found": "That job post doesn't exist any more (404).",
+        "invalid_url": "That doesn't look like a valid job link.",
+        "blocked_host": "This address can't be fetched for security reasons.",
+        "timeout": "The job site took too long to respond.",
+        "too_large": "That page is too large to analyse.",
+        "not_html": "That link isn't a web page.",
+        "empty": "We couldn't find a job description on that page.",
+        "rate_limited": "Too many requests. Wait a minute and try again.",
+        "invalid": "That doesn't look like a valid job link.",
+        "server": "We couldn't reach the job site.",
+        "network": "We couldn't reach the job site."
+      },
+      "model_failed": "The on-device model failed to load. Your GPU may not have enough memory. Try the light model or the keyword parser.",
+      "no_skills": "We didn't recognise any skills in this text.",
+      "no_content": "We don't have exercises for these skills yet ({detail}). Try adding JavaScript, TypeScript, React or algorithms.",
+      "server": "Something went wrong on our side. Please try again."
+    },
+    "actions": {
+      "retry": "Try again",
+      "edit": "Change skills",
+      "paste": "Paste the text instead",
+      "login": "Sign in",
+      "lightModel": "Use the light model"
+    },
+    "missing": "No interview request found. Start from the skills picker.",
+    "backToPicker": "Back to the picker"
+  },
+  "interview": {
+    "metaTitle": "Interview",
+    "step": "Step {current} of {total}",
+    "progress": "Interview progress",
+    "stepState": {
+      "done": "answered",
+      "skipped": "skipped",
+      "current": "current",
+      "pending": "not started"
+    },
+    "timer": "Elapsed time",
+    "timerValue": "{elapsed} of {budget}",
+    "overBudget": "You're over the suggested time. No pressure, the timer never ends the interview.",
+    "halfway": "Halfway through the suggested time.",
+    "quiz": "Quiz",
+    "practice": "Coding task",
+    "complexity": "Complexity {value} of 5",
+    "estimate": "~{minutes} min",
+    "previouslyFailed": "Previously failed",
+    "previouslyPassed": "Passed before",
+    "selectOne": "Choose one answer",
+    "selectMany": "Choose all that apply",
+    "help": "Ask for help",
+    "helpHint": "Opens the related lecture in a new tab. A hinted answer earns 85% of the credit.",
+    "helpUsed": "Lecture opened",
+    "skip": "Skip",
+    "submit": "Submit answer",
+    "submitCode": "Run tests & submit",
+    "submitting": "Submitting…",
+    "runningTests": "Running tests before submitting…",
+    "testsSummary": "{passed} of {total} tests passed",
+    "finish": "Finish interview",
+    "finishing": "Grading…",
+    "confirmSkip": "Skip this task? It will count as unanswered.",
+    "answerRequired": "Choose an answer first",
+    "submitError": "We couldn't save your answer. Check your connection and try again.",
+    "completedRedirect": "This interview is finished. Opening your results…",
+    "code": "Code",
+    "exit": "Exit interview",
+    "cancel": "Cancel",
+    "testsTimedOut": "The tests did not report back, so nothing was submitted. Check the preview for errors and try again."
+  },
+  "results": {
+    "metaTitle": "Interview results",
+    "eyebrow": "Results",
+    "title": "Your assay is in",
+    "score": "Score",
+    "grade": "Grade",
+    "time": "Time",
+    "tasks": "Tasks",
+    "correctCount": "{correct} of {total} correct",
+    "signals": {
+      "24K": "Exceptional",
+      "22K": "Strong hire",
+      "18K": "Hire",
+      "14K": "Lean hire",
+      "10K": "Lean no-hire",
+      "ORE": "Raw ore: not yet"
+    },
+    "gradeNames": {
+      "24K": "24 karat",
+      "22K": "22 karat",
+      "18K": "18 karat",
+      "14K": "14 karat",
+      "10K": "10 karat",
+      "ORE": "Raw ore"
+    },
+    "bySkill": "By skill",
+    "review": "Answer review",
+    "yourAnswer": "Your answer",
+    "correctAnswer": "Correct answer",
+    "explanation": "Explanation",
+    "yourCode": "Your code",
+    "referenceSolution": "Reference solution",
+    "testsPassed": "{passed} of {total} tests passed",
+    "noAnswer": "No answer",
+    "skipped": "Skipped",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "partial": "Partially correct",
+    "helpUsed": "Lecture used",
+    "readLecture": "Read the lecture",
+    "trainWeak": "Train weak skills",
+    "newInterview": "New interview",
+    "notFound": "Results not found",
+    "points": "{value}% credit"
+  },
+  "progressPage": {
+    "metaTitle": "My progress",
+    "title": "Your mastery map",
+    "intro": "Mastery is estimated from your recent results, weighted by difficulty. Older attempts count less over time.",
+    "empty": "No attempts yet. Take your first interview to start the map.",
+    "mastery": "Mastery",
+    "attempted": "{passed} of {attempted} tasks passed",
+    "history": "Recent interviews",
+    "noHistory": "No interviews yet",
+    "inProgress": "In progress",
+    "resume": "Resume",
+    "view": "View results",
+    "tasks": "Tasks",
+    "status": {
+      "passed": "Passed",
+      "failed": "Failed",
+      "untried": "Not tried"
+    },
+    "start": "Start an interview"
+  }
+}

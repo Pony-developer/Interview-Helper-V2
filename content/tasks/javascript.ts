@@ -1,0 +1,130 @@
+import { defineTasks } from "@/lib/content/schema";
+import { practice, quiz } from "./_helpers";
+
+export default defineTasks([
+  quiz(
+    "js-typeof-null",
+    ["javascript"],
+    1,
+    45,
+    ["typeof null", "typeof null"],
+    ["What does `typeof null` return?", "Що повертає `typeof null`?"],
+    [
+      ['`"null"`', '`"null"`'],
+      ['`"object"`', '`"object"`'],
+      ['`"undefined"`', '`"undefined"`'],
+      ["It throws a TypeError", "Кидає TypeError"],
+    ],
+    "b",
+    [
+      "A long-standing bug from the first JavaScript implementation that can't be fixed without breaking the web. Check for null with `value === null`.",
+      "Давня помилка першої реалізації JavaScript, яку не можна виправити, не зламавши веб. Перевіряйте null через `value === null`.",
+    ],
+  ),
+  quiz(
+    "js-reference-equality",
+    ["javascript"],
+    1,
+    60,
+    ["Comparing objects", "Порівняння об'єктів"],
+    ["What does this code log?", "Що виведе цей код?"],
+    [
+      ["`true true`", "`true true`"],
+      ["`false true`", "`false true`"],
+      ["`false false`", "`false false`"],
+      ["`true false`", "`true false`"],
+    ],
+    "b",
+    [
+      "Objects are compared by reference. `a` and `b` are two distinct objects, so `a === b` is false. `c` points at the same object as `a`, so `a === c` is true.",
+      "Об'єкти порівнюються за посиланням. `a` і `b` є двома різними об'єктами, тому `a === b` дає false. `c` вказує на той самий об'єкт, що й `a`, тому `a === c` дає true.",
+    ],
+    { code: "const a = { id: 1 };\nconst b = { id: 1 };\nconst c = a;\nconsole.log(a === b, a === c);", codeLanguage: "js" },
+  ),
+  quiz(
+    "js-falsy-values",
+    ["javascript"],
+    2,
+    90,
+    ["Falsy values", "Хибні значення"],
+    ["Which of these values are **falsy**? Select all that apply.", "Які з цих значень є **хибними (falsy)**? Оберіть усі правильні."],
+    [
+      ["`0`", "`0`"],
+      ['`"0"`', '`"0"`'],
+      ["`[]`", "`[]`"],
+      ["`NaN`", "`NaN`"],
+      ['`""`', '`""`'],
+    ],
+    "ade",
+    [
+      "The falsy values are `false`, `0`, `-0`, `0n`, `\"\"`, `null`, `undefined` and `NaN`. Non-empty strings like `\"0\"` and every object, including empty arrays, are truthy.",
+      "Хибні значення: `false`, `0`, `-0`, `0n`, `\"\"`, `null`, `undefined` і `NaN`. Непорожні рядки на кшталт `\"0\"` і будь-які об'єкти, зокрема порожні масиви, є істинними.",
+    ],
+  ),
+  quiz(
+    "js-this-callback",
+    ["javascript", { slug: "closures-scope", weight: 0.5 }],
+    3,
+    120,
+    ["Lost `this`", "Втрачений `this`"],
+    ["What happens when `setTimeout` calls `counter.inc` after 0 ms in strict mode?", "Що станеться, коли `setTimeout` викличе `counter.inc` через 0 мс у strict mode?"],
+    [
+      ["`count` becomes 1", "`count` стане 1"],
+      ["A TypeError is thrown because `this` is `undefined`", "Буде TypeError, бо `this` дорівнює `undefined`"],
+      ["`count` becomes `NaN`", "`count` стане `NaN`"],
+      ["Nothing, `setTimeout` ignores methods", "Нічого, `setTimeout` ігнорує методи"],
+    ],
+    "b",
+    [
+      "`this` depends on the call site. `setTimeout` calls the function on its own, not as `counter.inc()`, so `this` is `undefined` in strict mode, and reading `this.count` throws. Fix it with `setTimeout(() => counter.inc())` or `counter.inc.bind(counter)`.",
+      "`this` залежить від місця виклику. `setTimeout` викликає функцію окремо, а не як `counter.inc()`, тож у strict mode `this` дорівнює `undefined`, і читання `this.count` кидає помилку. Виправлення: `setTimeout(() => counter.inc())` або `counter.inc.bind(counter)`.",
+    ],
+    { code: '"use strict";\nconst counter = {\n  count: 0,\n  inc() { this.count++; },\n};\nsetTimeout(counter.inc, 0);', codeLanguage: "js" },
+  ),
+  quiz(
+    "js-prototype-lookup",
+    ["javascript"],
+    4,
+    150,
+    ["Prototype chain", "Ланцюжок прототипів"],
+    ["What does the last line log?", "Що виведе останній рядок?"],
+    [
+      ['`"base"`', '`"base"`'],
+      ['`"own"`', '`"own"`'],
+      ["`undefined`", "`undefined`"],
+      ["It throws", "Кидає помилку"],
+    ],
+    "a",
+    [
+      "`delete child.kind` removes the own property, so the lookup continues up the prototype chain and finds `kind` on `base`. Deleting never touches the prototype.",
+      "`delete child.kind` видаляє власну властивість, тож пошук продовжується ланцюжком прототипів і знаходить `kind` у `base`. Видалення ніколи не зачіпає прототип.",
+    ],
+    { code: 'const base = { kind: "base" };\nconst child = Object.create(base);\nchild.kind = "own";\ndelete child.kind;\nconsole.log(child.kind);', codeLanguage: "js" },
+  ),
+  practice({
+    slug: "js-group-by",
+    skills: ["javascript", { slug: "arrays-strings", weight: 0.5 }],
+    complexity: 2,
+    estSeconds: 600,
+    framework: "vanilla-js",
+    title: ["Implement groupBy", "Реалізуйте groupBy"],
+    prompt: [
+      "Implement `groupBy(items, keyFn)`. It returns a plain object whose keys are the results of `keyFn(item)` and whose values are arrays of items with that key, **in their original order**. Don't mutate `items`.\n\n```js\ngroupBy([1.2, 1.7, 2.3], Math.floor) // { 1: [1.2, 1.7], 2: [2.3] }\n```",
+      "Реалізуйте `groupBy(items, keyFn)`. Функція повертає звичайний об'єкт, ключі якого є результатами `keyFn(item)`, а значення є масивами елементів із цим ключем **у початковому порядку**. Не змінюйте `items`.\n\n```js\ngroupBy([1.2, 1.7, 2.3], Math.floor) // { 1: [1.2, 1.7], 2: [2.3] }\n```",
+    ],
+    files: {
+      "/src/groupBy.js": "/**\n * @template T\n * @param {T[]} items\n * @param {(item: T) => string | number} keyFn\n * @returns {Record<string, T[]>}\n */\nexport function groupBy(items, keyFn) {\n  // TODO\n  return {};\n}\n",
+      "/index.js": 'import "./styles.css";\nimport { groupBy } from "./src/groupBy";\n\nconst people = [\n  { name: "Ada", team: "core" },\n  { name: "Linus", team: "infra" },\n  { name: "Grace", team: "core" },\n];\nconst groups = groupBy(people, (p) => p.team);\n\ndocument.getElementById("app").innerHTML =\n  "<h1>Teams</h1>" +\n  Object.entries(groups)\n    .map(([team, list]) => `<h2>${team}</h2><ul>${list.map((p) => `<li>${p.name}</li>`).join("")}</ul>`)\n    .join("");\n',
+    },
+    visibleFiles: ["/src/groupBy.js", "/index.js"],
+    activeFile: "/src/groupBy.js",
+    tests: 'import { describe, it, expect, screen } from "./test-kit";\nimport { groupBy } from "../src/groupBy";\n\ndescribe("groupBy", () => {\n  it("groups by the key function", () => {\n    expect(groupBy([1.2, 1.7, 2.3], Math.floor)).toEqual({ 1: [1.2, 1.7], 2: [2.3] });\n  });\n  it("keeps the original order inside groups", () => {\n    const words = ["apple", "bob", "avocado", "banana"];\n    expect(groupBy(words, (w) => w[0])).toEqual({ a: ["apple", "avocado"], b: ["bob", "banana"] });\n  });\n  it("returns an empty object for an empty array", () => expect(groupBy([], (x) => x)).toEqual({}));\n  it("does not mutate the input", () => {\n    const input = [3, 1, 2];\n    groupBy(input, (n) => n % 2);\n    expect(input).toEqual([3, 1, 2]);\n  });\n  it("renders the teams demo", async () => {\n    await screen.findByRole("heading", { name: "core" });\n    expect(screen.getAllByRole("listitem")).toHaveLength(3);\n  });\n});\n',
+    solution: {
+      "/src/groupBy.js": "export function groupBy(items, keyFn) {\n  const result = {};\n  for (const item of items) {\n    const key = keyFn(item);\n    (result[key] ??= []).push(item);\n  }\n  return result;\n}\n",
+    },
+    explanation: [
+      "One pass with an accumulator object: compute the key, create the bucket on first use (`??=`), push the item. It runs in O(n). Modern runtimes also ship `Object.groupBy`, which has the same semantics.",
+      "Один прохід з об'єктом-акумулятором: обчислюємо ключ, створюємо «кошик» при першому використанні (`??=`) і додаємо елемент. Складність O(n). Сучасні середовища також мають `Object.groupBy` з такою самою семантикою.",
+    ],
+  }),
+]);
