@@ -77,15 +77,17 @@ npx supabase link --project-ref <project-ref>
 ```
 
 ```bash
-npm run seed:build
-```
-
-```bash
 npm run db:push
 ```
 
-- `seed:build` validates everything in `content/` and writes `supabase/seed.sql`. The seed is idempotent: rows are upserted by slug.
-- `db:push` applies `supabase/migrations/*` and the seed.
+```bash
+npm run db:seed
+```
+
+- `db:push` applies `supabase/migrations/*` (and the seed, but only the very first time: the Supabase CLI records seed files it has run and never runs them again).
+- `db:seed` runs `seed:build`, which validates everything in `content/` and writes `supabase/seed.sql`, then applies the seed to the linked project. The seed is too large for one request, so `scripts/seed-remote.mjs` splits it into parts and runs them in order. It asks for confirmation first (`npm run db:seed -- --yes` skips the prompt, `-- --dry-run` only writes the parts). The seed is idempotent: rows are upserted by slug, so it's safe to re-run, including after a failed part.
+
+**Publishing content changes later:** edit `content/`, then run `npm run db:seed`. Run `npm run db:push` as well when you've added a migration.
 
 ### 5. Run
 
@@ -153,7 +155,7 @@ Admins open **Admin panel** from the account menu, or go to `/admin`. Signed-out
 - A task that has been used in an interview can be unpublished but not deleted, so interview history stays intact.
 - Saved content goes live right away; the affected pages are revalidated.
 
-**Admin edits and the repository seed.** Catalogue rows have a `source` column: `seed` (from `content/`) or `admin` (saved in the admin panel). `npm run seed:build` generates SQL that only overwrites `seed` rows, so `npm run db:push` never undoes an admin edit. To hand a row back to the repository, set its `source` to `seed` in SQL; the next seed then overwrites it.
+**Admin edits and the repository seed.** Catalogue rows have a `source` column: `seed` (from `content/`) or `admin` (saved in the admin panel). `npm run seed:build` generates SQL that only overwrites `seed` rows, so `npm run db:seed` never undoes an admin edit. To hand a row back to the repository, set its `source` to `seed` in SQL; the next seed then overwrites it.
 
 ## Deploying to Vercel
 
@@ -184,7 +186,7 @@ content/
 - Tests use the built-in kit: `describe`, `it`, `expect`, `screen`, `user`, `waitFor`. They import user code relative to `/assay/`, e.g. `import { sum } from "../src/sum"`.
 - The Angular template is Angular 11 with NgModule (Sandpack's runtime).
 
-Run `npm run seed:build` after editing content. It fails on duplicate slugs or aliases, unknown skills, missing translations, wrong correct-option IDs, or tasks without tests.
+Run `npm run seed:build` after editing content, and `npm run db:seed` to publish it. The build fails on duplicate slugs or aliases, unknown skills, missing translations, wrong correct-option IDs, or tasks without tests.
 
 ## Scripts
 
@@ -195,7 +197,8 @@ Run `npm run seed:build` after editing content. It fails on duplicate slugs or a
 | `npm run test:e2e` | Playwright + axe: public pages in both locales, SEO tags, redirects |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run seed:build` | Validate content → `supabase/seed.sql` |
-| `npm run db:push` | Apply migrations + seed to the linked Supabase project |
+| `npm run db:push` | Apply migrations to the linked Supabase project (seeds only on the first push) |
+| `npm run db:seed` | Validate content and apply `supabase/seed.sql` to the linked project, in parts |
 | `npm run db:types` | Regenerate `src/lib/supabase/database.types.ts` |
 | `npm run icons` | Regenerate favicon / apple / PWA icons from `src/app/icon.svg` |
 

@@ -14,6 +14,7 @@
     "seed:build": "node scripts/register-tasks.mjs && tsx scripts/build-seed.ts",
     "icons": "tsx scripts/generate-icons.ts",
     "db:push": "supabase db push --remote --include-seed",
+    "db:seed": "npm run seed:build && node scripts/seed-remote.mjs",
     "db:types": "supabase gen types --lang=typescript --remote --schema public > src/lib/supabase/database.types.ts"
   },
   "dependencies": {
