@@ -229,4 +229,108 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
       expect(await roleOf(USER_B)).toBe("user");
     });
   });
+
+  // Runs after "user roles": Ada (USER_A) is an admin, Bob (USER_B) is not.
+  describe("admin content management", () => {
+    const L = (en: string) => ({ en, uk: `${en} (uk)` });
+    const newQuiz = {
+      slug: "admin-quiz-one",
+      kind: "quiz",
+      complexity: 2,
+      est_seconds: 60,
+      title: L("Admin quiz"),
+      prompt: L("Pick b"),
+      explanation: L("Because b"),
+      published: true,
+      lecture: null,
+      skills: [{ slug: "admin-skill", weight: 1 }],
+      quiz: { mode: "single", options: [{ id: "a", text: L("A") }, { id: "b", text: L("B") }] },
+      correct: ["b"],
+    };
+
+    it("rejects content writes from non-admins and anonymous users", async () => {
+      await asUser(USER_B, async () => {
+        await expect(db.query(`select public.admin_save_task($1::jsonb, true)`, [JSON.stringify(newQuiz)])).rejects.toThrow(/Only admins/);
+        await expect(db.query(`select public.admin_get_task('js-typeof-null')`)).rejects.toThrow(/Only admins/);
+        await expect(db.query(`select public.admin_delete_lecture('javascript')`)).rejects.toThrow(/Only admins/);
+        await expect(db.query(`update public.tasks set complexity = 1`)).rejects.toThrow(/permission denied/);
+      });
+      await asUser(null, async () => {
+        await expect(db.query(`select public.admin_save_skill('{}'::jsonb, true)`)).rejects.toThrow(/permission denied/);
+      });
+    });
+
+    it("lets admins create a skill, lecture and gradable quiz", async () => {
+      await asUser(USER_A, async () => {
+        await db.query(`select public.admin_save_skill($1::jsonb, true)`, [
+          JSON.stringify({ slug: "admin-skill", name: "Admin Skill", category: "practices", aliases: ["adm"], codeable: false, popularity: 10 }),
+        ]);
+        await db.query(`select public.admin_save_lecture($1::jsonb, true)`, [
+          JSON.stringify({ slug: "admin-skill", skill: "admin-skill", title: L("T"), summary: L("S"), body: L("# Body"), reading_minutes: 3 }),
+        ]);
+
+        await expect(
+          db.query(`select public.admin_save_task($1::jsonb, true)`, [JSON.stringify({ ...newQuiz, correct: ["z"] })]),
+        ).rejects.toThrow(/existing option ids/);
+        await expect(
+          db.query(`select public.admin_save_task($1::jsonb, true)`, [JSON.stringify({ ...newQuiz, skills: [{ slug: "nope", weight: 1 }] })]),
+        ).rejects.toThrow(/Unknown skill: nope/);
+
+        await db.query(`select public.admin_save_task($1::jsonb, true)`, [JSON.stringify(newQuiz)]);
+        const got = (await db.query<{ t: Record<string, unknown> }>(`select public.admin_get_task('admin-quiz-one') as t`)).rows[0].t;
+        expect(got).toMatchObject({ kind: "quiz", lecture: "admin-skill", correct: ["b"], source: "admin", used_in_interviews: false });
+
+        // Changing the kind of an existing task is refused.
+        await expect(
+          db.query(`select public.admin_save_task($1::jsonb, false)`, [JSON.stringify({ ...newQuiz, kind: "practice", quiz: null, practice: {} })]),
+        ).rejects.toThrow(/kind/);
+      });
+
+      const flags = await db.query<{ has_content: boolean; source: string }>(`select has_content, source from public.skills where slug = 'admin-skill'`);
+      expect(flags.rows[0]).toEqual({ has_content: true, source: "admin" });
+      const sol = await db.query<{ correct_option_ids: string[] }>(
+        `select s.correct_option_ids from private.task_solutions s join public.tasks t on t.id = s.task_id where t.slug = 'admin-quiz-one'`,
+      );
+      expect(sol.rows[0].correct_option_ids).toEqual(["b"]);
+    });
+
+    it("keeps admin edits when the seed runs again", async () => {
+      const seedTask = (await db.query<{ slug: string }>(`select slug from public.tasks where kind = 'quiz' and source = 'seed' order by slug limit 1`)).rows[0].slug;
+      await asUser(USER_A, async () => {
+        const t = (await db.query<{ t: Record<string, unknown> }>(`select public.admin_get_task($1) as t`, [seedTask])).rows[0].t;
+        await db.query(`select public.admin_save_task($1::jsonb, false)`, [JSON.stringify({ ...t, title: L("Edited by admin") })]);
+      });
+
+      await db.exec(readFileSync(seedPath, "utf8"));
+
+      const rows = await db.query<{ slug: string; title: { en: string }; published: boolean }>(
+        `select slug, title, published from public.tasks where slug in ($1, 'admin-quiz-one') order by slug`,
+        [seedTask],
+      );
+      expect(rows.rows.find((r) => r.slug === seedTask)?.title.en).toBe("Edited by admin");
+      expect(rows.rows.find((r) => r.slug === "admin-quiz-one")?.published).toBe(true);
+      const links = await db.query<{ n: number }>(
+        `select count(*)::int as n from public.task_skills ts join public.tasks t on t.id = ts.task_id where t.slug = $1`,
+        [seedTask],
+      );
+      expect(links.rows[0].n).toBeGreaterThan(0);
+    });
+
+    it("unpublishes tasks used in interviews instead of deleting them", async () => {
+      const used = (await db.query<{ slug: string }>(`select t.slug from public.interview_items ii join public.tasks t on t.id = ii.task_id limit 1`)).rows[0].slug;
+      await asUser(USER_A, async () => {
+        await expect(db.query(`select public.admin_delete_task($1)`, [used])).rejects.toThrow(/unpublish/);
+        await db.query(`select public.admin_set_task_published($1, false)`, [used]);
+        // Admins still see the unpublished task; ordinary users do not.
+        expect((await db.query(`select 1 from public.tasks where slug = $1`, [used])).rows).toHaveLength(1);
+        await db.query(`select public.admin_delete_task('admin-quiz-one')`);
+        await expect(db.query(`select public.admin_delete_skill('admin-skill')`)).rejects.toThrow(/still used/);
+        await db.query(`select public.admin_delete_lecture('admin-skill')`);
+        await db.query(`select public.admin_delete_skill('admin-skill')`);
+      });
+      await asUser(USER_B, async () => {
+        expect((await db.query(`select 1 from public.tasks where slug = $1`, [used])).rows).toHaveLength(0);
+      });
+    });
+  });
 });

@@ -32,7 +32,8 @@
     "signIn": "Sign in",
     "signOut": "Sign out",
     "account": "Account",
-    "admin": "Admin"
+    "admin": "Admin",
+    "adminPanel": "Admin panel"
   },
   "auth": {
     "title": "Sign in to Assay",

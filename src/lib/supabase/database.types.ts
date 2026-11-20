@@ -7,6 +7,9 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 type Localized = Json;
 
+/** 'seed' rows come from content/ in the repository; 'admin' rows were edited in the admin panel. */
+export type ContentSource = "seed" | "admin";
+
 export type Database = {
   __InternalSupabase: { PostgrestVersion: "13" };
   public: {
@@ -22,6 +25,7 @@ export type Database = {
           codeable: boolean;
           has_content: boolean;
           popularity: number;
+          source: ContentSource;
           created_at: string;
         };
         Insert: never;
@@ -37,6 +41,7 @@ export type Database = {
           summary: Localized;
           body: Localized;
           reading_minutes: number;
+          source: ContentSource;
           updated_at: string;
         };
         Insert: never;
@@ -58,6 +63,7 @@ export type Database = {
           quiz: Json | null;
           practice: Json | null;
           published: boolean;
+          source: ContentSource;
           updated_at: string;
         };
         Insert: never;
@@ -192,6 +198,14 @@ export type Database = {
         Returns: undefined;
       };
       finish_interview: { Args: { p_interview_id: string }; Returns: Json };
+      admin_save_skill: { Args: { p_skill: Json; p_create: boolean }; Returns: string };
+      admin_delete_skill: { Args: { p_slug: string }; Returns: undefined };
+      admin_save_lecture: { Args: { p_lecture: Json; p_create: boolean }; Returns: string };
+      admin_delete_lecture: { Args: { p_slug: string }; Returns: undefined };
+      admin_save_task: { Args: { p_task: Json; p_create: boolean }; Returns: string };
+      admin_get_task: { Args: { p_slug: string }; Returns: Json };
+      admin_set_task_published: { Args: { p_slug: string; p_published: boolean }; Returns: undefined };
+      admin_delete_task: { Args: { p_slug: string }; Returns: undefined };
       get_interview_review: {
         Args: { p_interview_id: string };
         Returns: {

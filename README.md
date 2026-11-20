@@ -19,6 +19,7 @@ Assay is an IT interview preparation tool. Pick the skills you want to train, or
 | `/interview/[id]` | Stepper with quizzes and coding tasks, a progress rail, a timer, "Ask for help" (opens the lecture in a new tab), skip, and resume |
 | `/results/[id]` | Karat grade, per-skill scores, and your answer vs. the correct answer for every task, with explanations |
 | `/progress` | Mastery per skill, passed/failed/untried status per task, interview history |
+| `/admin` | Admins only: create and edit quizzes, practice tasks (JavaScript, TypeScript, React, Angular, HTML/CSS), lectures and skills |
 | `/lectures`, `/lectures/[slug]` | Public lecture library (statically generated, in the sitemap) |
 
 ### How tasks are chosen
@@ -133,6 +134,26 @@ export default async function AdminPage() {
 - Users cannot write the `role` column themselves: `authenticated` may update only `display_name` and `avatar_url`.
 - `public.is_admin()` is available to RLS policies. Admins can read every profile; everyone else sees only their own.
 - The header shows an "Admin" badge, but it is display only. Access is decided by the database and the server helpers.
+
+## Admin panel
+
+Admins open **Admin panel** from the account menu, or go to `/admin`. Signed-out users are sent to the login page, and signed-in non-admins get a 404.
+
+| Page | What it does |
+| --- | --- |
+| `/admin` | Content counts and shortcuts to create a quiz, practice task, lecture or skill |
+| `/admin/tasks` | All quizzes and practice tasks, filterable by kind, framework, skill and status |
+| `/admin/tasks/new?kind=quiz` | Quiz editor: bilingual title, prompt and options, an optional code snippet, correct answers and explanation |
+| `/admin/tasks/new?kind=practice&template=react` | Practice editor: starter and solution files, tests, framework, dependencies. Templates: `javascript`, `typescript`, `react`, `angular`, `html-css`. **Run with solution** runs the tests in the real coding ground |
+| `/admin/lectures` | Markdown lectures in English and Ukrainian, with a live preview |
+| `/admin/skills` | Skills for the picker and job-post parser. New skills appear on `/practice` |
+
+**How it works.**
+- Every write goes through an admin-only `SECURITY DEFINER` RPC (`admin_save_task`, `admin_save_lecture`, `admin_save_skill`, …) in `supabase/migrations/20261120120000_admin_content.sql`. Clients still have no write access to the catalogue, and quiz answers stay in the `private` schema.
+- A task that has been used in an interview can be unpublished but not deleted, so interview history stays intact.
+- Saved content goes live right away; the affected pages are revalidated.
+
+**Admin edits and the repository seed.** Catalogue rows have a `source` column: `seed` (from `content/`) or `admin` (saved in the admin panel). `npm run seed:build` generates SQL that only overwrites `seed` rows, so `npm run db:push` never undoes an admin edit. To hand a row back to the repository, set its `source` to `seed` in SQL; the next seed then overwrites it.
 
 ## Deploying to Vercel
 

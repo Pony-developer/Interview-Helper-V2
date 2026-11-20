@@ -36,6 +36,7 @@ import reactMore from "./react-more";
 import react from "./react";
 import recursionMore from "./recursion-more";
 import recursion from "./recursion";
+import redux from "./redux";
 import rxjsMore from "./rxjs-more";
 import rxjs from "./rxjs";
 import searchingAlgorithmsMore from "./searching-algorithms-more";
@@ -88,6 +89,7 @@ export const taskFiles: Record<string, unknown[]> = {
   "react.ts": react,
   "recursion-more.ts": recursionMore,
   "recursion.ts": recursion,
+  "redux.ts": redux,
   "rxjs-more.ts": rxjsMore,
   "rxjs.ts": rxjs,
   "searching-algorithms-more.ts": searchingAlgorithmsMore,

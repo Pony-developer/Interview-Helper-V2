@@ -27,7 +27,8 @@ async function main() {
   out.push("begin;", "");
 
   // Skills
-  out.push("insert into public.skills (slug, name, category, aliases, description, codeable, has_content, popularity) values");
+  // Rows edited in the admin panel (source = 'admin') are never overwritten by the seed.
+  out.push("insert into public.skills as cur (slug, name, category, aliases, description, codeable, has_content, popularity) values");
   out.push(
     skills
       .map(
@@ -40,13 +41,14 @@ async function main() {
   );
   out.push(
     "on conflict (slug) do update set name = excluded.name, category = excluded.category, aliases = excluded.aliases,",
-    "  description = excluded.description, codeable = excluded.codeable, has_content = excluded.has_content, popularity = excluded.popularity;",
+    "  description = excluded.description, codeable = excluded.codeable, has_content = excluded.has_content, popularity = excluded.popularity",
+    "where cur.source = 'seed';",
     "",
   );
 
   // Lectures
   if (lectures.length) {
-    out.push("insert into public.lectures (slug, skill_id, title, summary, body, reading_minutes, updated_at)");
+    out.push("insert into public.lectures as cur (slug, skill_id, title, summary, body, reading_minutes, updated_at)");
     out.push("select v.slug, s.id, v.title, v.summary, v.body, v.reading_minutes, now() from (values");
     out.push(
       lectures
@@ -57,14 +59,15 @@ async function main() {
     out.push("join public.skills s on s.slug = v.skill_slug");
     out.push(
       "on conflict (slug) do update set skill_id = excluded.skill_id, title = excluded.title, summary = excluded.summary,",
-      "  body = excluded.body, reading_minutes = excluded.reading_minutes, updated_at = now();",
+      "  body = excluded.body, reading_minutes = excluded.reading_minutes, updated_at = now()",
+      "where cur.source = 'seed';",
       "",
     );
   }
 
   // Tasks
   if (tasks.length) {
-    out.push("insert into public.tasks (slug, kind, complexity, est_seconds, title, prompt, lecture_id, quiz, practice, published, updated_at)");
+    out.push("insert into public.tasks as cur (slug, kind, complexity, est_seconds, title, prompt, lecture_id, quiz, practice, published, updated_at)");
     out.push("select v.slug, v.kind::public.task_kind, v.complexity, v.est_seconds, v.title, v.prompt, l.id, v.quiz, v.practice, true, now() from (values");
     out.push(
       tasks
@@ -95,15 +98,16 @@ async function main() {
     out.push(
       "on conflict (slug) do update set kind = excluded.kind, complexity = excluded.complexity, est_seconds = excluded.est_seconds,",
       "  title = excluded.title, prompt = excluded.prompt, lecture_id = excluded.lecture_id, quiz = excluded.quiz,",
-      "  practice = excluded.practice, published = true, updated_at = now();",
+      "  practice = excluded.practice, published = true, updated_at = now()",
+      "where cur.source = 'seed';",
       "",
     );
 
     // Unpublish tasks that were removed from the content folder (keeps history intact).
-    out.push(`update public.tasks set published = false where slug not in (${tasks.map((t) => q(t.slug)).join(", ")});`, "");
+    out.push(`update public.tasks set published = false where source = 'seed' and slug not in (${tasks.map((t) => q(t.slug)).join(", ")});`, "");
 
     // Task ↔ skill links
-    out.push(`delete from public.task_skills where task_id in (select id from public.tasks where slug in (${tasks.map((t) => q(t.slug)).join(", ")}));`);
+    out.push(`delete from public.task_skills where task_id in (select id from public.tasks where source = 'seed' and slug in (${tasks.map((t) => q(t.slug)).join(", ")}));`);
     out.push("insert into public.task_skills (task_id, skill_id, weight)");
     out.push("select t.id, s.id, v.weight from (values");
     out.push(
@@ -118,7 +122,7 @@ async function main() {
         .join(",\n"),
     );
     out.push(") as v(task_slug, skill_slug, weight)");
-    out.push("join public.tasks t on t.slug = v.task_slug");
+    out.push("join public.tasks t on t.slug = v.task_slug and t.source = 'seed'");
     out.push("join public.skills s on s.slug = v.skill_slug", "on conflict do nothing;", "");
 
     // Solutions (private schema)
@@ -134,13 +138,20 @@ async function main() {
         .join(",\n"),
     );
     out.push(") as v(task_slug, correct_option_ids, explanation, solution_files)");
-    out.push("join public.tasks t on t.slug = v.task_slug");
+    out.push("join public.tasks t on t.slug = v.task_slug and t.source = 'seed'");
     out.push(
       "on conflict (task_id) do update set correct_option_ids = excluded.correct_option_ids,",
       "  explanation = excluded.explanation, solution_files = excluded.solution_files;",
       "",
     );
   }
+
+  // has_content also counts tasks created in the admin panel.
+  out.push(
+    "update public.skills s set has_content = exists (",
+    "  select 1 from public.task_skills ts join public.tasks t on t.id = ts.task_id and t.published where ts.skill_id = s.id);",
+    "",
+  );
 
   out.push("commit;", "");
   writeFileSync("supabase/seed.sql", out.join("\n"));

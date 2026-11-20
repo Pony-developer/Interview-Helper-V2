@@ -5,7 +5,7 @@ import { refreshSession } from "@/lib/supabase/proxy";
 
 const handleI18nRouting = createMiddleware(routing);
 
-const PROTECTED_PREFIXES = ["/practice", "/interview", "/results", "/progress"];
+const PROTECTED_PREFIXES = ["/practice", "/interview", "/results", "/progress", "/admin"];
 
 function splitLocale(pathname: string) {
   const [, first, ...rest] = pathname.split("/");

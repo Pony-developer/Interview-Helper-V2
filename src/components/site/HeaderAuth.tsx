@@ -115,6 +115,11 @@ export function HeaderAuth() {
           <Link role="menuitem" href="/progress" className="block px-4 py-2 text-sm hover:bg-paper" onClick={() => setOpen(false)}>
             {t("progress")}
           </Link>
+          {isAdmin ? (
+            <Link role="menuitem" href="/admin" className="block px-4 py-2 text-sm hover:bg-paper" onClick={() => setOpen(false)}>
+              {t("adminPanel")}
+            </Link>
+          ) : null}
           <form action="/auth/signout" method="post">
             <button role="menuitem" type="submit" className="block w-full px-4 py-2 text-left text-sm hover:bg-paper">
               {t("signOut")}

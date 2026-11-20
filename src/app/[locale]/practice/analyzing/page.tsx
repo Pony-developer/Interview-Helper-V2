@@ -3,10 +3,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AnalyzingView } from "@/components/analyzing/AnalyzingView";
 import { Logo } from "@/components/brand/Logo";
 import { Link } from "@/i18n/navigation";
+import { getSkillCatalog } from "@/lib/data/catalog";
 import { toLocale } from "@/i18n/locale";
-import { skillDef } from "@/lib/content/schema";
 import { privatePageMetadata } from "@/lib/seo";
-import { skills as rawSkills } from "@content/skills";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/practice/analyzing">): Promise<Metadata> {
   const locale = toLocale((await params).locale);
@@ -17,7 +16,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/practice
 export default async function AnalyzingPage({ params }: PageProps<"/[locale]/practice/analyzing">) {
   const locale = toLocale((await params).locale);
   setRequestLocale(locale);
-  const catalog = rawSkills.map((s) => skillDef.parse(s));
+  const catalog = await getSkillCatalog();
 
   return (
     <div className="grain relative flex min-h-screen flex-col overflow-hidden bg-forest-950">
