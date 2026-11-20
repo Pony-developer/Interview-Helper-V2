@@ -100,7 +100,7 @@ export const skills = defineSkills([
       uk: "Примітивні типи, неявне й явне перетворення, ToPrimitive, == проти === і правила порівняння.",
     },
   }),
-  s("closures-scope", "Closures & Scope", "javascript-core", ["closures", "closure", "lexical scope", "scope chain", "hoisting", "замикання", "this keyword"], {
+  s("closures-scope", "Closures & Scope", "javascript-core", ["closures", "closure", "lexical scope", "scope chain", "hoisting", "замикання"], {
     ...core,
     popularity: 70,
     description: {
@@ -172,7 +172,7 @@ export const skills = defineSkills([
       uk: "Асимптотична складність за часом і пам'яттю та як її оцінювати.",
     },
   }),
-  s("browser-apis", "Browser APIs & Storage", "web-platform", ["web apis", "browser apis", "localstorage", "sessionstorage", "indexeddb", "fetch api", "service worker", "web workers", "intersection observer"], {
+  s("browser-apis", "Browser APIs & Storage", "web-platform", ["web apis", "browser apis", "localstorage", "sessionstorage", "indexeddb", "fetch api", "service worker", "intersection observer"], {
     ...core,
     popularity: 60,
     description: {
@@ -248,6 +248,184 @@ export const skills = defineSkills([
     },
   }),
 
+  s("regex", "Regular Expressions", "javascript-core", ["regex", "regexp", "regular expressions", "regular expression", "регулярні вирази"], {
+    ...core,
+    popularity: 55,
+    description: {
+      en: "Pattern syntax, flags, groups and lookarounds, replace and matchAll, escaping input and avoiding catastrophic backtracking.",
+      uk: "Синтаксис шаблонів, прапорці, групи й перевірки вперед і назад, replace і matchAll, екранування даних і уникнення катастрофічного бектрекінгу.",
+    },
+  }),
+  s("web-workers", "Web Workers", "web-platform", ["web workers", "web worker", "dedicated worker", "comlink", "offscreencanvas", "sharedarraybuffer"], {
+    ...core,
+    popularity: 45,
+    description: {
+      en: "Running JavaScript off the main thread: postMessage and structured clone, transferables, worker pools, RPC and shared memory.",
+      uk: "Виконання JavaScript поза головним потоком: postMessage і структуроване клонування, transferable-об'єкти, пули worker, RPC і спільна пам'ять.",
+    },
+  }),
+
+  s("this-prototypes", "this & Prototypes", "javascript-core", ["this keyword", "this binding", "prototypes", "prototype chain", "prototypal inheritance", "object prototypes", "call apply bind"], {
+    ...core,
+    popularity: 60,
+    description: {
+      en: "How this is bound (default, implicit, explicit, new, arrow), the prototype chain, delegation and what class really does.",
+      uk: "Як прив'язується this (типово, неявно, явно, new, стрілочні), ланцюжок прототипів, делегування і що насправді робить class.",
+    },
+  }),
+  s("js-values-grammar", "Values & Grammar", "javascript-core", ["floating point", "ieee 754", "number precision", "bigint", "automatic semicolon insertion", "operator precedence"], {
+    ...core,
+    popularity: 45,
+    description: {
+      en: "Numbers and precision, BigInt, -0, strings and arrays as values, native wrappers, ASI, precedence and statements vs expressions.",
+      uk: "Числа й точність, BigInt, -0, рядки й масиви як значення, нативні обгортки, ASI, пріоритет операторів і інструкції проти виразів.",
+    },
+  }),
+  s("iterators-generators", "Iterators & Generators", "javascript-core", ["generators", "generator functions", "iterators", "iteration protocol", "async generators", "for await"], {
+    ...core,
+    popularity: 45,
+    description: {
+      en: "The iteration protocol, generator functions, two-way yield, delegation, cleanup with return, async generators and coroutines.",
+      uk: "Протокол ітерації, функції-генератори, двобічний yield, делегування, очищення через return, асинхронні генератори й корутини.",
+    },
+  }),
+  s("js-metaprogramming", "Symbols, Proxy & Reflect", "javascript-core", ["proxy", "proxies", "reflect api", "symbols", "metaprogramming", "property descriptors", "object.defineproperty"], {
+    ...core,
+    popularity: 40,
+    description: {
+      en: "Property descriptors, getters and setters, freezing, Symbols and well-known symbols, Proxy traps and invariants, and Reflect.",
+      uk: "Дескриптори властивостей, гетери й сетери, заморожування, символи й загальновідомі символи, пастки й інваріанти Proxy та Reflect.",
+    },
+  }),
+  s("modern-js-syntax", "Modern JS Syntax", "javascript-core", ["destructuring", "spread operator", "rest parameters", "default parameters", "template literals", "optional chaining", "nullish coalescing", "es2020"], {
+    ...core,
+    popularity: 70,
+    description: {
+      en: "Destructuring, spread and rest, default parameters and their scope, template and tagged literals, optional chaining, ?? and logical assignment.",
+      uk: "Деструктуризація, spread і rest, параметри за замовчуванням та їхня область видимості, шаблонні й теговані літерали, optional chaining, ?? і логічне присвоєння.",
+    },
+  }),
+  s("js-classes", "JavaScript Classes", "javascript-core", ["es6 classes", "javascript classes", "class fields", "private fields", "static blocks", "mixins"], {
+    ...core,
+    popularity: 60,
+    description: {
+      en: "Class syntax in depth: fields and their initialisation order, #private members, static members and blocks, accessors, extends and super, mixins and pitfalls.",
+      uk: "Класи в деталях: поля та порядок їхньої ініціалізації, #приватні члени, статичні члени й блоки, аксесори, extends і super, міксини та підводні камені.",
+    },
+  }),
+  s("js-collections", "Map, Set & Weak Collections", "javascript-core", ["map and set", "weakmap", "weakset", "weakref", "finalizationregistry", "typed arrays", "arraybuffer"], {
+    ...core,
+    popularity: 50,
+    description: {
+      en: "Map and Set semantics (SameValueZero, insertion order), the new Set methods, WeakMap/WeakSet/WeakRef and garbage collection, typed arrays and ArrayBuffer.",
+      uk: "Семантика Map і Set (SameValueZero, порядок вставлення), нові методи Set, WeakMap/WeakSet/WeakRef і збирання сміття, типізовані масиви та ArrayBuffer.",
+    },
+  }),
+  s("js-engine-performance", "JS Engines, Memory & Benchmarking", "javascript-core", ["v8", "jit compilation", "hidden classes", "inline caching", "garbage collection", "memory leaks", "benchmarking", "microbenchmarks"], {
+    ...core,
+    popularity: 45,
+    description: {
+      en: "How engines run JavaScript (parsing, JIT tiers, hidden classes, inline caches, deopts), garbage collection and memory leaks, and how to benchmark honestly.",
+      uk: "Як рушії виконують JavaScript (розбір, рівні JIT, приховані класи, inline-кеші, деоптимізації), збирання сміття й витоки пам'яті та як чесно вимірювати швидкодію.",
+    },
+  }),
+  s("promise-internals", "Promises in Depth", "javascript-core", ["promise internals", "promise/a+", "thenables", "zalgo", "callback hell", "inversion of control", "promisify"], {
+    ...core,
+    popularity: 55,
+    description: {
+      en: "Why callbacks lose trust, how promises fix it, the resolution procedure and thenables, chaining and error propagation, unhandled rejections and writing a promise from scratch.",
+      uk: "Чому колбеки втрачають довіру, як проміси це виправляють, процедура розв'язання й thenable-об'єкти, ланцюжки й поширення помилок, необроблені відхилення і написання промісу з нуля.",
+    },
+  }),
+  s("error-handling", "Error Handling", "javascript-core", ["error handling", "exception handling", "try catch", "custom errors", "unhandled rejections"], {
+    ...core,
+    popularity: 75,
+    description: {
+      en: "Error types and causes, custom errors, try/catch/finally semantics, errors in async code, global handlers, and designing what to throw, return or retry.",
+      uk: "Типи помилок і їхні причини, власні помилки, семантика try/catch/finally, помилки в асинхронному коді, глобальні обробники і як вирішити, що кидати, повертати чи повторювати.",
+    },
+  }),
+  s("scope-strict-mode", "Scope Model & Strict Mode", "javascript-core", ["strict mode", "use strict", "global scope", "globalthis", "lexical environment"], {
+    ...core,
+    popularity: 45,
+    description: {
+      en: "How the engine resolves names: compile-time scopes, lookups, the global object vs the global scope, function declarations in blocks, eval and with, and everything strict mode changes.",
+      uk: "Як рушій знаходить імена: області видимості під час компіляції, пошук, глобальний об'єкт проти глобальної області, оголошення функцій у блоках, eval і with та все, що змінює строгий режим.",
+    },
+  }),
+  s("async-cancellation", "Cancellation & Async Control Flow", "javascript-core", ["abortcontroller", "abortsignal", "cancellation", "race conditions", "request cancellation"], {
+    ...core,
+    popularity: 45,
+    description: {
+      en: "AbortController and AbortSignal, timeouts, stale-response race conditions, latest-wins and queued flows, cancellable async work, and channels for coordinating producers and consumers.",
+      uk: "AbortController і AbortSignal, тайм-аути, стани гонитви з застарілими відповідями, сценарії «перемагає останній» і черги, асинхронна робота зі скасуванням і канали для координації виробників і споживачів.",
+    },
+  }),
+  s("unicode-strings", "Strings & Unicode", "javascript-core", ["unicode", "utf-8", "utf-16", "emoji handling", "string encoding", "intl.segmenter"], {
+    ...core,
+    popularity: 45,
+    description: {
+      en: "UTF-16 code units vs code points vs grapheme clusters, surrogate pairs, normalisation, the u and v regex flags, locale-aware comparison and encoding text to bytes.",
+      uk: "Кодові одиниці UTF-16, кодові точки й кластери графем, сурогатні пари, нормалізація, прапорці регулярних виразів u і v, порівняння з урахуванням локалі й кодування тексту в байти.",
+    },
+  }),
+  s("transpiling-polyfills", "Transpiling, Polyfills & Feature Detection", "javascript-core", ["polyfills", "polyfill", "core-js", "browserslist", "transpiling", "feature detection"], {
+    ...core,
+    popularity: 50,
+    description: {
+      en: "Syntax vs APIs, how transpilers and polyfills work, browserslist targets, writing spec-compliant polyfills, feature detection instead of user-agent sniffing, and the cost of shipping both.",
+      uk: "Синтаксис проти API, як працюють транспілятори й поліфіли, цілі browserslist, написання поліфілів за специфікацією, визначення можливостей замість аналізу user-agent і ціна постачання обох.",
+    },
+  }),
+  s("main-thread-scheduling", "Main-Thread Scheduling", "javascript-core", ["requestanimationframe", "requestidlecallback", "long tasks", "time slicing", "scheduler.yield", "cooperative scheduling"], {
+    ...core,
+    popularity: 45,
+    description: {
+      en: "Keeping the main thread responsive: long tasks and INP, chunking and yielding, requestAnimationFrame vs timers vs idle callbacks, task priorities, and batching DOM reads and writes.",
+      uk: "Як тримати головний потік чутливим: довгі задачі й INP, розбиття роботи й поступка потоку, requestAnimationFrame проти таймерів і idle-колбеків, пріоритети задач і групування читань і записів DOM.",
+    },
+  }),
+  s("immutability-copying", "Values, References & Immutability", "javascript-core", ["immutability", "deep clone", "deep copy", "structuredclone", "value vs reference", "structural sharing"], {
+    ...core,
+    popularity: 60,
+    description: {
+      en: "Primitives vs references, how assignment and arguments really work, shallow vs deep copies and structuredClone's limits, immutable update patterns, structural sharing and freezing.",
+      uk: "Примітиви проти посилань, як насправді працюють присвоєння й аргументи, поверхневі й глибокі копії та обмеження structuredClone, шаблони незмінних оновлень, структурне спільне використання й заморожування.",
+    },
+  }),
+  s("dates-time", "Dates, Time Zones & Temporal", "javascript-core", ["date handling", "time zones", "timezones", "temporal api", "date-fns", "dayjs", "luxon", "moment.js"], {
+    ...core,
+    popularity: 60,
+    description: {
+      en: "How Date really stores time, parsing and month pitfalls, UTC vs local time, time zones and DST, formatting with Intl, date arithmetic, and the Temporal API.",
+      uk: "Як Date насправді зберігає час, пастки розбору й місяців, UTC проти локального часу, часові пояси й перехід на літній час, форматування через Intl, арифметика дат і Temporal API.",
+    },
+  }),
+  s("json-serialization", "JSON & Serialization", "javascript-core", ["json", "json.stringify", "json.parse", "serialization", "serialisation", "json schema"], {
+    ...core,
+    popularity: 65,
+    description: {
+      en: "Exactly what JSON.stringify keeps and drops, toJSON, replacers and revivers, BigInt and dates, cycles, safe parsing of untrusted input, and validating data at the boundary.",
+      uk: "Що саме зберігає й відкидає JSON.stringify, toJSON, функції replacer і reviver, BigInt і дати, цикли, безпечний розбір ненадійних даних і валідація даних на межі системи.",
+    },
+  }),
+  s("module-pattern", "Module Pattern & Encapsulation", "javascript-core", ["module pattern", "revealing module pattern", "iife", "factory functions", "information hiding"], {
+    ...core,
+    popularity: 45,
+    description: {
+      en: "Encapsulating state with closures: IIFEs, the revealing module and factory patterns, singletons, privacy with closures vs #private vs WeakMap vs Symbol, and how modules replaced them.",
+      uk: "Інкапсуляція стану через замикання: IIFE, шаблони revealing module і фабрики, синглтони, приватність через замикання, #private, WeakMap чи Symbol і як модулі прийшли їм на зміну.",
+    },
+  }),
+  s("event-emitters", "Events & Pub/Sub", "javascript-core", ["event emitter", "eventemitter", "event bus", "publish subscribe", "custom events"], {
+    ...core,
+    popularity: 55,
+    description: {
+      en: "The publish/subscribe model: Node's EventEmitter and the DOM's EventTarget, synchronous dispatch, once and removal during emit, the error event, leaks, and turning events into promises.",
+      uk: "Модель публікації й підписки: EventEmitter у Node і EventTarget у DOM, синхронна доставка, once і видалення під час emit, подія error, витоки й перетворення подій на проміси.",
+    },
+  }),
+
   // ── Languages ───────────────────────────────────────────────────────────────
   s("python", "Python", "languages", ["python", "python3", "python 3", "пайтон"], { popularity: 90 }),
   s("java", "Java", "languages", ["java", "java 8", "java 11", "java 17", "java 21", "jvm"], { popularity: 85 }),
@@ -276,8 +454,21 @@ export const skills = defineSkills([
 
   // ── Web platform ────────────────────────────────────────────────────────────
   s("web-components", "Web Components", "web-platform", ["web components", "custom elements", "shadow dom", "lit-element"], { popularity: 30 }),
-  s("websockets", "WebSockets", "web-platform", ["websocket", "websockets", "socket.io", "server-sent events", "sse"], { popularity: 45 }),
-  s("pwa", "Progressive Web Apps", "web-platform", ["pwa", "progressive web app", "progressive web apps"], { popularity: 30 }),
+  s("websockets", "WebSockets", "web-platform", ["websocket", "websockets", "socket.io", "server-sent events", "sse"], {
+    codeable: true,
+    popularity: 45,
+    description: {
+      en: "Real-time transports (WebSocket, SSE, polling), reconnection with backoff, message ordering, security and scaling.",
+      uk: "Транспорти реального часу (WebSocket, SSE, опитування), перепідключення з наростанням затримки, порядок повідомлень, безпека й масштабування.",
+    },
+  }),
+  s("pwa", "Progressive Web Apps", "web-platform", ["pwa", "progressive web app", "progressive web apps"], {
+    popularity: 30,
+    description: {
+      en: "Web app manifest, service worker lifecycle and updates, caching strategies, offline support, install and push.",
+      uk: "Маніфест вебзастосунку, життєвий цикл і оновлення service worker, стратегії кешування, офлайн-підтримка, встановлення й push.",
+    },
+  }),
   s("seo", "SEO", "web-platform", ["seo", "search engine optimization", "structured data"], { popularity: 35 }),
   s("canvas-webgl", "Canvas & WebGL", "web-platform", ["canvas", "webgl", "three.js", "threejs", "pixijs", "svg animation"], { popularity: 20 }),
   s("i18n", "Internationalisation", "web-platform", ["i18n", "internationalization", "internationalisation", "localization", "l10n"], { popularity: 25 }),
@@ -351,16 +542,34 @@ export const skills = defineSkills([
 
   // ── Styling ─────────────────────────────────────────────────────────────────
   s("sass", "Sass / SCSS", "styling", ["sass", "scss", "less", "stylus", "postcss"], { popularity: 60 }),
-  s("tailwind", "Tailwind CSS", "styling", ["tailwind", "tailwindcss", "tailwind css"], { popularity: 60 }),
+  s("tailwind", "Tailwind CSS", "styling", ["tailwind", "tailwindcss", "tailwind css"], {
+    popularity: 60,
+    description: {
+      en: "Utility-first styling, variants, theme tokens, how class scanning works, reuse and class merging.",
+      uk: "Утилітарні стилі, варіанти, токени теми, як працює сканування класів, повторне використання й злиття класів.",
+    },
+  }),
   s("bootstrap", "Bootstrap", "styling", ["bootstrap", "bootstrap 5"], { popularity: 35 }),
   s("css-in-js", "CSS-in-JS", "styling", ["css-in-js", "styled-components", "styled components", "emotion", "css modules"], { popularity: 40 }),
-  s("responsive-design", "Responsive Design", "styling", ["responsive design", "adaptive design", "mobile-first", "cross-browser", "кросбраузерна верстка", "адаптивна верстка", "pixel perfect"], { popularity: 55 }),
+  s("responsive-design", "Responsive Design", "styling", ["responsive design", "adaptive design", "mobile-first", "cross-browser", "кросбраузерна верстка", "адаптивна верстка", "pixel perfect"], {
+    popularity: 55,
+    description: {
+      en: "Mobile-first media queries, fluid Grid/Flexbox layouts, container queries, responsive images and viewport units.",
+      uk: "Медіазапити mobile-first, гнучкі макети на Grid/Flexbox, контейнерні запити, адаптивні зображення й одиниці вікна.",
+    },
+  }),
   s("animations", "CSS & UI Animations", "styling", ["css animations", "framer motion", "gsap", "web animations"], { popularity: 20 }),
   s("figma", "Figma", "practices", ["figma", "sketch", "zeplin", "adobe xd"], { popularity: 50 }),
 
   // ── Build tooling ───────────────────────────────────────────────────────────
   s("webpack", "Webpack", "build-tooling", ["webpack", "module federation"], { popularity: 55 }),
-  s("vite", "Vite", "build-tooling", ["vite", "vitejs"], { popularity: 45 }),
+  s("vite", "Vite", "build-tooling", ["vite", "vitejs"], {
+    popularity: 45,
+    description: {
+      en: "Native-ESM dev server and HMR, production builds, tree shaking, code splitting, caching and environment variables.",
+      uk: "Dev-сервер на нативних ESM і HMR, продакшен-збірки, tree shaking, розбиття коду, кешування й змінні оточення.",
+    },
+  }),
   s("babel", "Babel", "build-tooling", ["babel", "babeljs"], { popularity: 25 }),
   s("esbuild", "esbuild / SWC", "build-tooling", ["esbuild", "swc", "rollup", "parcel", "turbopack"], { popularity: 20 }),
   s("eslint", "ESLint & Prettier", "build-tooling", ["eslint", "prettier", "tslint", "stylelint", "linting"], { popularity: 45 }),
@@ -418,7 +627,14 @@ export const skills = defineSkills([
       uk: "Єдиний обов'язок, відкритість/закритість, підстановка Лісков, розділення інтерфейсів та інверсія залежностей на практиці.",
     },
   }),
-  s("system-design", "System Design", "cs-fundamentals", ["system design", "software architecture", "architecture design", "scalability", "high load", "high-load", "distributed systems"], { popularity: 60 }),
+  s("system-design", "System Design", "cs-fundamentals", ["system design", "software architecture", "architecture design", "scalability", "high load", "high-load", "distributed systems"], {
+    codeable: true,
+    popularity: 60,
+    description: {
+      en: "Frontend system design interviews: requirements, architecture, data model, APIs, performance and resilience.",
+      uk: "Співбесіди з проєктування фронтенду: вимоги, архітектура, модель даних, API, продуктивність і стійкість.",
+    },
+  }),
   s("concurrency", "Concurrency & Multithreading", "cs-fundamentals", ["concurrency", "multithreading", "parallelism", "багатопотоковість"], { popularity: 40 }),
   s("networking", "Networking Basics", "cs-fundamentals", ["tcp/ip", "tcp", "udp", "dns", "networking", "osi model"], { popularity: 35 }),
   s("operating-systems", "Operating Systems", "cs-fundamentals", ["operating systems", "memory management"], { popularity: 15 }),
@@ -502,7 +718,13 @@ export const skills = defineSkills([
   s("mocha", "Mocha / Chai", "testing", ["mocha", "chai", "sinon"], { popularity: 20 }),
   s("jasmine-karma", "Jasmine / Karma", "testing", ["jasmine", "karma"], { popularity: 30 }),
   s("cypress", "Cypress", "testing", ["cypress"], { popularity: 50 }),
-  s("playwright", "Playwright", "testing", ["playwright"], { popularity: 45 }),
+  s("playwright", "Playwright", "testing", ["playwright"], {
+    popularity: 45,
+    description: {
+      en: "End-to-end testing: locators, auto-waiting and web-first assertions, auth state, network mocking and flaky tests.",
+      uk: "Наскрізне тестування: локатори, автоочікування й web-first перевірки, стан автентифікації, імітація мережі й нестабільні тести.",
+    },
+  }),
   s("selenium", "Selenium", "testing", ["selenium", "webdriver", "webdriverio", "selenide"], { popularity: 40 }),
   s("e2e-testing", "E2E Testing", "testing", ["e2e", "end-to-end testing", "end to end testing", "e2e tests", "integration testing", "integration tests"], { popularity: 50 }),
   s("tdd", "TDD / BDD", "testing", ["tdd", "test-driven development", "bdd", "cucumber", "gherkin"], { popularity: 40 }),
@@ -543,7 +765,14 @@ export const skills = defineSkills([
       uk: "XSS і безпечний вивід, CSP, CSRF і cookie, CORS, зберігання токенів та інші ризики безпеки фронтенду.",
     },
   }),
-  s("auth", "Authentication & Authorisation", "security", ["authentication", "authorization", "authorisation", "rbac", "access control", "автентифікація", "авторизація"], { popularity: 50 }),
+  s("auth", "Authentication & Authorisation", "security", ["authentication", "authorization", "authorisation", "rbac", "access control", "автентифікація", "авторизація"], {
+    codeable: true,
+    popularity: 50,
+    description: {
+      en: "Sessions vs JWTs, token storage and refresh, OAuth/OIDC with PKCE, RBAC/ABAC and IDOR prevention.",
+      uk: "Сесії проти JWT, зберігання й оновлення токенів, OAuth/OIDC з PKCE, RBAC/ABAC і запобігання IDOR.",
+    },
+  }),
   s("cryptography", "Cryptography Basics", "security", ["cryptography", "encryption", "hashing", "tls", "ssl", "pki"], { popularity: 20 }),
   s("penetration-testing", "Penetration Testing", "security", ["penetration testing", "pentest", "pentesting", "burp suite"], { popularity: 10 }),
 
@@ -599,4 +828,34 @@ export const CORE_SKILL_SLUGS = [
   "dynamic-programming",
   "graphs",
   "vue",
+  "regex",
+  "web-workers",
+  "responsive-design",
+  "tailwind",
+  "vite",
+  "websockets",
+  "pwa",
+  "system-design",
+  "auth",
+  "playwright",
+  "this-prototypes",
+  "js-values-grammar",
+  "iterators-generators",
+  "js-metaprogramming",
+  "modern-js-syntax",
+  "js-classes",
+  "js-collections",
+  "js-engine-performance",
+  "promise-internals",
+  "error-handling",
+  "scope-strict-mode",
+  "async-cancellation",
+  "unicode-strings",
+  "transpiling-polyfills",
+  "main-thread-scheduling",
+  "immutability-copying",
+  "dates-time",
+  "json-serialization",
+  "module-pattern",
+  "event-emitters",
 ] as const;

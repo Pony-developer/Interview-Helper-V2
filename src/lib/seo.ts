@@ -20,15 +20,69 @@ export function ogLocale(locale: Locale | string) {
   return locale === "uk" ? "uk_UA" : "en_US";
 }
 
+type OpenGraph = NonNullable<Metadata["openGraph"]>;
+
+/**
+ * Metadata for a public, indexable page: canonical, hreflang, Open Graph and Twitter.
+ * Next.js merges metadata shallowly, so a page that sets `openGraph` replaces the layout's whole
+ * object; this rebuilds the shared fields (site name, locales) every time. The image comes from
+ * the `opengraph-image` file convention, which Next.js adds to both cards.
+ */
+export function publicPageMetadata({
+  path,
+  locale,
+  title,
+  description,
+  openGraph,
+}: {
+  path: string;
+  locale: string;
+  title: string;
+  description: string;
+  openGraph?: OpenGraph;
+}): Metadata {
+  return {
+    description,
+    alternates: alternatesFor(path, locale),
+    openGraph: {
+      type: "website",
+      siteName: siteConfig.name,
+      title,
+      description,
+      url: absoluteUrl(localizedPath(path, locale)),
+      locale: ogLocale(locale),
+      alternateLocale: routing.locales.filter((l) => l !== locale).map(ogLocale),
+      ...openGraph,
+    } as OpenGraph,
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(siteConfig.twitter ? { site: siteConfig.twitter, creator: siteConfig.twitter } : {}),
+    },
+  };
+}
+
+export const organizationId = absoluteUrl("/#organization");
+export const websiteId = absoluteUrl("/#website");
+
 export const organizationJsonLd = {
-  "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": organizationId,
   name: siteConfig.name,
   url: siteConfig.url,
-  logo: absoluteUrl("/icon-512.png"),
+  logo: { "@type": "ImageObject", url: absoluteUrl("/icon-512.png"), width: 512, height: 512 },
+  email: siteConfig.contactEmail,
 };
 
-/** Pages behind sign-in should never be indexed. */
+/** Indexable by default; Google may show large image previews and full snippets. */
+export const publicRobots: Metadata["robots"] = {
+  index: true,
+  follow: true,
+  googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+};
+
+/** Pages behind sign-in (and dev tools) should never be indexed. */
 export const privatePageMetadata: Metadata = {
-  robots: { index: false, follow: false, nocache: true },
+  robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } },
 };

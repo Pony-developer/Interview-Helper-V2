@@ -296,7 +296,8 @@ function TestPanel({ state, onRerun }: { state: TestRunState; onRerun: () => voi
           {t("rerun")}
         </button>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-2">
+      {/* Focusable so keyboard users can scroll a long list of results. */}
+      <div tabIndex={0} aria-label={t("results")} role="group" className="min-h-0 flex-1 overflow-y-auto px-4 py-2">
         {state.status === "error" ? (
           <pre className="whitespace-pre-wrap font-mono text-xs text-[#ffb4a8]">{state.message}</pre>
         ) : null}
@@ -305,9 +306,9 @@ function TestPanel({ state, onRerun }: { state: TestRunState; onRerun: () => voi
             {state.run.tests.map((test, i) => (
               <li key={i} className="flex items-start gap-2">
                 {test.status === "pass" ? (
-                  <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#8fd3b0]" aria-label={t("passed")} />
+                  <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#8fd3b0]" role="img" aria-label={t("passed")} />
                 ) : (
-                  <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#ffb4a8]" aria-label={t("failed")} />
+                  <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#ffb4a8]" role="img" aria-label={t("failed")} />
                 )}
                 <div className="min-w-0">
                   <p className="leading-snug">{test.name}</p>

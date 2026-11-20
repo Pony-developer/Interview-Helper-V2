@@ -28,11 +28,14 @@ test("landing exposes SEO essentials", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle(/Assay/);
   await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /interview/i);
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /^http:\/\/localhost:\d+\/?$/);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /^https?:\/\/[^/]+\/?$/); // site root; origin comes from NEXT_PUBLIC_SITE_URL
   await expect(page.locator('link[rel="alternate"][hreflang="uk"]')).toHaveAttribute("href", /\/uk$/);
   await expect(page.locator('meta[property="og:image"]').first()).toHaveAttribute("content", /opengraph-image/);
   const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
-  const types = jsonLd.flatMap((t) => [JSON.parse(t)].flat().map((x: { "@type": string }) => x["@type"]));
+  type Node = { "@type": string; "@graph"?: Node[] };
+  const types = jsonLd.flatMap((t) =>
+    [JSON.parse(t) as Node | Node[]].flat().flatMap((x) => (x["@graph"] ?? [x]).map((n) => n["@type"])),
+  );
   expect(types).toEqual(expect.arrayContaining(["Organization", "WebSite", "WebApplication", "FAQPage"]));
 });
 
@@ -43,6 +46,18 @@ test("skip link moves focus to main content", async ({ page, browserName }) => {
   await expect(page.getByRole("link", { name: "Skip to main content" })).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/#main$/);
+});
+
+test("mobile menu closes on Escape and returns focus to its toggle", async ({ page, isMobile }) => {
+  test.skip(!isMobile);
+  await page.goto("/");
+  const toggle = page.locator("header button[aria-expanded]").first();
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await page.locator(`#${await toggle.getAttribute("aria-controls")} a`).first().focus();
+  await page.keyboard.press("Escape");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(toggle).toBeFocused();
 });
 
 test("hero carousel can be paused and navigated", async ({ page }) => {

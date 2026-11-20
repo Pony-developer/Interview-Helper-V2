@@ -11,7 +11,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { PillLink } from "@/components/ui/PillLink";
 import { Link } from "@/i18n/navigation";
 import { getLecture, getLectures } from "@/lib/data/lectures";
-import { alternatesFor, localizedPath, ogLocale } from "@/lib/seo";
+import { localizedPath, publicPageMetadata } from "@/lib/seo";
 import { absoluteUrl, siteConfig } from "@/lib/site";
 
 export const revalidate = 3600;
@@ -30,17 +30,13 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/lectures
   const path = `/lectures/${slug}`;
   return {
     title: lecture.title,
-    description: lecture.summary,
-    alternates: alternatesFor(path, locale),
-    openGraph: {
-      type: "article",
+    ...publicPageMetadata({
+      path,
+      locale,
       title: lecture.title,
       description: lecture.summary,
-      url: absoluteUrl(localizedPath(path, locale)),
-      locale: ogLocale(locale),
-      modifiedTime: lecture.updatedAt,
-      section: lecture.skill.name,
-    },
+      openGraph: { type: "article", modifiedTime: lecture.updatedAt, section: lecture.skill.name },
+    }),
   };
 }
 

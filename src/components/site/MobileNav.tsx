@@ -2,7 +2,7 @@
 
 import { Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 
@@ -10,6 +10,7 @@ export function MobileNav({ links }: { links: { href: string; label: string }[] 
   const t = useTranslations("nav");
   const [open, setOpen] = useState(false);
   const id = useId();
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const [lastPath, setLastPath] = useState(pathname);
 
@@ -22,7 +23,10 @@ export function MobileNav({ links }: { links: { href: string; label: string }[] 
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      // The panel is about to be hidden; keep focus on the toggle instead of dropping it to <body>.
+      buttonRef.current?.focus();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -31,6 +35,7 @@ export function MobileNav({ links }: { links: { href: string; label: string }[] 
   return (
     <div className="lg:hidden">
       <button
+        ref={buttonRef}
         type="button"
         aria-expanded={open}
         aria-controls={id}

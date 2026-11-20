@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { fontDisplay, fontMono, fontSans } from "@/lib/fonts";
+import { ogLocale, publicRobots } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 import "../globals.css";
 
@@ -29,11 +30,12 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     authors: [{ name: siteConfig.name }],
     creator: siteConfig.name,
     formatDetection: { telephone: false },
+    robots: publicRobots,
     openGraph: {
       type: "website",
       siteName: siteConfig.name,
-      locale: locale === "uk" ? "uk_UA" : "en_US",
-      alternateLocale: locale === "uk" ? ["en_US"] : ["uk_UA"],
+      locale: ogLocale(locale),
+      alternateLocale: routing.locales.filter((l) => l !== locale).map(ogLocale),
     },
     twitter: { card: "summary_large_image" },
   };

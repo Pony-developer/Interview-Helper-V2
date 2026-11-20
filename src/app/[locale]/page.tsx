@@ -10,7 +10,8 @@ import { SkillsMap } from "@/components/landing/SkillsMap";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { alternatesFor, localizedPath, ogLocale, organizationJsonLd } from "@/lib/seo";
+import { routing } from "@/i18n/routing";
+import { localizedPath, organizationId, organizationJsonLd, publicPageMetadata, websiteId } from "@/lib/seo";
 import { absoluteUrl, siteConfig } from "@/lib/site";
 
 export const revalidate = 3600;
@@ -20,14 +21,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]">): Prom
   const t = await getTranslations({ locale, namespace: "meta" });
   return {
     title: { absolute: t("title") },
-    description: t("description"),
-    alternates: alternatesFor("/", locale),
-    openGraph: {
-      title: t("title"),
-      description: t("description"),
-      url: absoluteUrl(localizedPath("/", locale)),
-      locale: ogLocale(locale),
-    },
+    ...publicPageMetadata({ path: "/", locale, title: t("title"), description: t("description") }),
   };
 }
 
@@ -35,6 +29,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const locale = toLocale((await params).locale);
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "meta" });
+  const pageUrl = absoluteUrl(localizedPath("/", locale));
 
   return (
     <>
@@ -49,28 +44,45 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       </main>
       <SiteFooter />
       <JsonLd
-        data={[
-          organizationJsonLd,
-          {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            name: siteConfig.name,
-            url: absoluteUrl(localizedPath("/", locale)),
-            inLanguage: locale,
-            description: t("description"),
-          },
-          {
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            name: siteConfig.name,
-            url: absoluteUrl(localizedPath("/", locale)),
-            applicationCategory: "EducationalApplication",
-            operatingSystem: "Any (modern web browser)",
-            inLanguage: ["en", "uk"],
-            description: t("description"),
-            offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-          },
-        ]}
+        data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            organizationJsonLd,
+            {
+              "@type": "WebSite",
+              "@id": websiteId,
+              name: siteConfig.name,
+              url: absoluteUrl("/"),
+              inLanguage: [...routing.locales],
+              publisher: { "@id": organizationId },
+            },
+            {
+              "@type": "WebPage",
+              "@id": `${pageUrl}#webpage`,
+              url: pageUrl,
+              name: t("title"),
+              description: t("description"),
+              inLanguage: locale,
+              isPartOf: { "@id": websiteId },
+              about: { "@id": `${absoluteUrl("/")}#app` },
+              publisher: { "@id": organizationId },
+            },
+            {
+              "@type": "WebApplication",
+              "@id": `${absoluteUrl("/")}#app`,
+              name: siteConfig.name,
+              url: pageUrl,
+              description: t("description"),
+              applicationCategory: "EducationalApplication",
+              operatingSystem: "Any (modern web browser)",
+              browserRequirements: "Requires JavaScript",
+              inLanguage: [...routing.locales],
+              isAccessibleForFree: true,
+              offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+              publisher: { "@id": organizationId },
+            },
+          ],
+        }}
       />
     </>
   );

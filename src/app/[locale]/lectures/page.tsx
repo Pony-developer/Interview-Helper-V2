@@ -6,8 +6,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { getLectures } from "@/lib/data/lectures";
-import { alternatesFor, localizedPath, ogLocale } from "@/lib/seo";
-import { absoluteUrl } from "@/lib/site";
+import { publicPageMetadata } from "@/lib/seo";
 
 export const revalidate = 3600;
 
@@ -16,9 +15,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/lectures
   const t = await getTranslations({ locale, namespace: "lectures" });
   return {
     title: t("title"),
-    description: t("description"),
-    alternates: alternatesFor("/lectures", locale),
-    openGraph: { title: t("title"), description: t("description"), url: absoluteUrl(localizedPath("/lectures", locale)), locale: ogLocale(locale) },
+    ...publicPageMetadata({ path: "/lectures", locale, title: t("title"), description: t("description") }),
   };
 }
 

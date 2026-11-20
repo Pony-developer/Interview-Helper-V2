@@ -6,9 +6,11 @@ import angularMore from "./angular-more";
 import angular from "./angular";
 import arraysStringsMore from "./arrays-strings-more";
 import arraysStrings from "./arrays-strings";
+import asyncCancellation from "./async-cancellation";
 import asyncJavascriptAdvanced from "./async-javascript-advanced";
 import asyncJavascriptMore from "./async-javascript-more";
 import asyncJavascript from "./async-javascript";
+import auth from "./auth";
 import bigOMore from "./big-o-more";
 import bigO from "./big-o";
 import browserApisMore from "./browser-apis-more";
@@ -19,13 +21,16 @@ import cssMore from "./css-more";
 import css from "./css";
 import dataStructuresMore from "./data-structures-more";
 import dataStructures from "./data-structures";
+import datesTime from "./dates-time";
 import designPatternsMore from "./design-patterns-more";
 import designPatterns from "./design-patterns";
 import domEventsMore from "./dom-events-more";
 import domEvents from "./dom-events";
 import dynamicProgramming from "./dynamic-programming";
+import errorHandling from "./error-handling";
 import esModulesMore from "./es-modules-more";
 import esModules from "./es-modules";
+import eventEmitters from "./event-emitters";
 import eventLoop from "./event-loop";
 import functionalProgramming from "./functional-programming";
 import gitMore from "./git-more";
@@ -36,19 +41,36 @@ import htmlMore from "./html-more";
 import html from "./html";
 import httpRestMore from "./http-rest-more";
 import httpRest from "./http-rest";
+import immutabilityCopying from "./immutability-copying";
+import iteratorsGenerators from "./iterators-generators";
 import javascriptMore from "./javascript-more";
 import javascript from "./javascript";
+import jsClasses from "./js-classes";
+import jsCollections from "./js-collections";
+import jsEnginePerformance from "./js-engine-performance";
+import jsMetaprogramming from "./js-metaprogramming";
+import jsValuesGrammar from "./js-values-grammar";
+import jsonSerialization from "./json-serialization";
+import mainThreadScheduling from "./main-thread-scheduling";
+import modernJsSyntax from "./modern-js-syntax";
+import modulePattern from "./module-pattern";
 import nextjs from "./nextjs";
 import nodejsMore from "./nodejs-more";
 import nodejs from "./nodejs";
 import oop from "./oop";
+import playwright from "./playwright";
+import promiseInternals from "./promise-internals";
+import pwa from "./pwa";
 import reactMore from "./react-more";
 import react from "./react";
 import recursionMore from "./recursion-more";
 import recursion from "./recursion";
 import redux from "./redux";
+import regex from "./regex";
+import responsiveDesign from "./responsive-design";
 import rxjsMore from "./rxjs-more";
 import rxjs from "./rxjs";
+import scopeStrictMode from "./scope-strict-mode";
 import searchingAlgorithmsMore from "./searching-algorithms-more";
 import searchingAlgorithms from "./searching-algorithms";
 import solid from "./solid";
@@ -57,26 +79,36 @@ import sortingAlgorithms from "./sorting-algorithms";
 import sql from "./sql";
 import stateManagementMore from "./state-management-more";
 import stateManagement from "./state-management";
+import systemDesign from "./system-design";
+import tailwind from "./tailwind";
+import thisPrototypes from "./this-prototypes";
+import transpilingPolyfills from "./transpiling-polyfills";
 import typeCoercion from "./type-coercion";
 import typescriptMore from "./typescript-more";
 import typescript from "./typescript";
+import unicodeStrings from "./unicode-strings";
 import unitTestingMore from "./unit-testing-more";
 import unitTesting from "./unit-testing";
+import vite from "./vite";
 import vue from "./vue";
 import webAccessibilityMore from "./web-accessibility-more";
 import webAccessibility from "./web-accessibility";
 import webPerformanceMore from "./web-performance-more";
 import webPerformance from "./web-performance";
 import webSecurity from "./web-security";
+import webWorkers from "./web-workers";
+import websockets from "./websockets";
 
 export const taskFiles: Record<string, unknown[]> = {
   "angular-more.ts": angularMore,
   "angular.ts": angular,
   "arrays-strings-more.ts": arraysStringsMore,
   "arrays-strings.ts": arraysStrings,
+  "async-cancellation.ts": asyncCancellation,
   "async-javascript-advanced.ts": asyncJavascriptAdvanced,
   "async-javascript-more.ts": asyncJavascriptMore,
   "async-javascript.ts": asyncJavascript,
+  "auth.ts": auth,
   "big-o-more.ts": bigOMore,
   "big-o.ts": bigO,
   "browser-apis-more.ts": browserApisMore,
@@ -87,13 +119,16 @@ export const taskFiles: Record<string, unknown[]> = {
   "css.ts": css,
   "data-structures-more.ts": dataStructuresMore,
   "data-structures.ts": dataStructures,
+  "dates-time.ts": datesTime,
   "design-patterns-more.ts": designPatternsMore,
   "design-patterns.ts": designPatterns,
   "dom-events-more.ts": domEventsMore,
   "dom-events.ts": domEvents,
   "dynamic-programming.ts": dynamicProgramming,
+  "error-handling.ts": errorHandling,
   "es-modules-more.ts": esModulesMore,
   "es-modules.ts": esModules,
+  "event-emitters.ts": eventEmitters,
   "event-loop.ts": eventLoop,
   "functional-programming.ts": functionalProgramming,
   "git-more.ts": gitMore,
@@ -104,19 +139,36 @@ export const taskFiles: Record<string, unknown[]> = {
   "html.ts": html,
   "http-rest-more.ts": httpRestMore,
   "http-rest.ts": httpRest,
+  "immutability-copying.ts": immutabilityCopying,
+  "iterators-generators.ts": iteratorsGenerators,
   "javascript-more.ts": javascriptMore,
   "javascript.ts": javascript,
+  "js-classes.ts": jsClasses,
+  "js-collections.ts": jsCollections,
+  "js-engine-performance.ts": jsEnginePerformance,
+  "js-metaprogramming.ts": jsMetaprogramming,
+  "js-values-grammar.ts": jsValuesGrammar,
+  "json-serialization.ts": jsonSerialization,
+  "main-thread-scheduling.ts": mainThreadScheduling,
+  "modern-js-syntax.ts": modernJsSyntax,
+  "module-pattern.ts": modulePattern,
   "nextjs.ts": nextjs,
   "nodejs-more.ts": nodejsMore,
   "nodejs.ts": nodejs,
   "oop.ts": oop,
+  "playwright.ts": playwright,
+  "promise-internals.ts": promiseInternals,
+  "pwa.ts": pwa,
   "react-more.ts": reactMore,
   "react.ts": react,
   "recursion-more.ts": recursionMore,
   "recursion.ts": recursion,
   "redux.ts": redux,
+  "regex.ts": regex,
+  "responsive-design.ts": responsiveDesign,
   "rxjs-more.ts": rxjsMore,
   "rxjs.ts": rxjs,
+  "scope-strict-mode.ts": scopeStrictMode,
   "searching-algorithms-more.ts": searchingAlgorithmsMore,
   "searching-algorithms.ts": searchingAlgorithms,
   "solid.ts": solid,
@@ -125,15 +177,23 @@ export const taskFiles: Record<string, unknown[]> = {
   "sql.ts": sql,
   "state-management-more.ts": stateManagementMore,
   "state-management.ts": stateManagement,
+  "system-design.ts": systemDesign,
+  "tailwind.ts": tailwind,
+  "this-prototypes.ts": thisPrototypes,
+  "transpiling-polyfills.ts": transpilingPolyfills,
   "type-coercion.ts": typeCoercion,
   "typescript-more.ts": typescriptMore,
   "typescript.ts": typescript,
+  "unicode-strings.ts": unicodeStrings,
   "unit-testing-more.ts": unitTestingMore,
   "unit-testing.ts": unitTesting,
+  "vite.ts": vite,
   "vue.ts": vue,
   "web-accessibility-more.ts": webAccessibilityMore,
   "web-accessibility.ts": webAccessibility,
   "web-performance-more.ts": webPerformanceMore,
   "web-performance.ts": webPerformance,
   "web-security.ts": webSecurity,
+  "web-workers.ts": webWorkers,
+  "websockets.ts": websockets,
 };

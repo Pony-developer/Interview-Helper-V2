@@ -3,12 +3,17 @@ import { ImageResponse } from "next/og";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 
-export const alt = "Assay — mock technical interviews";
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+const size = { width: 1200, height: 630 };
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
+}
+
+/** One image per locale, with alt text in the page's language (og:image:alt / twitter:image:alt). */
+export async function generateImageMetadata({ params }: { params: { locale: string } | Promise<{ locale: string }> }) {
+  const locale = toLocale((await params).locale);
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return [{ id: "default", alt: t("title"), size, contentType: "image/png" }];
 }
 
 /** Loads a Google font subset (TTF) for the given text, so Cyrillic titles render too. */

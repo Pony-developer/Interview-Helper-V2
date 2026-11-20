@@ -7,7 +7,10 @@ import { absoluteUrl } from "@/lib/site";
 export const revalidate = 3600;
 
 function entry(path: string, priority: number, lastModified?: string): MetadataRoute.Sitemap[number] {
-  const languages = Object.fromEntries(routing.locales.map((l) => [l, absoluteUrl(localizedPath(path, l))]));
+  const languages: Record<string, string> = Object.fromEntries(
+    routing.locales.map((l) => [l, absoluteUrl(localizedPath(path, l))]),
+  );
+  languages["x-default"] = absoluteUrl(localizedPath(path, routing.defaultLocale));
   return {
     url: absoluteUrl(localizedPath(path, routing.defaultLocale)),
     lastModified: lastModified ? new Date(lastModified) : new Date(),

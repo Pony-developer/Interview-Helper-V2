@@ -83,7 +83,7 @@ export function AnalyzingView({ catalog, deps, interviewPath = (id) => `/intervi
   if (hydrated && !request && !state) {
     return (
       <div className="mx-auto max-w-xl py-24 text-center text-white">
-        <p className="text-lg text-forest-100">{t("missing")}</p>
+        <h1 className="text-lg font-normal text-forest-100">{t("missing")}</h1>
         <Link href={pickerPath} className={pillClasses("gold", "mt-8")}>
           <PillArrow />
           <span>{t("backToPicker")}</span>

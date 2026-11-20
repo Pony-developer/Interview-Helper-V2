@@ -1,0 +1,120 @@
+import { defineTasks } from "@/lib/content/schema";
+import { quiz, w } from "./_helpers";
+
+export default defineTasks([
+  quiz(
+    "pw-what-to-e2e",
+    ["playwright", w("unit-testing")],
+    1,
+    60,
+    ["What to cover end to end", "Що покривати наскрізними тестами"],
+    ["Which of these is the best candidate for an end-to-end test?", "Що з цього найкраще підходить для наскрізного тесту?"],
+    [
+      ["Sign-up → email confirmation → first login, through the real UI", "Реєстрація → підтвердження email → перший вхід через справжній інтерфейс"],
+      ["Every branch of a date-formatting helper", "Кожна гілка помічника для форматування дат"],
+      ["All 40 validation messages of a form field", "Усі 40 повідомлень валідації поля форми"],
+      ["The sorting function of a table", "Функція сортування таблиці"],
+    ],
+    "a",
+    [
+      "E2E tests are slow and comparatively brittle, so spend them on critical journeys that cross pages and services. Pure logic (formatting, sorting, validation rules) is cheaper and more precise to test with unit or component tests. Keep a thin E2E layer on top of many fast lower-level tests.",
+      "Наскрізні тести повільні й відносно крихкі, тож витрачайте їх на критичні сценарії, що проходять через сторінки й сервіси. Чисту логіку (форматування, сортування, правила валідації) дешевше й точніше тестувати модульними чи компонентними тестами. Тримайте тонкий шар E2E поверх багатьох швидких тестів нижчого рівня.",
+    ],
+  ),
+  quiz(
+    "pw-locators",
+    ["playwright", w("web-accessibility")],
+    2,
+    60,
+    ["Choosing a locator", "Вибір локатора"],
+    ["Which locator for the \"Save\" button is most robust and recommended?", "Який локатор для кнопки «Save» найнадійніший і рекомендований?"],
+    [
+      ["`page.getByRole(\"button\", { name: \"Save\" })`", "`page.getByRole(\"button\", { name: \"Save\" })`"],
+      ["`page.locator(\"div > div:nth-child(3) > button\")`", "`page.locator(\"div > div:nth-child(3) > button\")`"],
+      ["`page.locator(\".btn.btn-primary.css-1x9f2\")`", "`page.locator(\".btn.btn-primary.css-1x9f2\")`"],
+      ["`page.locator(\"xpath=//button[2]\")`", "`page.locator(\"xpath=//button[2]\")`"],
+    ],
+    "a",
+    [
+      "Role-based locators match what users and assistive technology perceive, survive markup and styling changes, and fail if the button loses its accessible name. Structural CSS/XPath selectors and generated class names break with every refactor. Use `getByTestId` when no user-facing attribute is stable.",
+      "Локатори за роллю відповідають тому, що сприймають користувачі й допоміжні технології, переживають зміни розмітки та стилів і падають, якщо кнопка втратила доступну назву. Структурні CSS/XPath-селектори й згенеровані назви класів ламаються з кожним рефакторингом. Використовуйте `getByTestId`, коли жоден атрибут, видимий користувачу, не стабільний.",
+    ],
+  ),
+  quiz(
+    "pw-web-first-assertions",
+    ["playwright"],
+    2,
+    90,
+    ["A flaky assertion", "Нестабільна перевірка"],
+    ["This test sometimes fails with `Expected \"Saved\", received \"Saving…\"`. What's the fix?", "Цей тест іноді падає з `Expected \"Saved\", received \"Saving…\"`. Як виправити?"],
+    [
+      ["Use a web-first assertion: `await expect(status).toHaveText(\"Saved\")`, which retries until it matches or times out", "Використати web-first перевірку: `await expect(status).toHaveText(\"Saved\")`, яка повторюється, доки не збіжеться чи не вийде час"],
+      ["Add `await page.waitForTimeout(3000)` before reading the text", "Додати `await page.waitForTimeout(3000)` перед читанням тексту"],
+      ["Increase the global test timeout", "Збільшити загальний тайм-аут тестів"],
+      ["Retry the whole test three times", "Повторювати весь тест тричі"],
+    ],
+    "a",
+    [
+      "`textContent()` reads the value once, immediately, so the assertion races the app. `expect(locator).toHaveText()` polls until the condition holds. Fixed sleeps make tests slow and still flaky on slow machines; retries only hide the problem.",
+      "`textContent()` читає значення один раз і одразу, тож перевірка змагається із застосунком. `expect(locator).toHaveText()` опитує, доки умова не виконається. Фіксовані паузи роблять тести повільними й однаково нестабільними на повільних машинах; повтори лише ховають проблему.",
+    ],
+    { code: 'await page.getByRole("button", { name: "Save" }).click();\nconst status = page.getByRole("status");\nexpect(await status.textContent()).toBe("Saved");', codeLanguage: "ts" },
+  ),
+  quiz(
+    "pw-strict-mode",
+    ["playwright"],
+    3,
+    90,
+    ["Strict mode violation", "Порушення суворого режиму"],
+    ["`await page.getByRole(\"button\", { name: \"Delete\" }).click()` fails with \"strict mode violation: resolved to 3 elements\" on a table with three rows. What's the best fix?", "`await page.getByRole(\"button\", { name: \"Delete\" }).click()` падає з «strict mode violation: resolved to 3 elements» на таблиці з трьома рядками. Як найкраще виправити?"],
+    [
+      ["Scope it to the right row: `page.getByRole(\"row\", { name: /Invoice 42/ }).getByRole(\"button\", { name: \"Delete\" })`", "Обмежити потрібним рядком: `page.getByRole(\"row\", { name: /Invoice 42/ }).getByRole(\"button\", { name: \"Delete\" })`"],
+      ["Use `.first()` so the test always clicks the first button", "Використати `.first()`, щоб тест завжди клацав першу кнопку"],
+      ["Disable strict mode in the config", "Вимкнути суворий режим у конфігурації"],
+      ["Switch to an XPath selector", "Перейти на XPath-селектор"],
+    ],
+    "a",
+    [
+      "Strict mode protects you from acting on the wrong element when a locator is ambiguous. Narrowing by a meaningful container (the row for invoice 42) states exactly which button the test means. `.first()` silences the error but makes the test depend on row order.",
+      "Суворий режим захищає від дій над неправильним елементом, коли локатор неоднозначний. Звуження до змістовного контейнера (рядка рахунку 42) точно вказує, яку кнопку має на увазі тест. `.first()` приглушує помилку, але робить тест залежним від порядку рядків.",
+    ],
+  ),
+  quiz(
+    "pw-storage-state",
+    ["playwright", w("auth")],
+    3,
+    90,
+    ["Logging in for every test", "Вхід для кожного тесту"],
+    ["Every test starts by filling in the login form, which makes the suite slow. What's the idiomatic Playwright approach?", "Кожен тест починається із заповнення форми входу, що робить набір тестів повільним. Який підхід ідіоматичний для Playwright?"],
+    [
+      ["Log in once in a setup project, save `storageState` to a file, and start tests with that state", "Увійти один раз у setup-проєкті, зберегти `storageState` у файл і запускати тести з цим станом"],
+      ["Run all tests in one browser tab sequentially", "Запускати всі тести послідовно в одній вкладці браузера"],
+      ["Disable authentication in the test environment", "Вимкнути автентифікацію в тестовому середовищі"],
+      ["Store the password in each test file", "Зберігати пароль у кожному тестовому файлі"],
+    ],
+    "a",
+    [
+      "`storageState` captures cookies and local storage after logging in; each test then gets a fresh, isolated context that's already authenticated. Tests stay independent and parallelisable. Keep one test that goes through the real login form, and keep credentials in environment variables, not in code.",
+      "`storageState` зберігає cookie й локальне сховище після входу; кожен тест потім отримує новий ізольований контекст, що вже автентифікований. Тести лишаються незалежними й можуть іти паралельно. Лишіть один тест, що проходить справжню форму входу, а облікові дані тримайте в змінних оточення, а не в коді.",
+    ],
+  ),
+  quiz(
+    "pw-ci-only-failure",
+    ["playwright"],
+    4,
+    120,
+    ["Fails only in CI", "Падає лише в CI"],
+    ["A test passes locally but fails about once in five CI runs. What's the most effective first step?", "Тест проходить локально, але падає приблизно в одному з п'яти запусків у CI. Який перший крок найефективніший?"],
+    [
+      ["Enable traces (e.g. `trace: \"on-first-retry\"`) and inspect the DOM snapshots, network and console of the failing run", "Увімкнути трасування (наприклад, `trace: \"on-first-retry\"`) і переглянути знімки DOM, мережу й консоль невдалого запуску"],
+      ["Mark it `test.skip` in CI", "Позначити його `test.skip` у CI"],
+      ["Add `waitForTimeout(5000)` before each step", "Додати `waitForTimeout(5000)` перед кожним кроком"],
+      ["Increase retries to 10", "Збільшити кількість повторів до 10"],
+    ],
+    "a",
+    [
+      "Intermittent CI failures usually come from timing, shared data between parallel tests, or environment differences (slower machines, fonts, time zones). A trace shows exactly what the page looked like and which requests were pending at each step, which points to the real cause. Skipping, sleeping and retrying hide the problem.",
+      "Нестабільні падіння в CI зазвичай спричинені таймінгом, спільними даними між паралельними тестами чи відмінностями середовища (повільніші машини, шрифти, часові пояси). Трасування показує, як саме виглядала сторінка і які запити очікували на кожному кроці, що вказує на справжню причину. Пропуск, паузи й повтори ховають проблему.",
+    ],
+  ),
+]);

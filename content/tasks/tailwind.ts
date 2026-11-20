@@ -1,0 +1,121 @@
+import { defineTasks } from "@/lib/content/schema";
+import { quiz, w } from "./_helpers";
+
+export default defineTasks([
+  quiz(
+    "tw-utility-first",
+    ["tailwind"],
+    1,
+    45,
+    ["Utility-first", "Utility-first"],
+    ["What does \"utility-first\" mean in Tailwind?", "Що означає «utility-first» у Tailwind?"],
+    [
+      ["Styling by composing small single-purpose classes (`p-4`, `text-lg`) in the markup instead of writing custom CSS classes", "Стилізація складанням невеликих однопризначених класів (`p-4`, `text-lg`) у розмітці замість власних CSS-класів"],
+      ["Writing all styles in JavaScript objects", "Написання всіх стилів в об'єктах JavaScript"],
+      ["Using only inline `style` attributes", "Використання лише атрибутів `style`"],
+      ["A set of prebuilt components like buttons and modals", "Набір готових компонентів на кшталт кнопок і модальних вікон"],
+    ],
+    "a",
+    [
+      "Each utility does one thing and comes from the theme scale. Unlike inline styles, utilities support variants (hover, breakpoints, dark mode) and share consistent values; unlike component libraries, Tailwind provides building blocks rather than finished components.",
+      "Кожна утиліта робить одну річ і бере значення зі шкали теми. На відміну від інлайн-стилів, утиліти підтримують варіанти (hover, контрольні точки, темна тема) і мають узгоджені значення; на відміну від бібліотек компонентів, Tailwind дає будівельні блоки, а не готові компоненти.",
+    ],
+  ),
+  quiz(
+    "tw-responsive-prefix",
+    ["tailwind", w("responsive-design")],
+    2,
+    60,
+    ["Reading breakpoint prefixes", "Читання префіксів контрольних точок"],
+    ["With Tailwind's default breakpoints (`md` = 48rem / 768px), how wide is this element on a 500px-wide phone and on a 1000px-wide laptop?", "Зі стандартними контрольними точками Tailwind (`md` = 48rem / 768px) якої ширини цей елемент на телефоні шириною 500px і на ноутбуці шириною 1000px?"],
+    [
+      ["Full width on the phone, half width on the laptop", "На всю ширину на телефоні, на половину на ноутбуці"],
+      ["Half width on the phone, full width on the laptop", "На половину на телефоні, на всю ширину на ноутбуці"],
+      ["Half width on both", "На половину на обох"],
+      ["Full width on both", "На всю ширину на обох"],
+    ],
+    "a",
+    [
+      "Tailwind is mobile-first: unprefixed utilities apply everywhere, and `md:` means \"from 768px up\". So `w-full` applies on small screens and `md:w-1/2` overrides it from `md`. There's no `max-` meaning unless you use `max-md:`.",
+      "Tailwind працює за принципом mobile-first: утиліти без префікса діють усюди, а `md:` означає «від 768px і ширше». Тож `w-full` діє на малих екранах, а `md:w-1/2` перекриває його від `md`. Значення «до певної ширини» з'являється лише з `max-md:`.",
+    ],
+    { code: '<div class="w-full md:w-1/2">…</div>', codeLanguage: "html" },
+  ),
+  quiz(
+    "tw-dynamic-classes",
+    ["tailwind"],
+    2,
+    90,
+    ["Classes that never appear", "Класи, що не з'являються"],
+    ["The badge has no background colour in production. Why?", "У продакшені значок не має кольору фону. Чому?"],
+    [
+      ["Tailwind generates CSS by scanning source files for complete class names; `bg-${color}-500` never appears literally, so no CSS is generated", "Tailwind генерує CSS, шукаючи в коді повні назви класів; `bg-${color}-500` ніде не записано буквально, тож CSS не генерується"],
+      ["Template literals aren't allowed in `className`", "Шаблонні рядки заборонені в `className`"],
+      ["Colour utilities only work with `@apply`", "Утиліти кольорів працюють лише з `@apply`"],
+      ["The class must be added with `classList.add`", "Клас треба додавати через `classList.add`"],
+    ],
+    "a",
+    [
+      "The scanner reads files as plain text and never runs your code. Map values to complete class names (`{ red: \"bg-red-500\", green: \"bg-green-500\" }[color]`) so every class appears literally, or safelist them in configuration if they truly come from data.",
+      "Сканер читає файли як звичайний текст і ніколи не виконує ваш код. Зіставляйте значення з повними назвами класів (`{ red: \"bg-red-500\", green: \"bg-green-500\" }[color]`), щоб кожен клас було записано буквально, або додайте їх до safelist у конфігурації, якщо вони справді приходять із даних.",
+    ],
+    { code: "function Badge({ color, children }) {\n  return <span className={`rounded px-2 bg-${color}-500`}>{children}</span>;\n}", codeLanguage: "tsx" },
+  ),
+  quiz(
+    "tw-class-conflicts",
+    ["tailwind", w("react")],
+    3,
+    120,
+    ["Overriding classes", "Перевизначення класів"],
+    ["`Button` renders `className={\"px-4 py-2 \" + className}`. A caller passes `className=\"px-2\"`. Which horizontal padding wins?", "`Button` рендерить `className={\"px-4 py-2 \" + className}`. Викликач передає `className=\"px-2\"`. Який горизонтальний відступ переможе?"],
+    [
+      ["Whichever rule comes later in the generated stylesheet, not the order in the class attribute; merge with a tool like `tailwind-merge`", "Те правило, що стоїть пізніше в згенерованій таблиці стилів, а не порядок в атрибуті class; зливайте класи інструментом на кшталт `tailwind-merge`"],
+      ["Always `px-2`, because it comes last in the attribute", "Завжди `px-2`, бо він останній в атрибуті"],
+      ["Always `px-4`, because it comes first", "Завжди `px-4`, бо він перший"],
+      ["Neither: conflicting classes cancel out", "Жоден: конфліктні класи скасовують одне одного"],
+    ],
+    "a",
+    [
+      "Both classes have the same specificity, so the cascade picks the one defined later in the CSS file, and the order of classes in the HTML attribute doesn't matter. `tailwind-merge` removes conflicting utilities so the caller's `px-2` replaces `px-4` reliably (usually combined with `clsx` in a `cn()` helper).",
+      "Обидва класи мають однакову специфічність, тож каскад обирає той, що визначений пізніше у файлі CSS, а порядок класів в атрибуті HTML не важливий. `tailwind-merge` прибирає конфліктні утиліти, тож `px-2` від викликача надійно замінює `px-4` (зазвичай разом із `clsx` у помічнику `cn()`).",
+    ],
+  ),
+  quiz(
+    "tw-group-hover",
+    ["tailwind", w("css")],
+    3,
+    90,
+    ["Styling a child on parent hover", "Стиль дитини при наведенні на батька"],
+    ["A card's arrow icon should become visible when the **card** is hovered. Which markup does that?", "Іконка-стрілка в картці має ставати видимою, коли наводять на **картку**. Яка розмітка це робить?"],
+    [
+      ["`<a class=\"group …\">…<svg class=\"opacity-0 group-hover:opacity-100\" /></a>`", "`<a class=\"group …\">…<svg class=\"opacity-0 group-hover:opacity-100\" /></a>`"],
+      ["`<a class=\"hover:svg-visible\">…<svg class=\"opacity-0\" /></a>`", "`<a class=\"hover:svg-visible\">…<svg class=\"opacity-0\" /></a>`"],
+      ["`<a>…<svg class=\"opacity-0 hover:opacity-100\" /></a>`", "`<a>…<svg class=\"opacity-0 hover:opacity-100\" /></a>`"],
+      ["`<a class=\"peer\">…<svg class=\"peer-hover:opacity-100\" /></a>`", "`<a class=\"peer\">…<svg class=\"peer-hover:opacity-100\" /></a>`"],
+    ],
+    "a",
+    [
+      "Mark the parent with `group`, then use `group-hover:` (or `group-focus-visible:`) on descendants. `hover:` on the icon only reacts when the pointer is over the icon itself. `peer` works for **following siblings** of the marked element, not for its children.",
+      "Позначте батька класом `group`, а для нащадків використайте `group-hover:` (або `group-focus-visible:`). `hover:` на іконці реагує лише тоді, коли вказівник над самою іконкою. `peer` працює для **наступних сусідів** позначеного елемента, а не для його дітей.",
+    ],
+  ),
+  quiz(
+    "tw-apply-overuse",
+    ["tailwind", w("clean-code")],
+    4,
+    120,
+    ["Reusing styles", "Повторне використання стилів"],
+    ["A team writes `.btn`, `.card-header`, `.sidebar-link` and 200 other classes with `@apply`. What's the main downside, and what's usually better?", "Команда пише `.btn`, `.card-header`, `.sidebar-link` і ще 200 класів через `@apply`. Який головний недолік і що зазвичай краще?"],
+    [
+      ["It brings back naming, a separate stylesheet and cascade coupling; reuse through components (one `<Button>` with the class list) instead", "Це повертає вигадування назв, окрему таблицю стилів і залежність від каскаду; краще повторно використовувати через компоненти (один `<Button>` зі списком класів)"],
+      ["`@apply` doesn't support variants", "`@apply` не підтримує варіанти"],
+      ["`@apply` makes the bundle larger than inline styles", "`@apply` робить бандл більшим за інлайн-стилі"],
+      ["Nothing; this is the recommended approach", "Нічого; це рекомендований підхід"],
+    ],
+    "a",
+    [
+      "`@apply` is useful for a few base styles or markup you don't control, but using it everywhere recreates the problems utility-first avoids: inventing names, keeping CSS and markup in sync, and changes in one class affecting many places. In component-based apps the component is the unit of reuse.",
+      "`@apply` корисний для кількох базових стилів чи розмітки, яку ви не контролюєте, але використання всюди відтворює проблеми, яких уникає utility-first: вигадування назв, синхронізація CSS і розмітки, вплив зміни одного класу на багато місць. У застосунках на компонентах одиницею повторного використання є компонент.",
+    ],
+  ),
+]);

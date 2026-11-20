@@ -15,7 +15,9 @@ function Switcher({ tone }: { tone: "light" | "dark" }) {
   const query = Object.fromEntries(search.entries());
 
   return (
-    <nav aria-label={t("language")} className="flex items-center gap-1.5">
+    // A group, not a <nav>: the switcher is repeated in the header, mobile menu and footer, and
+    // duplicate "Language" landmarks only add noise to the screen-reader landmark list.
+    <div role="group" aria-label={t("language")} className="flex items-center gap-1.5">
       <Globe aria-hidden className={`h-4 w-4 ${tone === "light" ? "text-gold-300" : "text-forest-700"}`} />
       <ul className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider">
         {routing.locales.map((l) => {
@@ -45,7 +47,7 @@ function Switcher({ tone }: { tone: "light" | "dark" }) {
           );
         })}
       </ul>
-    </nav>
+    </div>
   );
 }
 

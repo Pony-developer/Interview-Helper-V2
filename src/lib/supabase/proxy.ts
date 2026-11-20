@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import type { NextRequest } from "next/server";
 import type { Database } from "./database.types";
+import { isSupabaseConfigured } from "./env";
 
 export type PendingCookies = {
   cookies: { name: string; value: string; options?: Record<string, unknown> }[];
@@ -15,9 +16,11 @@ export type PendingCookies = {
  */
 export async function refreshSession(request: NextRequest) {
   const pending: PendingCookies = { cookies: [], headers: {} };
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) return { userId: null as string | null, pending };
+  // Unconfigured or malformed settings mean "no session" (protected pages redirect to login),
+  // rather than an exception that turns every protected route into an error page.
+  if (!isSupabaseConfigured()) return { userId: null as string | null, pending };
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
   const supabase = createServerClient<Database>(url, key, {
     cookies: {

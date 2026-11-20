@@ -222,7 +222,7 @@ export function InterviewRunner({
             className="ml-auto inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-forest-100 hover:bg-white/10 sm:ml-0"
           >
             <LogOut aria-hidden className="h-4 w-4" />
-            <span className="hidden md:inline">{t("exit")}</span>
+            <span className="sr-only md:not-sr-only">{t("exit")}</span>
           </Link>
         </div>
       </header>
@@ -234,7 +234,7 @@ export function InterviewRunner({
               {t("step", { current: index + 1, total: steps.length })}
             </span>
             <span className="rounded-full bg-gold-100 px-3 py-1 font-semibold text-gold-800">{t(step.kind)}</span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-paper-3 px-3 py-1 text-ink-muted" aria-label={t("complexity", { value: step.complexity })}>
+            <span className="inline-flex items-center gap-1 rounded-full border border-paper-3 px-3 py-1 text-ink-muted" role="img" aria-label={t("complexity", { value: step.complexity })}>
               {Array.from({ length: 5 }, (_, i) => (
                 <span key={i} aria-hidden className={`h-1.5 w-1.5 rounded-full ${i < step.complexity ? "bg-gold-500" : "bg-paper-3"}`} />
               ))}

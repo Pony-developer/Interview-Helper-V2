@@ -3,11 +3,12 @@
 import type { User } from "@supabase/supabase-js";
 import { ChevronDown, LogIn } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 
-const configured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+const configured = isSupabaseConfigured();
 
 export function HeaderAuth() {
   const t = useTranslations("nav");
@@ -15,6 +16,8 @@ export function HeaderAuth() {
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<{ userId: string; isAdmin: boolean } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuId = useId();
   const userId = user?.id;
 
   useEffect(() => {
@@ -49,7 +52,9 @@ export function HeaderAuth() {
       if (!menuRef.current?.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      buttonRef.current?.focus();
     };
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
@@ -81,9 +86,10 @@ export function HeaderAuth() {
   return (
     <div ref={menuRef} className="relative">
       <button
+        ref={buttonRef}
         type="button"
-        aria-haspopup="menu"
         aria-expanded={open}
+        aria-controls={menuId}
         aria-label={`${t("account")}: ${name}`}
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-2 rounded-full border border-white/25 py-1 pl-1 pr-3 text-white transition-colors hover:border-gold-300"
@@ -99,8 +105,13 @@ export function HeaderAuth() {
         <ChevronDown aria-hidden className="h-4 w-4" />
       </button>
       {open ? (
+        // Disclosure pattern (button + panel of links), not an ARIA menu: a menu role promises
+        // arrow-key navigation that a short list of links does not need.
         <div
-          role="menu"
+          id={menuId}
+          onBlur={(e) => {
+            if (!menuRef.current?.contains(e.relatedTarget as Node | null)) setOpen(false);
+          }}
           className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-paper-3 bg-white py-2 text-ink shadow-lift"
         >
           <p className="flex items-center gap-2 px-4 pb-2 pt-1 text-xs text-ink-muted">
@@ -109,22 +120,32 @@ export function HeaderAuth() {
               <span className="shrink-0 rounded-full bg-gold-100 px-2 py-0.5 font-semibold text-gold-800">{t("admin")}</span>
             ) : null}
           </p>
-          <Link role="menuitem" href="/practice" className="block px-4 py-2 text-sm hover:bg-paper" onClick={() => setOpen(false)}>
-            {t("practice")}
-          </Link>
-          <Link role="menuitem" href="/progress" className="block px-4 py-2 text-sm hover:bg-paper" onClick={() => setOpen(false)}>
-            {t("progress")}
-          </Link>
-          {isAdmin ? (
-            <Link role="menuitem" href="/admin" className="block px-4 py-2 text-sm hover:bg-paper" onClick={() => setOpen(false)}>
-              {t("adminPanel")}
-            </Link>
-          ) : null}
-          <form action="/auth/signout" method="post">
-            <button role="menuitem" type="submit" className="block w-full px-4 py-2 text-left text-sm hover:bg-paper">
-              {t("signOut")}
-            </button>
-          </form>
+          <ul>
+            <li>
+              <Link href="/practice" className="block px-4 py-2 text-sm hover:bg-paper" onClick={() => setOpen(false)}>
+                {t("practice")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/progress" className="block px-4 py-2 text-sm hover:bg-paper" onClick={() => setOpen(false)}>
+                {t("progress")}
+              </Link>
+            </li>
+            {isAdmin ? (
+              <li>
+                <Link href="/admin" className="block px-4 py-2 text-sm hover:bg-paper" onClick={() => setOpen(false)}>
+                  {t("adminPanel")}
+                </Link>
+              </li>
+            ) : null}
+            <li>
+              <form action="/auth/signout" method="post">
+                <button type="submit" className="block w-full px-4 py-2 text-left text-sm hover:bg-paper">
+                  {t("signOut")}
+                </button>
+              </form>
+            </li>
+          </ul>
         </div>
       ) : null}
     </div>
