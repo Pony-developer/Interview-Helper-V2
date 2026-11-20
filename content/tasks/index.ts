@@ -6,6 +6,7 @@ import angularMore from "./angular-more";
 import angular from "./angular";
 import arraysStringsMore from "./arrays-strings-more";
 import arraysStrings from "./arrays-strings";
+import asyncJavascriptAdvanced from "./async-javascript-advanced";
 import asyncJavascriptMore from "./async-javascript-more";
 import asyncJavascript from "./async-javascript";
 import bigOMore from "./big-o-more";
@@ -18,20 +19,29 @@ import cssMore from "./css-more";
 import css from "./css";
 import dataStructuresMore from "./data-structures-more";
 import dataStructures from "./data-structures";
+import designPatternsMore from "./design-patterns-more";
+import designPatterns from "./design-patterns";
 import domEventsMore from "./dom-events-more";
 import domEvents from "./dom-events";
+import dynamicProgramming from "./dynamic-programming";
 import esModulesMore from "./es-modules-more";
 import esModules from "./es-modules";
+import eventLoop from "./event-loop";
+import functionalProgramming from "./functional-programming";
 import gitMore from "./git-more";
 import git from "./git";
+import graphql from "./graphql";
+import graphs from "./graphs";
 import htmlMore from "./html-more";
 import html from "./html";
 import httpRestMore from "./http-rest-more";
 import httpRest from "./http-rest";
 import javascriptMore from "./javascript-more";
 import javascript from "./javascript";
+import nextjs from "./nextjs";
 import nodejsMore from "./nodejs-more";
 import nodejs from "./nodejs";
+import oop from "./oop";
 import reactMore from "./react-more";
 import react from "./react";
 import recursionMore from "./recursion-more";
@@ -41,24 +51,30 @@ import rxjsMore from "./rxjs-more";
 import rxjs from "./rxjs";
 import searchingAlgorithmsMore from "./searching-algorithms-more";
 import searchingAlgorithms from "./searching-algorithms";
+import solid from "./solid";
 import sortingAlgorithmsMore from "./sorting-algorithms-more";
 import sortingAlgorithms from "./sorting-algorithms";
+import sql from "./sql";
 import stateManagementMore from "./state-management-more";
 import stateManagement from "./state-management";
+import typeCoercion from "./type-coercion";
 import typescriptMore from "./typescript-more";
 import typescript from "./typescript";
 import unitTestingMore from "./unit-testing-more";
 import unitTesting from "./unit-testing";
+import vue from "./vue";
 import webAccessibilityMore from "./web-accessibility-more";
 import webAccessibility from "./web-accessibility";
 import webPerformanceMore from "./web-performance-more";
 import webPerformance from "./web-performance";
+import webSecurity from "./web-security";
 
 export const taskFiles: Record<string, unknown[]> = {
   "angular-more.ts": angularMore,
   "angular.ts": angular,
   "arrays-strings-more.ts": arraysStringsMore,
   "arrays-strings.ts": arraysStrings,
+  "async-javascript-advanced.ts": asyncJavascriptAdvanced,
   "async-javascript-more.ts": asyncJavascriptMore,
   "async-javascript.ts": asyncJavascript,
   "big-o-more.ts": bigOMore,
@@ -71,20 +87,29 @@ export const taskFiles: Record<string, unknown[]> = {
   "css.ts": css,
   "data-structures-more.ts": dataStructuresMore,
   "data-structures.ts": dataStructures,
+  "design-patterns-more.ts": designPatternsMore,
+  "design-patterns.ts": designPatterns,
   "dom-events-more.ts": domEventsMore,
   "dom-events.ts": domEvents,
+  "dynamic-programming.ts": dynamicProgramming,
   "es-modules-more.ts": esModulesMore,
   "es-modules.ts": esModules,
+  "event-loop.ts": eventLoop,
+  "functional-programming.ts": functionalProgramming,
   "git-more.ts": gitMore,
   "git.ts": git,
+  "graphql.ts": graphql,
+  "graphs.ts": graphs,
   "html-more.ts": htmlMore,
   "html.ts": html,
   "http-rest-more.ts": httpRestMore,
   "http-rest.ts": httpRest,
   "javascript-more.ts": javascriptMore,
   "javascript.ts": javascript,
+  "nextjs.ts": nextjs,
   "nodejs-more.ts": nodejsMore,
   "nodejs.ts": nodejs,
+  "oop.ts": oop,
   "react-more.ts": reactMore,
   "react.ts": react,
   "recursion-more.ts": recursionMore,
@@ -94,16 +119,21 @@ export const taskFiles: Record<string, unknown[]> = {
   "rxjs.ts": rxjs,
   "searching-algorithms-more.ts": searchingAlgorithmsMore,
   "searching-algorithms.ts": searchingAlgorithms,
+  "solid.ts": solid,
   "sorting-algorithms-more.ts": sortingAlgorithmsMore,
   "sorting-algorithms.ts": sortingAlgorithms,
+  "sql.ts": sql,
   "state-management-more.ts": stateManagementMore,
   "state-management.ts": stateManagement,
+  "type-coercion.ts": typeCoercion,
   "typescript-more.ts": typescriptMore,
   "typescript.ts": typescript,
   "unit-testing-more.ts": unitTestingMore,
   "unit-testing.ts": unitTesting,
+  "vue.ts": vue,
   "web-accessibility-more.ts": webAccessibilityMore,
   "web-accessibility.ts": webAccessibility,
   "web-performance-more.ts": webPerformanceMore,
   "web-performance.ts": webPerformance,
+  "web-security.ts": webSecurity,
 };

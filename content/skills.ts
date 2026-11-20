@@ -76,12 +76,28 @@ export const skills = defineSkills([
       uk: "Пошук і зміна DOM, поширення подій, делегування та дії за замовчуванням.",
     },
   }),
-  s("async-javascript", "Async JavaScript", "javascript-core", ["promises", "async/await", "async await", "event loop", "asynchronous javascript", "асинхронність", "microtasks"], {
+  s("async-javascript", "Async JavaScript", "javascript-core", ["promises", "async/await", "async await", "asynchronous javascript", "асинхронність"], {
     ...core,
     popularity: 80,
     description: {
-      en: "Promises, async/await, the event loop, microtasks and concurrency patterns.",
-      uk: "Проміси, async/await, цикл подій, мікрозадачі та патерни конкурентності.",
+      en: "Promises, async/await, combinators, error handling and concurrency patterns.",
+      uk: "Проміси, async/await, комбінатори, обробка помилок і патерни конкурентності.",
+    },
+  }),
+  s("event-loop", "Event Loop", "javascript-core", ["event loop", "microtasks", "macrotasks", "task queue", "call stack", "цикл подій", "мікрозадачі"], {
+    ...core,
+    popularity: 70,
+    description: {
+      en: "The call stack, tasks and microtasks, timers, rendering and how to predict execution order.",
+      uk: "Стек викликів, задачі й мікрозадачі, таймери, рендеринг і як передбачити порядок виконання.",
+    },
+  }),
+  s("type-coercion", "Types & Coercion", "javascript-core", ["type coercion", "type conversion", "implicit coercion", "loose equality", "приведення типів"], {
+    ...core,
+    popularity: 65,
+    description: {
+      en: "Primitive types, implicit and explicit conversion, ToPrimitive, == vs === and comparison rules.",
+      uk: "Примітивні типи, неявне й явне перетворення, ToPrimitive, == проти === і правила порівняння.",
     },
   }),
   s("closures-scope", "Closures & Scope", "javascript-core", ["closures", "closure", "lexical scope", "scope chain", "hoisting", "замикання", "this keyword"], {
@@ -265,16 +281,37 @@ export const skills = defineSkills([
   s("seo", "SEO", "web-platform", ["seo", "search engine optimization", "structured data"], { popularity: 35 }),
   s("canvas-webgl", "Canvas & WebGL", "web-platform", ["canvas", "webgl", "three.js", "threejs", "pixijs", "svg animation"], { popularity: 20 }),
   s("i18n", "Internationalisation", "web-platform", ["i18n", "internationalization", "internationalisation", "localization", "l10n"], { popularity: 25 }),
-  s("graphql", "GraphQL", "web-platform", ["graphql", "apollo client", "apollo server", "apollo graphql"], { popularity: 55 }),
+  s("graphql", "GraphQL", "web-platform", ["graphql", "apollo client", "apollo server", "apollo graphql"], {
+    codeable: true,
+    popularity: 55,
+    description: {
+      en: "Schemas and types, queries and mutations, resolvers, N+1 and DataLoader, errors and client caching.",
+      uk: "Схеми й типи, запити й мутації, резолвери, N+1 і DataLoader, помилки й кешування на клієнті.",
+    },
+  }),
   s("grpc", "gRPC", "web-platform", ["grpc", "protobuf", "protocol buffers"], { popularity: 25 }),
   s("oauth", "OAuth & OpenID Connect", "security", ["oauth", "oauth2", "oauth 2.0", "openid connect", "oidc", "sso", "single sign-on"], { popularity: 40 }),
   s("jwt", "JWT", "security", ["jwt", "json web token", "json web tokens"], { popularity: 40 }),
 
   // ── Frontend frameworks & libraries ─────────────────────────────────────────
-  s("vue", "Vue.js", "frontend-frameworks", ["vue", "vue.js", "vuejs", "vue 3", "vue 2", "composition api"], { popularity: 75 }),
+  s("vue", "Vue.js", "frontend-frameworks", ["vue", "vue.js", "vuejs", "vue 3", "vue 2", "composition api"], {
+    codeable: true,
+    popularity: 75,
+    description: {
+      en: "Reactivity with ref and reactive, computed and watchers, directives, props and emits, and the Composition API.",
+      uk: "Реактивність через ref і reactive, computed і спостерігачі, директиви, props і emits та Composition API.",
+    },
+  }),
   s("angularjs", "AngularJS (1.x)", "frontend-frameworks", ["angularjs", "angular.js", "angular 1"], { popularity: 15 }),
   s("svelte", "Svelte", "frontend-frameworks", ["svelte", "sveltekit"], { popularity: 30 }),
-  s("nextjs", "Next.js", "frontend-frameworks", ["next.js", "nextjs", "next js", "app router"], { popularity: 80 }),
+  s("nextjs", "Next.js", "frontend-frameworks", ["next.js", "nextjs", "next js", "app router"], {
+    codeable: true,
+    popularity: 80,
+    description: {
+      en: "The React framework: App Router, Server and Client Components, data fetching, caching and Server Actions.",
+      uk: "React-фреймворк: App Router, серверні й клієнтські компоненти, отримання даних, кешування та Server Actions.",
+    },
+  }),
   s("nuxt", "Nuxt", "frontend-frameworks", ["nuxt", "nuxt.js", "nuxtjs"], { popularity: 35 }),
   s("remix", "Remix", "frontend-frameworks", ["remix run", "remix.run"], { popularity: 15, caseSensitiveAliases: ["Remix"] }),
   s("gatsby", "Gatsby", "frontend-frameworks", ["gatsby", "gatsbyjs"], { popularity: 15 }),
@@ -298,7 +335,14 @@ export const skills = defineSkills([
   s("primeng", "PrimeNG", "styling", ["primeng", "primereact", "primevue"], { popularity: 12 }),
 
   // ── State & data ────────────────────────────────────────────────────────────
-  s("redux", "Redux", "state-and-data", ["redux", "redux toolkit", "rtk", "rtk query", "redux-saga", "redux saga", "redux-thunk"], { popularity: 75 }),
+  s("redux", "Redux", "state-and-data", ["redux", "redux toolkit", "rtk", "rtk query", "redux-saga", "redux saga", "redux-thunk"], {
+    codeable: true,
+    popularity: 75,
+    description: {
+      en: "A predictable store: actions, pure reducers, middleware and thunks, Redux Toolkit and memoised selectors.",
+      uk: "Передбачуваний стор: дії, чисті редʼюсери, middleware і thunk, Redux Toolkit і мемоізовані селектори.",
+    },
+  }),
   s("mobx", "MobX", "state-and-data", ["mobx", "mobx-state-tree"], { popularity: 25 }),
   s("zustand", "Zustand", "state-and-data", ["zustand", "jotai", "recoil"], { popularity: 25 }),
   s("ngrx", "NgRx", "state-and-data", ["ngrx", "ngxs", "akita", "ngrx store", "ngrx signals"], { popularity: 45 }),
@@ -325,12 +369,55 @@ export const skills = defineSkills([
   s("micro-frontends", "Micro-frontends", "build-tooling", ["micro-frontends", "micro frontends", "microfrontends", "single-spa"], { popularity: 30 }),
 
   // ── CS fundamentals ─────────────────────────────────────────────────────────
-  s("dynamic-programming", "Dynamic Programming", "cs-fundamentals", ["dynamic programming", "динамічне програмування"], { popularity: 35 }),
-  s("graphs", "Graph Algorithms", "cs-fundamentals", ["graph algorithms", "bfs", "dfs", "dijkstra", "topological sort"], { popularity: 30 }),
-  s("oop", "Object-Oriented Programming", "cs-fundamentals", ["oop", "object-oriented programming", "object oriented programming", "ооп", "inheritance", "polymorphism", "encapsulation"], { popularity: 75 }),
-  s("functional-programming", "Functional Programming", "cs-fundamentals", ["functional programming", "pure functions", "currying"], { popularity: 40 }),
-  s("design-patterns", "Design Patterns", "cs-fundamentals", ["design patterns", "gof", "патерни проєктування"], { popularity: 65 }),
-  s("solid", "SOLID", "cs-fundamentals", ["solid principles", "yagni"], { popularity: 65, caseSensitiveAliases: ["SOLID", "DRY", "KISS"] }),
+  s("dynamic-programming", "Dynamic Programming", "cs-fundamentals", ["dynamic programming", "динамічне програмування"], {
+    codeable: true,
+    popularity: 35,
+    description: {
+      en: "Overlapping subproblems, memoisation and tabulation, coin change, knapsack and edit distance.",
+      uk: "Підзадачі, що перекриваються, мемоізація й табуляція, розмін монет, рюкзак і відстань редагування.",
+    },
+  }),
+  s("graphs", "Graph Algorithms", "cs-fundamentals", ["graph algorithms", "bfs", "dfs", "dijkstra", "topological sort"], {
+    codeable: true,
+    popularity: 30,
+    description: {
+      en: "BFS and DFS, cycle detection, topological sorting, connected components and Dijkstra's shortest paths.",
+      uk: "BFS і DFS, виявлення циклів, топологічне сортування, компоненти зв'язності й найкоротші шляхи Дейкстри.",
+    },
+  }),
+  s("oop", "Object-Oriented Programming", "cs-fundamentals", ["oop", "object-oriented programming", "object oriented programming", "ооп", "inheritance", "polymorphism", "encapsulation"], {
+    codeable: true,
+    popularity: 75,
+    description: {
+      en: "Encapsulation, inheritance, polymorphism and abstraction with classes, and when to prefer composition.",
+      uk: "Інкапсуляція, успадкування, поліморфізм і абстракція з класами, і коли краще обрати композицію.",
+    },
+  }),
+  s("functional-programming", "Functional Programming", "cs-fundamentals", ["functional programming", "pure functions", "currying"], {
+    codeable: true,
+    popularity: 40,
+    description: {
+      en: "Pure functions, immutability, higher-order functions, composition, currying and lazy sequences.",
+      uk: "Чисті функції, незмінність, функції вищого порядку, композиція, каррування й ліниві послідовності.",
+    },
+  }),
+  s("design-patterns", "Design Patterns", "cs-fundamentals", ["design patterns", "gof", "патерни проєктування"], {
+    codeable: true,
+    popularity: 65,
+    description: {
+      en: "Observer, Strategy, Decorator, Adapter, Proxy, Command, middleware chains and dependency injection in practice.",
+      uk: "Observer, Strategy, Decorator, Adapter, Proxy, Command, ланцюжки middleware і впровадження залежностей на практиці.",
+    },
+  }),
+  s("solid", "SOLID", "cs-fundamentals", ["solid principles", "yagni"], {
+    codeable: true,
+    popularity: 65,
+    caseSensitiveAliases: ["SOLID", "DRY", "KISS"],
+    description: {
+      en: "Single responsibility, open/closed, Liskov substitution, interface segregation and dependency inversion in practice.",
+      uk: "Єдиний обов'язок, відкритість/закритість, підстановка Лісков, розділення інтерфейсів та інверсія залежностей на практиці.",
+    },
+  }),
   s("system-design", "System Design", "cs-fundamentals", ["system design", "software architecture", "architecture design", "scalability", "high load", "high-load", "distributed systems"], { popularity: 60 }),
   s("concurrency", "Concurrency & Multithreading", "cs-fundamentals", ["concurrency", "multithreading", "parallelism", "багатопотоковість"], { popularity: 40 }),
   s("networking", "Networking Basics", "cs-fundamentals", ["tcp/ip", "tcp", "udp", "dns", "networking", "osi model"], { popularity: 35 }),
@@ -362,7 +449,14 @@ export const skills = defineSkills([
   s("serverless", "Serverless", "devops-cloud", ["serverless", "aws lambda", "lambda functions", "azure functions", "cloud functions"], { popularity: 40 }),
 
   // ── Databases ───────────────────────────────────────────────────────────────
-  s("sql", "SQL", "databases", ["sql", "t-sql", "pl/sql", "sql queries", "relational databases", "rdbms"], { popularity: 85 }),
+  s("sql", "SQL", "databases", ["sql", "t-sql", "pl/sql", "sql queries", "relational databases", "rdbms"], {
+    codeable: true,
+    popularity: 85,
+    description: {
+      en: "Queries, joins, NULL logic, aggregation, indexes, transactions and parameterised queries.",
+      uk: "Запити, з'єднання, логіка NULL, агрегація, індекси, транзакції та параметризовані запити.",
+    },
+  }),
   s("postgresql", "PostgreSQL", "databases", ["postgresql", "postgres", "psql"], { popularity: 75 }),
   s("mysql", "MySQL", "databases", ["mysql", "mariadb"], { popularity: 55 }),
   s("mssql", "SQL Server", "databases", ["ms sql", "mssql", "sql server", "microsoft sql server"], { popularity: 40 }),
@@ -441,7 +535,14 @@ export const skills = defineSkills([
   s("nlp", "NLP", "data-ml", ["nlp", "natural language processing", "spacy", "hugging face", "transformers"], { popularity: 15 }),
 
   // ── Security ────────────────────────────────────────────────────────────────
-  s("web-security", "Web Security", "security", ["web security", "owasp", "xss", "csrf", "sql injection", "content security policy", "csp", "безпека"], { popularity: 45 }),
+  s("web-security", "Web Security", "security", ["web security", "owasp", "xss", "csrf", "sql injection", "content security policy", "csp", "безпека"], {
+    codeable: true,
+    popularity: 45,
+    description: {
+      en: "XSS and safe output, CSP, CSRF and cookies, CORS, token storage and other frontend security risks.",
+      uk: "XSS і безпечний вивід, CSP, CSRF і cookie, CORS, зберігання токенів та інші ризики безпеки фронтенду.",
+    },
+  }),
   s("auth", "Authentication & Authorisation", "security", ["authentication", "authorization", "authorisation", "rbac", "access control", "автентифікація", "авторизація"], { popularity: 50 }),
   s("cryptography", "Cryptography Basics", "security", ["cryptography", "encryption", "hashing", "tls", "ssl", "pki"], { popularity: 20 }),
   s("penetration-testing", "Penetration Testing", "security", ["penetration testing", "pentest", "pentesting", "burp suite"], { popularity: 10 }),
@@ -484,4 +585,18 @@ export const CORE_SKILL_SLUGS = [
   "rxjs",
   "state-management",
   "nodejs",
+  "redux",
+  "oop",
+  "design-patterns",
+  "web-security",
+  "nextjs",
+  "event-loop",
+  "type-coercion",
+  "sql",
+  "graphql",
+  "solid",
+  "functional-programming",
+  "dynamic-programming",
+  "graphs",
+  "vue",
 ] as const;

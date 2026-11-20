@@ -1,10 +1,10 @@
 import { defineTasks } from "@/lib/content/schema";
-import { practice, quiz } from "./_helpers";
+import { practice, quiz, w } from "./_helpers";
 
 export default defineTasks([
   quiz(
     "js-nan-includes",
-    ["javascript"],
+    ["javascript", w("type-coercion")],
     3,
     60,
     ["Finding NaN", "Пошук NaN"],

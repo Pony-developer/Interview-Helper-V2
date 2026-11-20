@@ -1,10 +1,10 @@
 import { defineTasks } from "@/lib/content/schema";
-import { practice, quiz } from "./_helpers";
+import { practice, quiz, w } from "./_helpers";
 
 export default defineTasks([
   quiz(
     "js-typeof-null",
-    ["javascript"],
+    ["javascript", w("type-coercion")],
     1,
     45,
     ["typeof null", "typeof null"],
@@ -43,7 +43,7 @@ export default defineTasks([
   ),
   quiz(
     "js-falsy-values",
-    ["javascript"],
+    ["javascript", w("type-coercion")],
     2,
     90,
     ["Falsy values", "Хибні значення"],

@@ -4,7 +4,7 @@ import { practice, quiz, w } from "./_helpers";
 export default defineTasks([
   quiz(
     "async-event-loop-order",
-    ["async-javascript", w("javascript")],
+    ["async-javascript", w("javascript"), w("event-loop")],
     2,
     90,
     ["Event loop order", "Порядок у циклі подій"],

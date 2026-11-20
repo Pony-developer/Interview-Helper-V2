@@ -1,5 +1,5 @@
 import { defineTasks } from "@/lib/content/schema";
-import { practice, quiz } from "./_helpers";
+import { practice, quiz, w } from "./_helpers";
 
 export default defineTasks([
   quiz(
@@ -44,7 +44,7 @@ export default defineTasks([
   ),
   quiz(
     "async-return-promise-ticks",
-    ["async-javascript"],
+    ["async-javascript", w("event-loop")],
     5,
     120,
     ["Returning a promise from async", "Повернення промісу з async"],

@@ -23,7 +23,7 @@ export default defineTasks([
   ),
   quiz(
     "node-microtask-order",
-    ["nodejs", w("async-javascript")],
+    ["nodejs", w("async-javascript"), w("event-loop")],
     3,
     120,
     ["nextTick and promises", "nextTick і проміси"],

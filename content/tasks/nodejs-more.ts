@@ -1,5 +1,5 @@
 import { defineTasks } from "@/lib/content/schema";
-import { practice, quiz } from "./_helpers";
+import { practice, quiz, w } from "./_helpers";
 
 export default defineTasks([
   quiz(
@@ -43,7 +43,7 @@ export default defineTasks([
   ),
   quiz(
     "node-immediate-vs-timeout",
-    ["nodejs", { slug: "async-javascript", weight: 0.5 }],
+    ["nodejs", { slug: "async-javascript", weight: 0.5 }, w("event-loop")],
     5,
     120,
     ["setImmediate inside an I/O callback", "setImmediate усередині I/O-колбека"],
