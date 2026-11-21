@@ -68,7 +68,7 @@ export async function fetchJobPage(rawUrl: string): Promise<JobPageResult> {
         redirect: "manual",
         signal: controller.signal,
         headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; AssayJobReader/1.0; +https://assay.dev)",
+          "User-Agent": "Mozilla/5.0 (compatible; AssayJobReader/1.0; +https://assay-interview-helper.dev)",
           Accept: "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5",
           "Accept-Language": "en,uk;q=0.9",
         },

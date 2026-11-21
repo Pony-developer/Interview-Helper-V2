@@ -62,7 +62,7 @@ describe("safeNextPath", () => {
       const out = safeNextPath(value, "/practice");
       expect(out.startsWith("/")).toBe(true);
       expect(out.startsWith("//")).toBe(false);
-      expect(new URL(out, "https://assay.dev").origin).toBe("https://assay.dev");
+      expect(new URL(out, "https://assay-interview-helper.dev").origin).toBe("https://assay-interview-helper.dev");
     },
   );
   it("falls back for empty values", () => {

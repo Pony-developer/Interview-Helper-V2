@@ -2,6 +2,7 @@
 
 import { AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import type { KeyboardEvent, ReactNode } from "react";
+import { MarkdownArea } from "./MarkdownArea";
 
 export type Loc = { en: string; uk: string };
 export const emptyLoc = (): Loc => ({ en: "", uk: "" });
@@ -123,6 +124,7 @@ export function LocalizedField({
   onChange,
   rows,
   mono,
+  markdown,
 }: {
   id: string;
   label: string;
@@ -131,6 +133,8 @@ export function LocalizedField({
   onChange: (v: Loc) => void;
   rows?: number;
   mono?: boolean;
+  /** Markdown editor with toolbar and preview. */
+  markdown?: boolean;
 }) {
   return (
     <fieldset>
@@ -138,6 +142,17 @@ export function LocalizedField({
       <div className="grid gap-3 lg:grid-cols-2">
         {(["en", "uk"] as const).map((lang) => (
           <div key={lang} className="relative">
+            {markdown && rows ? (
+              <MarkdownArea
+                id={`${id}-${lang}`}
+                ariaLabel={`${label} (${lang})`}
+                badge={lang}
+                value={value[lang]}
+                rows={rows}
+                onChange={(v) => onChange({ ...value, [lang]: v })}
+              />
+            ) : (
+              <>
             <span className="pointer-events-none absolute right-2 top-2 rounded bg-paper-2 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink-soft">
               {lang}
             </span>
@@ -168,6 +183,8 @@ export function LocalizedField({
                 onChange={(e) => onChange({ ...value, [lang]: e.target.value })}
                 className={`${inputCls} pr-10`}
               />
+            )}
+              </>
             )}
           </div>
         ))}

@@ -242,13 +242,13 @@ export function TaskEditor({
         </Field>
 
         <LocalizedField id="title" label="Title" value={s.title} onChange={(v) => set("title", v)} />
-        <LocalizedField id="prompt" label="Prompt (Markdown)" value={s.prompt} onChange={(v) => set("prompt", v)} rows={6} />
+        <LocalizedField id="prompt" label="Prompt (Markdown)" value={s.prompt} onChange={(v) => set("prompt", v)} rows={9} markdown />
       </Section>
 
       {s.kind === "quiz" ? <QuizFields s={s} set={set} /> : <PracticeFields s={s} set={set} setS={setS} create={create} />}
 
       <Section title="Explanation" description="Markdown shown on the results page after the interview.">
-        <LocalizedField id="explanation" label="Explanation" value={s.explanation} onChange={(v) => set("explanation", v)} rows={5} />
+        <LocalizedField id="explanation" label="Explanation" value={s.explanation} onChange={(v) => set("explanation", v)} rows={7} markdown />
       </Section>
 
       <SaveBar status={status} onSave={save}>

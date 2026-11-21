@@ -5,13 +5,13 @@ import { resolveSiteUrl, siteConfig } from "./site";
 
 describe("resolveSiteUrl", () => {
   it("prefers NEXT_PUBLIC_SITE_URL and drops the trailing slash", () => {
-    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "https://assay.example/", VERCEL_PROJECT_PRODUCTION_URL: "x.vercel.app" })).toBe(
-      "https://assay.example",
+    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: "https://assay-interview-helper/", VERCEL_PROJECT_PRODUCTION_URL: "x.vercel.app" })).toBe(
+      "https://assay-interview-helper.example",
     );
   });
 
   it("falls back to the Vercel production domain, then localhost", () => {
-    expect(resolveSiteUrl({ VERCEL_PROJECT_PRODUCTION_URL: "assay.vercel.app" })).toBe("https://assay.vercel.app");
+    expect(resolveSiteUrl({ VERCEL_PROJECT_PRODUCTION_URL: "assay.vercel.app" })).toBe("https://assay-interview-helper.vercel.app");
     expect(resolveSiteUrl({})).toBe("http://localhost:3000");
   });
 

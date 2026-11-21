@@ -9,7 +9,6 @@ import { Link, useRouter } from "@/i18n/navigation";
 import {
   btn,
   callAction,
-  CodeArea,
   Field,
   inputCls,
   LocalizedField,
@@ -19,6 +18,7 @@ import {
   type Loc,
   type SaveStatus,
 } from "./fields";
+import { MarkdownArea } from "./MarkdownArea";
 
 export type LectureFormState = {
   slug: string;
@@ -150,7 +150,7 @@ export function LectureEditor({
         }
       >
         <div className={preview ? "grid gap-4 xl:grid-cols-2" : ""}>
-          <CodeArea ariaLabel={`Body (${lang})`} value={s.body[lang]} onChange={(v) => set("body", { ...s.body, [lang]: v })} rows={28} />
+          <MarkdownArea ariaLabel={`Body (${lang})`} badge={lang} preview={false} value={s.body[lang]} onChange={(v) => set("body", { ...s.body, [lang]: v })} rows={28} />
           {preview ? (
             <div className="prose-assay max-h-[44rem] overflow-auto rounded-xl border border-paper-3 bg-paper p-5">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{s.body[lang]}</ReactMarkdown>

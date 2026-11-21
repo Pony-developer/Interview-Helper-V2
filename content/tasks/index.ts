@@ -3,6 +3,7 @@
  * The content validator fails if a file in this folder is missing from this list.
  */
 import angularMore from "./angular-more";
+import angularPractice from "./angular-practice";
 import angular from "./angular";
 import arraysStringsMore from "./arrays-strings-more";
 import arraysStrings from "./arrays-strings";
@@ -62,6 +63,7 @@ import playwright from "./playwright";
 import promiseInternals from "./promise-internals";
 import pwa from "./pwa";
 import reactMore from "./react-more";
+import reactPractice from "./react-practice";
 import react from "./react";
 import recursionMore from "./recursion-more";
 import recursion from "./recursion";
@@ -101,6 +103,7 @@ import websockets from "./websockets";
 
 export const taskFiles: Record<string, unknown[]> = {
   "angular-more.ts": angularMore,
+  "angular-practice.ts": angularPractice,
   "angular.ts": angular,
   "arrays-strings-more.ts": arraysStringsMore,
   "arrays-strings.ts": arraysStrings,
@@ -160,6 +163,7 @@ export const taskFiles: Record<string, unknown[]> = {
   "promise-internals.ts": promiseInternals,
   "pwa.ts": pwa,
   "react-more.ts": reactMore,
+  "react-practice.ts": reactPractice,
   "react.ts": react,
   "recursion-more.ts": recursionMore,
   "recursion.ts": recursion,
