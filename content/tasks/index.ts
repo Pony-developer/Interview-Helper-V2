@@ -5,6 +5,7 @@
 import angularMore from "./angular-more";
 import angularPractice from "./angular-practice";
 import angular from "./angular";
+import animationsPractice from "./animations-practice";
 import arraysStringsMore from "./arrays-strings-more";
 import arraysStrings from "./arrays-strings";
 import asyncCancellation from "./async-cancellation";
@@ -18,8 +19,10 @@ import browserApisMore from "./browser-apis-more";
 import browserApis from "./browser-apis";
 import closuresScopeMore from "./closures-scope-more";
 import closuresScope from "./closures-scope";
+import concurrencyPractice from "./concurrency-practice";
 import cssMore from "./css-more";
 import css from "./css";
+import d3Practice from "./d3-practice";
 import dataStructuresMore from "./data-structures-more";
 import dataStructures from "./data-structures";
 import datesTime from "./dates-time";
@@ -32,9 +35,13 @@ import errorHandling from "./error-handling";
 import esModulesMore from "./es-modules-more";
 import esModules from "./es-modules";
 import eventEmitters from "./event-emitters";
+import eventLoopInterviewQuizzes from "./event-loop-interview-quizzes";
 import eventLoop from "./event-loop";
+import expressPractice from "./express-practice";
+import frontendInterviewPractice from "./frontend-interview-practice";
 import functionalProgramming from "./functional-programming";
 import gitMore from "./git-more";
+import gitPractice from "./git-practice";
 import git from "./git";
 import graphql from "./graphql";
 import graphs from "./graphs";
@@ -42,7 +49,10 @@ import htmlMore from "./html-more";
 import html from "./html";
 import httpRestMore from "./http-rest-more";
 import httpRest from "./http-rest";
+import i18nPractice from "./i18n-practice";
 import immutabilityCopying from "./immutability-copying";
+import interviewPrepExtra from "./interview-prep-extra";
+import interviewPrepMore from "./interview-prep-more";
 import iteratorsGenerators from "./iterators-generators";
 import javascriptMore from "./javascript-more";
 import javascript from "./javascript";
@@ -52,15 +62,22 @@ import jsEnginePerformance from "./js-engine-performance";
 import jsMetaprogramming from "./js-metaprogramming";
 import jsValuesGrammar from "./js-values-grammar";
 import jsonSerialization from "./json-serialization";
+import jwtPractice from "./jwt-practice";
+import loggingPractice from "./logging-practice";
 import mainThreadScheduling from "./main-thread-scheduling";
 import modernJsSyntax from "./modern-js-syntax";
 import modulePattern from "./module-pattern";
+import monitoringPractice from "./monitoring-practice";
+import networkingPractice from "./networking-practice";
 import nextjs from "./nextjs";
 import nodejsMore from "./nodejs-more";
 import nodejs from "./nodejs";
+import npmPractice from "./npm-practice";
 import oop from "./oop";
+import playwrightMore from "./playwright-more";
 import playwright from "./playwright";
 import promiseInternals from "./promise-internals";
+import pwaPractice from "./pwa-practice";
 import pwa from "./pwa";
 import reactMore from "./react-more";
 import reactPractice from "./react-practice";
@@ -69,20 +86,26 @@ import recursionMore from "./recursion-more";
 import recursion from "./recursion";
 import redux from "./redux";
 import regex from "./regex";
+import responsiveDesignMore from "./responsive-design-more";
 import responsiveDesign from "./responsive-design";
+import restApiPractice from "./rest-api-practice";
 import rxjsMore from "./rxjs-more";
 import rxjs from "./rxjs";
 import scopeStrictMode from "./scope-strict-mode";
+import scrollLayoutInterview from "./scroll-layout-interview";
 import searchingAlgorithmsMore from "./searching-algorithms-more";
 import searchingAlgorithms from "./searching-algorithms";
 import seniorFrontendInterview from "./senior-frontend-interview";
+import seniorFullstackSystemDesign from "./senior-fullstack-system-design";
 import solid from "./solid";
 import sortingAlgorithmsMore from "./sorting-algorithms-more";
 import sortingAlgorithms from "./sorting-algorithms";
 import sql from "./sql";
 import stateManagementMore from "./state-management-more";
 import stateManagement from "./state-management";
+import systemDesignPractice from "./system-design-practice";
 import systemDesign from "./system-design";
+import tailwindMore from "./tailwind-more";
 import tailwind from "./tailwind";
 import thisPrototypes from "./this-prototypes";
 import transpilingPolyfills from "./transpiling-polyfills";
@@ -100,12 +123,14 @@ import webPerformanceMore from "./web-performance-more";
 import webPerformance from "./web-performance";
 import webSecurity from "./web-security";
 import webWorkers from "./web-workers";
+import websocketsPractice from "./websockets-practice";
 import websockets from "./websockets";
 
 export const taskFiles: Record<string, unknown[]> = {
   "angular-more.ts": angularMore,
   "angular-practice.ts": angularPractice,
   "angular.ts": angular,
+  "animations-practice.ts": animationsPractice,
   "arrays-strings-more.ts": arraysStringsMore,
   "arrays-strings.ts": arraysStrings,
   "async-cancellation.ts": asyncCancellation,
@@ -119,8 +144,10 @@ export const taskFiles: Record<string, unknown[]> = {
   "browser-apis.ts": browserApis,
   "closures-scope-more.ts": closuresScopeMore,
   "closures-scope.ts": closuresScope,
+  "concurrency-practice.ts": concurrencyPractice,
   "css-more.ts": cssMore,
   "css.ts": css,
+  "d3-practice.ts": d3Practice,
   "data-structures-more.ts": dataStructuresMore,
   "data-structures.ts": dataStructures,
   "dates-time.ts": datesTime,
@@ -133,9 +160,13 @@ export const taskFiles: Record<string, unknown[]> = {
   "es-modules-more.ts": esModulesMore,
   "es-modules.ts": esModules,
   "event-emitters.ts": eventEmitters,
+  "event-loop-interview-quizzes.ts": eventLoopInterviewQuizzes,
   "event-loop.ts": eventLoop,
+  "express-practice.ts": expressPractice,
+  "frontend-interview-practice.ts": frontendInterviewPractice,
   "functional-programming.ts": functionalProgramming,
   "git-more.ts": gitMore,
+  "git-practice.ts": gitPractice,
   "git.ts": git,
   "graphql.ts": graphql,
   "graphs.ts": graphs,
@@ -143,7 +174,10 @@ export const taskFiles: Record<string, unknown[]> = {
   "html.ts": html,
   "http-rest-more.ts": httpRestMore,
   "http-rest.ts": httpRest,
+  "i18n-practice.ts": i18nPractice,
   "immutability-copying.ts": immutabilityCopying,
+  "interview-prep-extra.ts": interviewPrepExtra,
+  "interview-prep-more.ts": interviewPrepMore,
   "iterators-generators.ts": iteratorsGenerators,
   "javascript-more.ts": javascriptMore,
   "javascript.ts": javascript,
@@ -153,15 +187,22 @@ export const taskFiles: Record<string, unknown[]> = {
   "js-metaprogramming.ts": jsMetaprogramming,
   "js-values-grammar.ts": jsValuesGrammar,
   "json-serialization.ts": jsonSerialization,
+  "jwt-practice.ts": jwtPractice,
+  "logging-practice.ts": loggingPractice,
   "main-thread-scheduling.ts": mainThreadScheduling,
   "modern-js-syntax.ts": modernJsSyntax,
   "module-pattern.ts": modulePattern,
+  "monitoring-practice.ts": monitoringPractice,
+  "networking-practice.ts": networkingPractice,
   "nextjs.ts": nextjs,
   "nodejs-more.ts": nodejsMore,
   "nodejs.ts": nodejs,
+  "npm-practice.ts": npmPractice,
   "oop.ts": oop,
+  "playwright-more.ts": playwrightMore,
   "playwright.ts": playwright,
   "promise-internals.ts": promiseInternals,
+  "pwa-practice.ts": pwaPractice,
   "pwa.ts": pwa,
   "react-more.ts": reactMore,
   "react-practice.ts": reactPractice,
@@ -170,20 +211,26 @@ export const taskFiles: Record<string, unknown[]> = {
   "recursion.ts": recursion,
   "redux.ts": redux,
   "regex.ts": regex,
+  "responsive-design-more.ts": responsiveDesignMore,
   "responsive-design.ts": responsiveDesign,
+  "rest-api-practice.ts": restApiPractice,
   "rxjs-more.ts": rxjsMore,
   "rxjs.ts": rxjs,
   "scope-strict-mode.ts": scopeStrictMode,
+  "scroll-layout-interview.ts": scrollLayoutInterview,
   "searching-algorithms-more.ts": searchingAlgorithmsMore,
   "searching-algorithms.ts": searchingAlgorithms,
   "senior-frontend-interview.ts": seniorFrontendInterview,
+  "senior-fullstack-system-design.ts": seniorFullstackSystemDesign,
   "solid.ts": solid,
   "sorting-algorithms-more.ts": sortingAlgorithmsMore,
   "sorting-algorithms.ts": sortingAlgorithms,
   "sql.ts": sql,
   "state-management-more.ts": stateManagementMore,
   "state-management.ts": stateManagement,
+  "system-design-practice.ts": systemDesignPractice,
   "system-design.ts": systemDesign,
+  "tailwind-more.ts": tailwindMore,
   "tailwind.ts": tailwind,
   "this-prototypes.ts": thisPrototypes,
   "transpiling-polyfills.ts": transpilingPolyfills,
@@ -201,5 +248,6 @@ export const taskFiles: Record<string, unknown[]> = {
   "web-performance.ts": webPerformance,
   "web-security.ts": webSecurity,
   "web-workers.ts": webWorkers,
+  "websockets-practice.ts": websocketsPractice,
   "websockets.ts": websockets,
 };
