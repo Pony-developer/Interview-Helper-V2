@@ -1,7 +1,8 @@
 "use client";
 
 import { AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
-import type { KeyboardEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
+import { CodeEditor } from "./CodeEditor";
 import { MarkdownArea } from "./MarkdownArea";
 
 export type Loc = { en: string; uk: string };
@@ -68,18 +69,7 @@ export function Field({
   );
 }
 
-/** Tab inserts two spaces instead of leaving the field (Esc, then Tab, still moves focus). */
-function onCodeKeyDown(e: KeyboardEvent<HTMLTextAreaElement>, onChange: (v: string) => void) {
-  if (e.key !== "Tab" || e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) return;
-  const el = e.currentTarget;
-  if (el.dataset.tabEscape === "1") return;
-  e.preventDefault();
-  const { selectionStart: s, selectionEnd: end, value } = el;
-  const next = value.slice(0, s) + "  " + value.slice(end);
-  onChange(next);
-  requestAnimationFrame(() => el.setSelectionRange(s + 2, s + 2));
-}
-
+/** Code editor (syntax highlighting, line numbers, auto-indent). `language` is a name or file name. */
 export function CodeArea({
   id,
   value,
@@ -87,6 +77,7 @@ export function CodeArea({
   rows = 10,
   placeholder,
   ariaLabel,
+  language,
 }: {
   id?: string;
   value: string;
@@ -94,25 +85,9 @@ export function CodeArea({
   rows?: number;
   placeholder?: string;
   ariaLabel?: string;
+  language?: string;
 }) {
-  return (
-    <textarea
-      id={id}
-      aria-label={ariaLabel}
-      value={value}
-      rows={rows}
-      spellCheck={false}
-      placeholder={placeholder}
-      onChange={(e) => onChange(e.target.value)}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") e.currentTarget.dataset.tabEscape = "1";
-        else if (e.key !== "Tab") delete e.currentTarget.dataset.tabEscape;
-        onCodeKeyDown(e, onChange);
-      }}
-      onBlur={(e) => delete e.currentTarget.dataset.tabEscape}
-      className={`${monoCls} resize-y whitespace-pre`}
-    />
-  );
+  return <CodeEditor id={id} ariaLabel={ariaLabel} value={value} rows={rows} placeholder={placeholder} language={language} onChange={onChange} />;
 }
 
 /** One bilingual field: English and Ukrainian side by side. */

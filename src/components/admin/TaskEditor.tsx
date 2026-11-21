@@ -364,7 +364,7 @@ function QuizFields({ s, set }: { s: TaskFormState; set: SetFn }) {
         </Field>
       </div>
       <Field label="Code snippet (optional)" htmlFor="quiz-code">
-        <CodeArea id="quiz-code" value={s.code} onChange={(v) => set("code", v)} rows={6} />
+        <CodeArea id="quiz-code" language={s.codeLanguage} value={s.code} onChange={(v) => set("code", v)} rows={6} />
       </Field>
 
       <fieldset>
@@ -424,6 +424,7 @@ function QuizFields({ s, set }: { s: TaskFormState; set: SetFn }) {
                 <div className="mt-2">
                   <CodeArea
                     ariaLabel={`Option ${o.id} code`}
+                    language={s.codeLanguage}
                     value={o.code}
                     rows={3}
                     onChange={(code) =>
@@ -642,10 +643,10 @@ function PracticeFields({
             </div>
             <div className="grid gap-4 xl:grid-cols-2">
               <Field label="Starter code" htmlFor="file-starter">
-                <CodeArea id="file-starter" value={file.starter} onChange={(starter) => updateFile({ starter })} rows={16} />
+                <CodeArea id="file-starter" language={file.path} value={file.starter} onChange={(starter) => updateFile({ starter })} rows={16} />
               </Field>
               <Field label="Reference solution" htmlFor="file-solution" hint="Empty = not part of the solution">
-                <CodeArea id="file-solution" value={file.solution} onChange={(solution) => updateFile({ solution })} rows={16} />
+                <CodeArea id="file-solution" language={file.path} value={file.solution} onChange={(solution) => updateFile({ solution })} rows={16} />
               </Field>
             </div>
           </div>
@@ -662,7 +663,7 @@ function PracticeFields({
           </>
         }
       >
-        <CodeArea id="tests" value={s.tests} onChange={(v) => set("tests", v)} rows={14} />
+        <CodeArea id="tests" language="tsx" value={s.tests} onChange={(v) => set("tests", v)} rows={14} />
       </Field>
 
       <div className="rounded-xl border border-dashed border-paper-3 p-4">
