@@ -238,6 +238,7 @@ export async function runAnalysis(req: AnalysisRequest, { catalog, locale, onUpd
       progress: context.progress,
       level,
       length: LENGTHS[req.length],
+      kinds: req.taskTypes === "quiz" ? ["quiz"] : req.taskTypes === "practice" ? ["practice"] : undefined,
       seed,
     });
     if (!selection.items.length) {

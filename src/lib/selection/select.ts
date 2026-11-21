@@ -36,6 +36,8 @@ export type SelectionInput = {
   progress: SelProgress[];
   level: Level;
   length: number;
+  /** Task kinds the user wants; defaults to both. */
+  kinds?: SelTask["kind"][];
   now?: Date;
   seed?: number;
 };
@@ -107,11 +109,15 @@ export function selectInterview(input: SelectionInput): SelectionResult {
   const random = rng(input.seed ?? now.getTime());
   const length = Math.max(1, Math.round(input.length));
   const skillIds = input.skills.map((s) => s.id);
+  // Mastery still uses every attempt (all kinds); only the pool offered to the user is narrowed.
   const mastery = computeMastery(skillIds, input.tasks, input.progress, now);
   const progressByTask = new Map(input.progress.map((p) => [p.taskId, p]));
+  const kinds = input.kinds?.length ? input.kinds : (["quiz", "practice"] as const);
+  const onlyPractice = kinds.length === 1 && kinds[0] === "practice";
 
   const tasksBySkill = new Map<string, SelTask[]>();
   for (const task of input.tasks) {
+    if (!kinds.includes(task.kind)) continue;
     for (const link of task.skills) {
       if (!skillIds.includes(link.skillId)) continue;
       const list = tasksBySkill.get(link.skillId) ?? [];
@@ -199,7 +205,7 @@ export function selectInterview(input: SelectionInput): SelectionResult {
   };
 
   const fill = (pool: Map<string, Candidate[]>) => {
-    const practiceCap = Math.max(1, Math.round(length * PRACTICE_SHARE));
+    const practiceCap = onlyPractice ? length : Math.max(1, Math.round(length * PRACTICE_SHARE));
     const practiceCount = () => picked.filter((c) => c.task.kind === "practice").length;
 
     // 1) Practice tasks first (round-robin over the neediest skills), up to ~30%.

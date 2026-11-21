@@ -133,4 +133,25 @@ describe("selectInterview", () => {
     expect(cs).toEqual([...cs].sort((a, b) => a - b));
     expect(r.budgetSeconds).toBe(440);
   });
+
+  describe("kinds filter", () => {
+    const kindOf = (id: string) => tasks.find((t) => t.id === id)!.kind;
+
+    it("quiz only never picks practice tasks", () => {
+      const r = selectInterview({ skills, tasks, progress: [], level: "middle", length: 10, kinds: ["quiz"], now: NOW, seed: 4 });
+      expect(r.items).toHaveLength(10);
+      expect(r.items.every((i) => kindOf(i.taskId) === "quiz")).toBe(true);
+    });
+
+    it("practice only picks practice tasks beyond the usual 30% share", () => {
+      const r = selectInterview({ skills: skills.slice(0, 2), tasks, progress: [], level: "middle", length: 4, kinds: ["practice"], now: NOW, seed: 4 });
+      expect(r.items).toHaveLength(4);
+      expect(r.items.every((i) => kindOf(i.taskId) === "practice")).toBe(true);
+    });
+
+    it("reports skills without tasks of the chosen kind as gaps", () => {
+      const r = selectInterview({ skills, tasks, progress: [], level: "middle", length: 6, kinds: ["practice"], now: NOW, seed: 4 });
+      expect(r.gaps).toEqual(["css"]);
+    });
+  });
 });

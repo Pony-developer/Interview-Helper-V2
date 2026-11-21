@@ -6,7 +6,8 @@ import type { LlmModelKey } from "@/lib/llm/models";
 
 export type Method = "manual" | "url" | "llm_url" | "llm_text";
 export type LevelChoice = "junior" | "middle" | "senior" | "auto";
-export const LENGTHS = { short: 6, standard: 10, long: 15 } as const;
+export type TaskTypeChoice = "both" | "quiz" | "practice";
+export const LENGTHS ={ short: 6, standard: 10, long: 15 } as const;
 export type LengthKey = keyof typeof LENGTHS;
 
 export type AnalysisRequest = {
@@ -17,6 +18,8 @@ export type AnalysisRequest = {
   text: string;
   level: LevelChoice;
   length: LengthKey;
+  /** Which kinds of tasks to include. Optional so requests persisted before this existed still work. */
+  taskTypes?: TaskTypeChoice;
   model: LlmModelKey;
   /** Paste mode without WebGPU: use the keyword matcher instead of the LLM. */
   keywordFallback: boolean;

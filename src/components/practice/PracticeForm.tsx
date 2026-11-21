@@ -10,7 +10,7 @@ import { PillArrow, pillClasses } from "@/components/ui/PillLink";
 import { useRouter } from "@/i18n/navigation";
 import type { Skill } from "@/lib/content/schema";
 import { DEFAULT_MODEL, type LlmModelKey } from "@/lib/llm/models";
-import { useAnalysisRequest, type LengthKey, type LevelChoice, type Method } from "@/lib/pipeline/request-store";
+import { useAnalysisRequest, type LengthKey, type LevelChoice, type Method, type TaskTypeChoice } from "@/lib/pipeline/request-store";
 import { DevicePanel } from "./DevicePanel";
 import { SkillMultiSelect } from "./SkillMultiSelect";
 
@@ -54,6 +54,7 @@ export function PracticeForm({ catalog, withContent, initialSkills, initialMetho
   const [text, setText] = useState("");
   const [level, setLevel] = useState<LevelChoice>(initialMethod === "manual" ? "middle" : "auto");
   const [length, setLength] = useState<LengthKey>("standard");
+  const [taskTypes, setTaskTypes] = useState<TaskTypeChoice>("both");
   const [model, setModel] = useState<LlmModelKey>(DEFAULT_MODEL);
   const [fallback, setFallback] = useState(false);
   const [gpu, setGpu] = useState<boolean | null>(null);
@@ -95,6 +96,7 @@ export function PracticeForm({ catalog, withContent, initialSkills, initialMetho
       text: text.trim(),
       level,
       length,
+      taskTypes,
       model,
       keywordFallback: method === "llm_text" && (fallback || gpu === false),
     });
@@ -235,6 +237,24 @@ export function PracticeForm({ catalog, withContent, initialSkills, initialMetho
             {(["short", "standard", "long"] as const).map((l) => (
               <Radio key={l} value={l} className={segment}>
                 {t(`length.${l}`)}
+              </Radio>
+            ))}
+          </div>
+        </RadioGroup>
+        <RadioGroup
+          value={taskTypes}
+          onChange={(v) => setTaskTypes(v as TaskTypeChoice)}
+          orientation="horizontal"
+          className="space-y-3 lg:col-span-2"
+        >
+          <Label className="font-display text-xl font-bold text-forest-700">{t("taskTypes.legend")}</Label>
+          <Text slot="description" className="block text-sm text-ink-muted">
+            {t("taskTypes.help")}
+          </Text>
+          <div className="flex flex-wrap gap-2">
+            {(["both", "quiz", "practice"] as const).map((k) => (
+              <Radio key={k} value={k} className={segment}>
+                {t(`taskTypes.${k}`)}
               </Radio>
             ))}
           </div>

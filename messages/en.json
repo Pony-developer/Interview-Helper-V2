@@ -309,6 +309,13 @@
       "standard": "Standard · 10 tasks",
       "long": "Long · 15 tasks"
     },
+    "taskTypes": {
+      "legend": "Task types",
+      "help": "Quizzes are quick multiple-choice questions; practice tasks are hands-on coding exercises.",
+      "both": "Quizzes + practice",
+      "quiz": "Quizzes only",
+      "practice": "Practice only"
+    },
     "start": "Build my interview",
     "errors": {
       "noSkills": "Choose at least one skill",
