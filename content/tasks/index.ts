@@ -75,6 +75,7 @@ import rxjs from "./rxjs";
 import scopeStrictMode from "./scope-strict-mode";
 import searchingAlgorithmsMore from "./searching-algorithms-more";
 import searchingAlgorithms from "./searching-algorithms";
+import seniorFrontendInterview from "./senior-frontend-interview";
 import solid from "./solid";
 import sortingAlgorithmsMore from "./sorting-algorithms-more";
 import sortingAlgorithms from "./sorting-algorithms";
@@ -175,6 +176,7 @@ export const taskFiles: Record<string, unknown[]> = {
   "scope-strict-mode.ts": scopeStrictMode,
   "searching-algorithms-more.ts": searchingAlgorithmsMore,
   "searching-algorithms.ts": searchingAlgorithms,
+  "senior-frontend-interview.ts": seniorFrontendInterview,
   "solid.ts": solid,
   "sorting-algorithms-more.ts": sortingAlgorithmsMore,
   "sorting-algorithms.ts": sortingAlgorithms,
