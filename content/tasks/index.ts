@@ -106,6 +106,7 @@ import sortingAlgorithms from "./sorting-algorithms";
 import sql from "./sql";
 import stateManagementMore from "./state-management-more";
 import stateManagement from "./state-management";
+import systemDesignBackend from "./system-design-backend";
 import systemDesignPractice from "./system-design-practice";
 import systemDesign from "./system-design";
 import tailwindMore from "./tailwind-more";
@@ -234,6 +235,7 @@ export const taskFiles: Record<string, unknown[]> = {
   "sql.ts": sql,
   "state-management-more.ts": stateManagementMore,
   "state-management.ts": stateManagement,
+  "system-design-backend.ts": systemDesignBackend,
   "system-design-practice.ts": systemDesignPractice,
   "system-design.ts": systemDesign,
   "tailwind-more.ts": tailwindMore,
