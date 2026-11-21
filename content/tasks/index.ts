@@ -30,7 +30,9 @@ import designPatternsMore from "./design-patterns-more";
 import designPatterns from "./design-patterns";
 import domEventsMore from "./dom-events-more";
 import domEvents from "./dom-events";
+import douInterviewPractice from "./dou-interview-practice";
 import dynamicProgramming from "./dynamic-programming";
+import dynamicsCrmPractice from "./dynamics-crm-practice";
 import errorHandling from "./error-handling";
 import esModulesMore from "./es-modules-more";
 import esModules from "./es-modules";
@@ -38,6 +40,7 @@ import eventEmitters from "./event-emitters";
 import eventLoopInterviewQuizzes from "./event-loop-interview-quizzes";
 import eventLoop from "./event-loop";
 import expressPractice from "./express-practice";
+import frontendGapsPractice from "./frontend-gaps-practice";
 import frontendInterviewPractice from "./frontend-interview-practice";
 import functionalProgramming from "./functional-programming";
 import gitMore from "./git-more";
@@ -155,7 +158,9 @@ export const taskFiles: Record<string, unknown[]> = {
   "design-patterns.ts": designPatterns,
   "dom-events-more.ts": domEventsMore,
   "dom-events.ts": domEvents,
+  "dou-interview-practice.ts": douInterviewPractice,
   "dynamic-programming.ts": dynamicProgramming,
+  "dynamics-crm-practice.ts": dynamicsCrmPractice,
   "error-handling.ts": errorHandling,
   "es-modules-more.ts": esModulesMore,
   "es-modules.ts": esModules,
@@ -163,6 +168,7 @@ export const taskFiles: Record<string, unknown[]> = {
   "event-loop-interview-quizzes.ts": eventLoopInterviewQuizzes,
   "event-loop.ts": eventLoop,
   "express-practice.ts": expressPractice,
+  "frontend-gaps-practice.ts": frontendGapsPractice,
   "frontend-interview-practice.ts": frontendInterviewPractice,
   "functional-programming.ts": functionalProgramming,
   "git-more.ts": gitMore,

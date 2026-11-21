@@ -426,6 +426,15 @@ export const skills = defineSkills([
     },
   }),
 
+  s("dynamics-crm", "Microsoft Dynamics 365 & Dataverse", "backend", ["dynamics 365", "dynamics crm", "dynamics", "dataverse", "power platform", "microsoft crm", "ms crm", "d365", "odata crm", "crm development"], {
+    ...core,
+    popularity: 40,
+    description: {
+      en: "Microsoft's business apps on Dataverse: tables and relationships, the OData Web API, solutions and environments, security roles, business rules, plug-ins and Power Automate flows.",
+      uk: "Бізнес-застосунки Microsoft на Dataverse: таблиці й зв'язки, OData Web API, рішення й середовища, ролі безпеки, бізнес-правила, плагіни та потоки Power Automate.",
+    },
+  }),
+
   // ── Languages ───────────────────────────────────────────────────────────────
   s("python", "Python", "languages", ["python", "python3", "python 3", "пайтон"], { popularity: 90 }),
   s("java", "Java", "languages", ["java", "java 8", "java 11", "java 17", "java 21", "jvm"], { popularity: 85 }),
@@ -858,4 +867,5 @@ export const CORE_SKILL_SLUGS = [
   "json-serialization",
   "module-pattern",
   "event-emitters",
+  "dynamics-crm",
 ] as const;
