@@ -423,6 +423,123 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
       expect(links.rows[0].n).toBeGreaterThan(0);
     });
 
+    describe("courses", () => {
+      const course = {
+        slug: "admin-course",
+        title: L("Admin course"),
+        summary: L("Made in the admin panel"),
+        topics: [L("One")],
+        published: true,
+      };
+
+      it("rejects course writes from non-admins", async () => {
+        await asUser(USER_B, async () => {
+          await expect(db.query(`select public.admin_save_course($1::jsonb, true)`, [JSON.stringify(course)])).rejects.toThrow(/Only admins/);
+          await expect(db.query(`select public.admin_delete_course('csharp')`)).rejects.toThrow(/Only admins/);
+          const slide = (await db.query<{ id: string }>(`select id from public.course_slides where slug = 'terminology'`)).rows[0].id;
+          await expect(db.query(`select public.admin_get_course_slide($1)`, [slide])).rejects.toThrow(/Only admins/);
+          await expect(db.query(`select public.admin_delete_course_slide($1)`, [slide])).rejects.toThrow(/Only admins/);
+          await expect(db.query(`update public.course_slides set title = '{}'`)).rejects.toThrow(/permission denied/);
+        });
+      });
+
+      it("lets admins build, grade, reorder and delete a course", async () => {
+        await asUser(USER_A, async () => {
+          await db.query(`select public.admin_save_course($1::jsonb, true)`, [JSON.stringify(course)]);
+          const moduleId = (
+            await db.query<{ id: string }>(`select public.admin_save_course_module($1::jsonb, true) as id`, [
+              JSON.stringify({ course: "admin-course", slug: "basics", title: L("Basics") }),
+            ])
+          ).rows[0].id;
+
+          const quizSlide = {
+            course: "admin-course",
+            module_id: moduleId,
+            slug: "admin-quiz",
+            kind: "quiz",
+            title: L("Quiz"),
+            body: L(""),
+            quiz: {
+              questions: [
+                { id: "q1", mode: "single", prompt: L("Pick b"), options: [{ id: "a", text: L("A") }, { id: "b", text: L("B") }], correct: ["b"] },
+                { id: "q2", mode: "multi", prompt: L("Pick a and c"), options: [{ id: "a", text: L("A") }, { id: "c", text: L("C") }], correct: ["a", "c"] },
+              ],
+            },
+          };
+          const quizId = (await db.query<{ id: string }>(`select public.admin_save_course_slide($1::jsonb, true) as id`, [JSON.stringify(quizSlide)])).rows[0].id;
+          const practiceId = (
+            await db.query<{ id: string }>(`select public.admin_save_course_slide($1::jsonb, true) as id`, [
+              JSON.stringify({
+                course: "admin-course",
+                module_id: moduleId,
+                slug: "admin-practice",
+                kind: "practice",
+                title: L("Practice"),
+                body: L("Print 42"),
+                practice: { language: "csharp", starter: "// start", solution: "// done", expected_output: "42\n", max_score: 3 },
+              }),
+            ])
+          ).rows[0].id;
+
+          const saved = (await db.query<{ s: Record<string, unknown> }>(`select public.admin_get_course_slide($1) as s`, [quizId])).rows[0].s;
+          expect(saved).toMatchObject({ kind: "quiz", max_score: 2, source: "admin", quiz_answers: { q1: ["b"], q2: ["a", "c"] } });
+          expect(JSON.stringify(saved.quiz)).not.toContain("correct");
+
+          // Reorder: practice first.
+          await db.query(`select public.admin_reorder_course_items('slide', $1::uuid[])`, [[practiceId, quizId]]);
+          const order = await db.query<{ slug: string }>(`select slug from public.course_slides where module_id = $1 order by sort_order`, [moduleId]);
+          expect(order.rows.map((r) => r.slug)).toEqual(["admin-practice", "admin-quiz"]);
+
+          // Edit the practice: the expected output changes, so the old answer no longer passes.
+          const practice = (await db.query<{ s: Record<string, unknown> }>(`select public.admin_get_course_slide($1) as s`, [practiceId])).rows[0].s;
+          await db.query(`select public.admin_save_course_slide($1::jsonb, false)`, [
+            JSON.stringify({ ...practice, practice: { starter: "// start", solution: "// done", expected_output: "43", max_score: 3 } }),
+          ]);
+        });
+
+        const graded = await asUser(null, async () => {
+          const quiz = (await db.query<{ id: string }>(`select id from public.course_slides where slug = 'admin-quiz'`)).rows[0].id;
+          const practice = (await db.query<{ id: string }>(`select id from public.course_slides where slug = 'admin-practice'`)).rows[0].id;
+          return {
+            quiz: (await db.query<{ r: { score: number } }>(`select public.course_submit_quiz($1, $2::jsonb) as r`, [quiz, JSON.stringify({ q1: ["b"], q2: ["c", "a"] })])).rows[0].r,
+            old: (await db.query<{ r: { passed: boolean } }>(`select public.course_submit_practice($1, '', '42') as r`, [practice])).rows[0].r,
+            fresh: (await db.query<{ r: { passed: boolean; max: number } }>(`select public.course_submit_practice($1, '', '43') as r`, [practice])).rows[0].r,
+          };
+        });
+        expect(graded.quiz.score).toBe(2);
+        expect(graded.old.passed).toBe(false);
+        expect(graded.fresh).toMatchObject({ passed: true, max: 3 });
+
+        await asUser(USER_A, async () => {
+          await db.query(`select public.admin_delete_course('admin-course')`);
+        });
+        const left = await db.query<{ n: number }>(`select count(*)::int as n from public.course_slides where slug like 'admin-%'`);
+        expect(left.rows[0].n).toBe(0);
+      });
+
+      it("keeps admin course edits when the seed runs again", async () => {
+        await asUser(USER_A, async () => {
+          const lecture = (await db.query<{ id: string }>(`select id from public.course_slides where slug = 'hello-world'`)).rows[0].id;
+          const s = (await db.query<{ s: Record<string, unknown> }>(`select public.admin_get_course_slide($1) as s`, [lecture])).rows[0].s;
+          await db.query(`select public.admin_save_course_slide($1::jsonb, false)`, [JSON.stringify({ ...s, title: L("Edited hello") })]);
+          await db.query(`select public.admin_save_course_slide($1::jsonb, true)`, [
+            JSON.stringify({ course: "csharp", module_id: s.module_id, slug: "extra-notes", kind: "lecture", title: L("Extra"), body: L("Notes") }),
+          ]);
+        });
+
+        await db.exec(readFileSync(seedPath, "utf8"));
+
+        const rows = await db.query<{ slug: string; title: { en: string }; source: string }>(
+          `select slug, title, source from public.course_slides where slug in ('hello-world', 'extra-notes', 'before-you-start') order by slug`,
+        );
+        expect(rows.rows.map((r) => [r.slug, r.title.en, r.source])).toEqual([
+          ["before-you-start", "Before you start", "seed"],
+          ["extra-notes", "Extra", "admin"],
+          ["hello-world", "Edited hello", "admin"],
+        ]);
+      });
+    });
+
     it("unpublishes tasks used in interviews instead of deleting them", async () => {
       const used = (await db.query<{ slug: string }>(`select t.slug from public.interview_items ii join public.tasks t on t.id = ii.task_id limit 1`)).rows[0].slug;
       await asUser(USER_A, async () => {

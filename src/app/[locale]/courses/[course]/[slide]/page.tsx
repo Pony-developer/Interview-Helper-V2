@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Markdown } from "@/components/content/Markdown";
+import { AdminSlideBar } from "@/components/courses/player/AdminSlideBar";
 import { CourseSidebar } from "@/components/courses/player/CourseSidebar";
 import { KindIcon } from "@/components/courses/player/kind-icon";
 import { MarkViewed } from "@/components/courses/player/MarkViewed";
@@ -12,6 +13,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { toLocale } from "@/i18n/locale";
 import { Link } from "@/i18n/navigation";
 import { getCourseOutline, getCourseProgress, getCourseSlide } from "@/lib/data/course-player";
+import { isAdmin } from "@/lib/auth/roles";
 import { localizedPath } from "@/lib/seo";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
@@ -49,6 +51,8 @@ export default async function CourseSlidePage({ params }: Params) {
 
   // Anonymous visitors can read and take quizzes; saving progress and running code needs an account.
   const accounts = isSupabaseConfigured();
+  const admin = accounts && progress.signedIn ? await isAdmin() : false;
+  const afterDelete = next ?? prev;
   const signInNote =
     accounts && !progress.signedIn ? (
       <span className="text-sm text-forest-100">
@@ -98,6 +102,14 @@ export default async function CourseSlidePage({ params }: Params) {
               }}
             />
             <div className="relative mx-auto max-w-4xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14">
+              {admin ? (
+                <AdminSlideBar
+                  course={outline.slug}
+                  slideId={slide.id}
+                  slideSlug={slide.slug}
+                  afterDeleteHref={afterDelete ? `/courses/${outline.slug}/${afterDelete.slug}` : `/admin/courses/${outline.slug}`}
+                />
+              ) : null}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-forest-700 px-3 py-1 font-semibold text-gold-300">
                   <KindIcon kind={slide.kind} className="h-3.5 w-3.5" />

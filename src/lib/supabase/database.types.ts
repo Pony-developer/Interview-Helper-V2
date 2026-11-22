@@ -59,6 +59,7 @@ export type Database = {
           topics: Json;
           sort_order: number;
           published: boolean;
+          source: ContentSource;
           updated_at: string;
         };
         Insert: never;
@@ -66,7 +67,7 @@ export type Database = {
         Relationships: [];
       };
       course_modules: {
-        Row: { id: string; course_id: string; slug: string; title: Localized; sort_order: number };
+        Row: { id: string; course_id: string; slug: string; title: Localized; sort_order: number; source: ContentSource };
         Insert: never;
         Update: never;
         Relationships: [];
@@ -84,6 +85,7 @@ export type Database = {
           practice: Json | null;
           max_score: number;
           sort_order: number;
+          source: ContentSource;
           updated_at: string;
         };
         Insert: never;
@@ -250,6 +252,14 @@ export type Database = {
       course_submit_quiz: { Args: { p_slide: string; p_answers: Json }; Returns: Json };
       course_submit_practice: { Args: { p_slide: string; p_code: string; p_output: string }; Returns: Json };
       course_save_code: { Args: { p_slide: string; p_code: string }; Returns: undefined };
+      admin_save_course: { Args: { p_course: Json; p_create: boolean }; Returns: string };
+      admin_delete_course: { Args: { p_slug: string }; Returns: undefined };
+      admin_save_course_module: { Args: { p_module: Json; p_create: boolean }; Returns: string };
+      admin_delete_course_module: { Args: { p_id: string }; Returns: undefined };
+      admin_save_course_slide: { Args: { p_slide: Json; p_create: boolean }; Returns: string };
+      admin_get_course_slide: { Args: { p_id: string }; Returns: Json };
+      admin_delete_course_slide: { Args: { p_id: string }; Returns: undefined };
+      admin_reorder_course_items: { Args: { p_kind: string; p_ids: string[] }; Returns: undefined };
       is_admin: { Args: Record<string, never>; Returns: boolean };
       set_user_role: {
         Args: { p_user_id: string; p_role: Database["public"]["Enums"]["app_role"] };

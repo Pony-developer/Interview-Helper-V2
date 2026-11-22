@@ -1,12 +1,13 @@
 "use client";
 
-import { BookOpen, LayoutDashboard, ListChecks, Tags } from "lucide-react";
+import { BookOpen, GraduationCap, LayoutDashboard, ListChecks, Tags } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 
 const ITEMS = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/tasks", label: "Quizzes & practice", icon: ListChecks },
   { href: "/admin/lectures", label: "Lectures", icon: BookOpen },
+  { href: "/admin/courses", label: "Courses", icon: GraduationCap },
   { href: "/admin/skills", label: "Skills", icon: Tags },
 ];
 

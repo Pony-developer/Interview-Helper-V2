@@ -168,18 +168,20 @@ async function main() {
   out.push(
     catalogCourses.map((c, i) => `  (${q(c.slug)}, ${j(c.title)}, ${j(c.summary)}, ${j(c.topics)}, ${i + 1})`).join(",\n"),
   );
+  // Course rows edited in the admin panel (source = 'admin') are never overwritten or deleted by the seed.
   out.push(
     "on conflict (slug) do update set title = excluded.title, summary = excluded.summary, topics = excluded.topics,",
-    "  sort_order = excluded.sort_order, updated_at = now();",
+    "  sort_order = excluded.sort_order, updated_at = now()",
+    "where cur.source = 'seed';",
     "",
   );
 
   for (const { course, modules } of loadedCourses) {
     const slides = modules.flatMap((m) => m.slides.map((s) => ({ ...s, moduleSlug: m.slug })));
     out.push(
-      `delete from public.course_slides s using public.courses c where s.course_id = c.id and c.slug = ${q(course)} and s.slug not in (${slides.map((s) => q(s.slug)).join(", ")});`,
+      `delete from public.course_slides s using public.courses c where s.course_id = c.id and c.slug = ${q(course)} and s.source = 'seed' and s.slug not in (${slides.map((s) => q(s.slug)).join(", ")});`,
       "",
-      `delete from public.course_modules m using public.courses c where m.course_id = c.id and c.slug = ${q(course)} and m.slug not in (${modules.map((m) => q(m.slug)).join(", ")});`,
+      `delete from public.course_modules m using public.courses c where m.course_id = c.id and c.slug = ${q(course)} and m.source = 'seed' and m.slug not in (${modules.map((m) => q(m.slug)).join(", ")}) and not exists (select 1 from public.course_slides x where x.module_id = m.id and x.source = 'admin');`,
       "",
     );
 
@@ -188,7 +190,7 @@ async function main() {
     out.push(modules.map((m, i) => `  (${q(course)}, ${q(m.slug)}, ${j(m.title)}, ${i + 1})`).join(",\n"));
     out.push(") as v(course_slug, slug, title, sort_order)");
     out.push("join public.courses c on c.slug = v.course_slug");
-    out.push("on conflict (course_id, slug) do update set title = excluded.title, sort_order = excluded.sort_order;", "");
+    out.push("on conflict (course_id, slug) do update set title = excluded.title, sort_order = excluded.sort_order", "where cur.source = 'seed';", "");
 
     out.push("insert into public.course_slides as cur (course_id, module_id, slug, kind, title, body, quiz, practice, max_score, sort_order, updated_at)");
     out.push("select m.course_id, m.id, v.slug, v.kind, v.title, v.body, v.quiz, v.practice, v.max_score, v.sort_order, now() from (values");
@@ -210,7 +212,8 @@ async function main() {
     out.push(
       "on conflict (course_id, slug) do update set module_id = excluded.module_id, kind = excluded.kind, title = excluded.title,",
       "  body = excluded.body, quiz = excluded.quiz, practice = excluded.practice, max_score = excluded.max_score,",
-      "  sort_order = excluded.sort_order, updated_at = now();",
+      "  sort_order = excluded.sort_order, updated_at = now()",
+      "where cur.source = 'seed';",
       "",
     );
 
@@ -230,7 +233,7 @@ async function main() {
       );
       out.push(") as v(course_slug, slide_slug, quiz_answers, expected_output, solution)");
       out.push("join public.courses c on c.slug = v.course_slug");
-      out.push("join public.course_slides s on s.course_id = c.id and s.slug = v.slide_slug");
+      out.push("join public.course_slides s on s.course_id = c.id and s.slug = v.slide_slug and s.source = 'seed'");
       out.push(
         "on conflict (slide_id) do update set quiz_answers = excluded.quiz_answers, expected_output = excluded.expected_output,",
         "  solution = excluded.solution;",

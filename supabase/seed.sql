@@ -3820,11 +3820,12 @@ insert into public.courses as cur (slug, title, summary, topics, sort_order) val
   ('csharp', '{"en":"C#","uk":"C#"}'::jsonb, '{"en":"From your first class to async/await: the C# language and the .NET runtime that backend and desktop interviews test.","uk":"Від першого класу до async/await: мова C# і платформа .NET, які перевіряють на співбесідах для backend- та desktop-ролей."}'::jsonb, '[{"en":"Types, variables and nullable reference types","uk":"Типи, змінні та nullable-посилання"},{"en":"Classes, records and structs","uk":"Класи, record і struct"},{"en":"Interfaces, generics and LINQ","uk":"Інтерфейси, узагальнення та LINQ"},{"en":"async/await and Task","uk":"async/await і Task"},{"en":"Dependency injection and ASP.NET Core","uk":"Dependency injection та ASP.NET Core"},{"en":"Testing with xUnit","uk":"Тестування з xUnit"}]'::jsonb, 1),
   ('javascript', '{"en":"JavaScript","uk":"JavaScript"}'::jsonb, '{"en":"The language behind every frontend interview: how values, scope and the event loop really work, from the first line to modern async code.","uk":"Мова, на якій тримаються всі frontend-співбесіди: як насправді працюють значення, область видимості та event loop, від першого рядка до сучасного асинхронного коду."}'::jsonb, '[{"en":"Values, types and coercion","uk":"Значення, типи та приведення типів"},{"en":"Scope, closures and this","uk":"Область видимості, замикання та this"},{"en":"Prototypes and classes","uk":"Прототипи та класи"},{"en":"Promises, async/await and the event loop","uk":"Проміси, async/await і event loop"},{"en":"Modules and the DOM","uk":"Модулі та DOM"},{"en":"Testing and tooling","uk":"Тестування та інструменти"}]'::jsonb, 2)
 on conflict (slug) do update set title = excluded.title, summary = excluded.summary, topics = excluded.topics,
-  sort_order = excluded.sort_order, updated_at = now();
+  sort_order = excluded.sort_order, updated_at = now()
+where cur.source = 'seed';
 
-delete from public.course_slides s using public.courses c where s.course_id = c.id and c.slug = 'csharp' and s.slug not in ('before-you-start', 'hello-world', 'terminology', 'first-step', 'sources', 'numeric-types', 'wrong-type', 'conversion-errors', 'kinds-of-errors', 'fix-the-bugs', 'if-else', 'leap-year', 'while-and-for', 'fizzbuzz', 'arrays-basics', 'index-of-max', 'lists-dictionaries-strings', 'word-frequency', 'why-test', 'capitalize', 'big-o', 'binary-search');
+delete from public.course_slides s using public.courses c where s.course_id = c.id and c.slug = 'csharp' and s.source = 'seed' and s.slug not in ('before-you-start', 'hello-world', 'terminology', 'first-step', 'sources', 'numeric-types', 'wrong-type', 'conversion-errors', 'kinds-of-errors', 'fix-the-bugs', 'if-else', 'leap-year', 'while-and-for', 'fizzbuzz', 'arrays-basics', 'index-of-max', 'lists-dictionaries-strings', 'word-frequency', 'why-test', 'capitalize', 'big-o', 'binary-search');
 
-delete from public.course_modules m using public.courses c where m.course_id = c.id and c.slug = 'csharp' and m.slug not in ('first-steps', 'errors', 'branching', 'loops', 'arrays', 'collections-strings-files', 'testing', 'complexity');
+delete from public.course_modules m using public.courses c where m.course_id = c.id and c.slug = 'csharp' and m.source = 'seed' and m.slug not in ('first-steps', 'errors', 'branching', 'loops', 'arrays', 'collections-strings-files', 'testing', 'complexity') and not exists (select 1 from public.course_slides x where x.module_id = m.id and x.source = 'admin');
 
 insert into public.course_modules as cur (course_id, slug, title, sort_order)
 select c.id, v.slug, v.title, v.sort_order from (values
@@ -3838,7 +3839,8 @@ select c.id, v.slug, v.title, v.sort_order from (values
   ('csharp', 'complexity', '{"en":"Algorithm complexity","uk":"Складність алгоритмів"}'::jsonb, 8)
 ) as v(course_slug, slug, title, sort_order)
 join public.courses c on c.slug = v.course_slug
-on conflict (course_id, slug) do update set title = excluded.title, sort_order = excluded.sort_order;
+on conflict (course_id, slug) do update set title = excluded.title, sort_order = excluded.sort_order
+where cur.source = 'seed';
 
 insert into public.course_slides as cur (course_id, module_id, slug, kind, title, body, quiz, practice, max_score, sort_order, updated_at)
 select m.course_id, m.id, v.slug, v.kind, v.title, v.body, v.quiz, v.practice, v.max_score, v.sort_order, now() from (values
@@ -3869,7 +3871,8 @@ join public.courses c on c.slug = v.course_slug
 join public.course_modules m on m.course_id = c.id and m.slug = v.module_slug
 on conflict (course_id, slug) do update set module_id = excluded.module_id, kind = excluded.kind, title = excluded.title,
   body = excluded.body, quiz = excluded.quiz, practice = excluded.practice, max_score = excluded.max_score,
-  sort_order = excluded.sort_order, updated_at = now();
+  sort_order = excluded.sort_order, updated_at = now()
+where cur.source = 'seed';
 
 insert into private.course_slide_keys (slide_id, quiz_answers, expected_output, solution)
 select s.id, v.quiz_answers, v.expected_output, v.solution from (values
@@ -3886,7 +3889,7 @@ select s.id, v.quiz_answers, v.expected_output, v.solution from (values
   ('csharp', 'binary-search', null::jsonb, ('"7 -> 3\n1 -> 0\n13 -> 6\n4 -> -1\n20 -> -1\n"'::jsonb #>> '{}'), ('"using System;\n\nclass Program\n{\n    // Return the index of value in the sorted array, or -1 if it is not there.\n    // Aim for O(log n): halve the search range on every step.\n    static int BinarySearch(int[] sorted, int value)\n    {\n        int left = 0, right = sorted.Length - 1;\n        while (left <= right)\n        {\n            var middle = left + (right - left) / 2;\n            if (sorted[middle] == value) return middle;\n            if (sorted[middle] < value) left = middle + 1;\n            else right = middle - 1;\n        }\n        return -1;\n    }\n\n    static void Main()\n    {\n        var numbers = new[] { 1, 3, 5, 7, 9, 11, 13 };\n        foreach (var value in new[] { 7, 1, 13, 4, 20 })\n            Console.WriteLine(value + \" -> \" + BinarySearch(numbers, value));\n    }\n}\n"'::jsonb #>> '{}'))
 ) as v(course_slug, slide_slug, quiz_answers, expected_output, solution)
 join public.courses c on c.slug = v.course_slug
-join public.course_slides s on s.course_id = c.id and s.slug = v.slide_slug
+join public.course_slides s on s.course_id = c.id and s.slug = v.slide_slug and s.source = 'seed'
 on conflict (slide_id) do update set quiz_answers = excluded.quiz_answers, expected_output = excluded.expected_output,
   solution = excluded.solution;
 
