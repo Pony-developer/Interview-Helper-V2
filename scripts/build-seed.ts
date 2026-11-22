@@ -5,6 +5,8 @@
  * The SQL is idempotent: rows are upserted by slug.
  */
 import { writeFileSync } from "node:fs";
+import { courses as catalogCourses } from "@content/courses";
+import { loadCourseModules } from "@/lib/content/course-loader";
 import { lectureForTask, loadContent } from "@/lib/content/loader";
 import { countTests, type PracticePayload } from "@/lib/playground/frameworks";
 
@@ -152,6 +154,90 @@ async function main() {
     "  select 1 from public.task_skills ts join public.tasks t on t.id = ts.task_id and t.published where ts.skill_id = s.id);",
     "",
   );
+
+  // Courses: catalogue rows, modules, slides and the private answer keys.
+  const { courses: loadedCourses, errors: courseErrors } = loadCourseModules();
+  if (courseErrors.length) {
+    console.error(`Course validation failed (${courseErrors.length}):\n - ${courseErrors.join("\n - ")}`);
+    process.exit(1);
+  }
+  // Multi-line text goes in as a JSON string so that every row stays on one line (see seed-remote.mjs).
+  const text = (v: string | null | undefined) => (v == null ? "null::text" : `(${j(v)} #>> '{}')`);
+
+  out.push("insert into public.courses as cur (slug, title, summary, topics, sort_order) values");
+  out.push(
+    catalogCourses.map((c, i) => `  (${q(c.slug)}, ${j(c.title)}, ${j(c.summary)}, ${j(c.topics)}, ${i + 1})`).join(",\n"),
+  );
+  out.push(
+    "on conflict (slug) do update set title = excluded.title, summary = excluded.summary, topics = excluded.topics,",
+    "  sort_order = excluded.sort_order, updated_at = now();",
+    "",
+  );
+
+  for (const { course, modules } of loadedCourses) {
+    const slides = modules.flatMap((m) => m.slides.map((s) => ({ ...s, moduleSlug: m.slug })));
+    out.push(
+      `delete from public.course_slides s using public.courses c where s.course_id = c.id and c.slug = ${q(course)} and s.slug not in (${slides.map((s) => q(s.slug)).join(", ")});`,
+      "",
+      `delete from public.course_modules m using public.courses c where m.course_id = c.id and c.slug = ${q(course)} and m.slug not in (${modules.map((m) => q(m.slug)).join(", ")});`,
+      "",
+    );
+
+    out.push("insert into public.course_modules as cur (course_id, slug, title, sort_order)");
+    out.push("select c.id, v.slug, v.title, v.sort_order from (values");
+    out.push(modules.map((m, i) => `  (${q(course)}, ${q(m.slug)}, ${j(m.title)}, ${i + 1})`).join(",\n"));
+    out.push(") as v(course_slug, slug, title, sort_order)");
+    out.push("join public.courses c on c.slug = v.course_slug");
+    out.push("on conflict (course_id, slug) do update set title = excluded.title, sort_order = excluded.sort_order;", "");
+
+    out.push("insert into public.course_slides as cur (course_id, module_id, slug, kind, title, body, quiz, practice, max_score, sort_order, updated_at)");
+    out.push("select m.course_id, m.id, v.slug, v.kind, v.title, v.body, v.quiz, v.practice, v.max_score, v.sort_order, now() from (values");
+    out.push(
+      slides
+        .map((s, i) => {
+          const quiz =
+            s.kind === "quiz"
+              ? { questions: s.questions.map(({ correct: _correct, ...publicPart }) => publicPart) }
+              : null;
+          const practice = s.kind === "practice" ? { language: s.language, starter: s.starter } : null;
+          return `  (${q(course)}, ${q(s.moduleSlug)}, ${q(s.slug)}, ${q(s.kind)}, ${j(s.title)}, ${j(s.body)}, ${j(quiz)}, ${j(practice)}, ${s.maxScore}, ${i + 1})`;
+        })
+        .join(",\n"),
+    );
+    out.push(") as v(course_slug, module_slug, slug, kind, title, body, quiz, practice, max_score, sort_order)");
+    out.push("join public.courses c on c.slug = v.course_slug");
+    out.push("join public.course_modules m on m.course_id = c.id and m.slug = v.module_slug");
+    out.push(
+      "on conflict (course_id, slug) do update set module_id = excluded.module_id, kind = excluded.kind, title = excluded.title,",
+      "  body = excluded.body, quiz = excluded.quiz, practice = excluded.practice, max_score = excluded.max_score,",
+      "  sort_order = excluded.sort_order, updated_at = now();",
+      "",
+    );
+
+    const keyed = slides.filter((s) => s.kind !== "lecture");
+    if (keyed.length) {
+      out.push("insert into private.course_slide_keys (slide_id, quiz_answers, expected_output, solution)");
+      out.push("select s.id, v.quiz_answers, v.expected_output, v.solution from (values");
+      out.push(
+        keyed
+          .map((s) => {
+            const answers = s.kind === "quiz" ? Object.fromEntries(s.questions.map((qq) => [qq.id, qq.correct])) : null;
+            const expected = s.kind === "practice" ? s.expectedOutput : null;
+            const solution = s.kind === "practice" ? s.solution : null;
+            return `  (${q(course)}, ${q(s.slug)}, ${j(answers)}, ${text(expected)}, ${text(solution)})`;
+          })
+          .join(",\n"),
+      );
+      out.push(") as v(course_slug, slide_slug, quiz_answers, expected_output, solution)");
+      out.push("join public.courses c on c.slug = v.course_slug");
+      out.push("join public.course_slides s on s.course_id = c.id and s.slug = v.slide_slug");
+      out.push(
+        "on conflict (slide_id) do update set quiz_answers = excluded.quiz_answers, expected_output = excluded.expected_output,",
+        "  solution = excluded.solution;",
+        "",
+      );
+    }
+  }
 
   out.push("commit;", "");
   writeFileSync("supabase/seed.sql", out.join("\n"));

@@ -94,6 +94,97 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
     }
   });
 
+  describe("course player", () => {
+    const slideId = async (slug: string) =>
+      (await db.query<{ id: string }>(`select id from public.course_slides where slug = $1`, [slug])).rows[0].id;
+
+    it("seeds the C# modules and slides, and keeps answers private", async () => {
+      await asUser(null, async () => {
+        const modules = await db.query<{ slug: string }>(
+          "select m.slug from public.course_modules m join public.courses c on c.id = m.course_id where c.slug = 'csharp' order by m.sort_order",
+        );
+        expect(modules.rows.map((r) => r.slug)).toEqual([
+          "first-steps",
+          "errors",
+          "branching",
+          "loops",
+          "arrays",
+          "collections-strings-files",
+          "testing",
+          "complexity",
+        ]);
+        const quiz = await db.query<{ quiz: { questions: Record<string, unknown>[] } }>(
+          "select quiz from public.course_slides where slug = 'terminology'",
+        );
+        expect(quiz.rows[0].quiz.questions).toHaveLength(5);
+        expect(JSON.stringify(quiz.rows[0].quiz)).not.toContain("correct");
+        await expect(db.query("select * from private.course_slide_keys")).rejects.toThrow(/permission denied/);
+        await expect(db.query("select * from public.course_progress")).rejects.toThrow(/permission denied/);
+      });
+    });
+
+    it("grades quizzes for anonymous visitors without saving anything", async () => {
+      const id = await slideId("terminology");
+      const result = await asUser(null, async () =>
+        (
+          await db.query<{ r: { score: number; max: number; saved: boolean; results: Record<string, boolean> } }>(
+            "select public.course_submit_quiz($1, $2::jsonb) as r",
+            [id, JSON.stringify({ main: ["a"], keywords: ["a", "b", "d"], write: ["b"] })],
+          )
+        ).rows[0].r,
+      );
+      expect(result).toMatchObject({ score: 2, max: 5, saved: false });
+      expect(result.results).toMatchObject({ main: true, keywords: true, write: false, compiler: false });
+      const saved = await db.query<{ n: number }>("select count(*)::int as n from public.course_progress where slide_id = $1", [id]);
+      expect(saved.rows[0].n).toBe(0);
+    });
+
+    it("saves the best quiz score, practice results and lecture views for signed-in users", async () => {
+      const quiz = await slideId("terminology");
+      const practice = await slideId("first-step");
+      const lecture = await slideId("hello-world");
+      const allCorrect = { main: ["a"], compiler: ["a"], keywords: ["d", "b", "a"], write: ["a"], "compile-error": ["a"] };
+
+      await asUser(USER_A, async () => {
+        await db.query("select public.course_submit_quiz($1, $2::jsonb)", [quiz, JSON.stringify(allCorrect)]);
+        await db.query("select public.course_submit_quiz($1, $2::jsonb)", [quiz, JSON.stringify({ main: ["b"] })]);
+
+        const wrong = await db.query<{ r: { passed: boolean } }>("select public.course_submit_practice($1, $2, $3) as r", [
+          practice,
+          "code v1",
+          "Hello, Assay!\n",
+        ]);
+        expect(wrong.rows[0].r.passed).toBe(false);
+        const right = await db.query<{ r: { passed: boolean; score: number } }>("select public.course_submit_practice($1, $2, $3) as r", [
+          practice,
+          "code v2",
+          "Hello, Assay!  \r\nC# is ready.\r\n\r\n",
+        ]);
+        expect(right.rows[0].r).toMatchObject({ passed: true, score: 5 });
+
+        await db.query("select public.course_mark_viewed($1)", [lecture]);
+        await expect(db.query("select public.course_mark_viewed($1)", [quiz])).rejects.toThrow(/Lecture not found/);
+
+        const rows = await db.query<{ slide_id: string; score: number; completed: boolean; attempts: number; last_code: string | null }>(
+          "select slide_id, score, completed, attempts, last_code from public.course_progress",
+        );
+        const bySlide = new Map(rows.rows.map((r) => [r.slide_id, r]));
+        expect(bySlide.get(quiz)).toMatchObject({ score: 5, completed: true, attempts: 2 });
+        expect(bySlide.get(practice)).toMatchObject({ score: 5, completed: true, attempts: 2, last_code: "code v2" });
+        expect(bySlide.get(lecture)).toMatchObject({ completed: true });
+        await expect(
+          db.query("insert into public.course_progress (user_id, slide_id, score) values ($1, $2, 99)", [USER_A, quiz]),
+        ).rejects.toThrow();
+      });
+
+      // Bob sees none of Ada's progress.
+      await asUser(USER_B, async () => {
+        const rows = await db.query<{ n: number }>("select count(*)::int as n from public.course_progress");
+        expect(rows.rows[0].n).toBe(0);
+      });
+    });
+  });
+
   it("runs a full interview with grading under RLS", async () => {
     const quiz = (
       await db.query<{ id: string; correct: string[]; options: { id: string }[] }>(

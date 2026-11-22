@@ -65,6 +65,45 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      course_modules: {
+        Row: { id: string; course_id: string; slug: string; title: Localized; sort_order: number };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      course_slides: {
+        Row: {
+          id: string;
+          course_id: string;
+          module_id: string;
+          slug: string;
+          kind: "lecture" | "quiz" | "practice";
+          title: Localized;
+          body: Localized;
+          quiz: Json | null;
+          practice: Json | null;
+          max_score: number;
+          sort_order: number;
+          updated_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      course_progress: {
+        Row: {
+          user_id: string;
+          slide_id: string;
+          score: number;
+          completed: boolean;
+          attempts: number;
+          last_code: string | null;
+          updated_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       tasks: {
         Row: {
           id: string;
@@ -207,6 +246,10 @@ export type Database = {
         Returns: Json;
       };
       mark_help_used: { Args: { p_item_id: string }; Returns: undefined };
+      course_mark_viewed: { Args: { p_slide: string }; Returns: undefined };
+      course_submit_quiz: { Args: { p_slide: string; p_answers: Json }; Returns: Json };
+      course_submit_practice: { Args: { p_slide: string; p_code: string; p_output: string }; Returns: Json };
+      course_save_code: { Args: { p_slide: string; p_code: string }; Returns: undefined };
       is_admin: { Args: Record<string, never>; Returns: boolean };
       set_user_role: {
         Args: { p_user_id: string; p_role: Database["public"]["Enums"]["app_role"] };

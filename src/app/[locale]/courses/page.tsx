@@ -42,6 +42,7 @@ export default async function CoursesPage({ params }: PageProps<"/[locale]/cours
                 dark={index % 2 === 0}
                 topicsLabel={t("topics")}
                 topicCount={t("topicCount", { count: course.topics.length })}
+                openLabel={t("open")}
               />
             ))
           )}

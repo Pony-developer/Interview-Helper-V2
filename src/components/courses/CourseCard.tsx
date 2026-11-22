@@ -1,3 +1,5 @@
+import { ArrowRight } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import type { Course } from "@/lib/data/courses";
 
 /**
@@ -10,12 +12,14 @@ export function CourseCard({
   dark,
   topicsLabel,
   topicCount,
+  openLabel,
 }: {
   course: Course;
   index: number;
   dark: boolean;
   topicsLabel: string;
   topicCount: string;
+  openLabel: string;
 }) {
   const number = String(index + 1).padStart(2, "0");
 
@@ -46,7 +50,9 @@ export function CourseCard({
         <div className="relative">
           <div className="gold-rule w-20 transition-[width] duration-300 group-hover:w-full" />
           <h2 className={`mt-6 font-display text-4xl font-extrabold leading-tight sm:text-5xl ${dark ? "text-white" : "text-forest-700"}`}>
-            {course.title}
+            <Link href={`/courses/${course.slug}`} className="rounded-lg after:absolute after:inset-0 after:content-['']">
+              {course.title}
+            </Link>
           </h2>
           <p className={`mt-5 text-lg leading-relaxed ${dark ? "text-forest-100" : "text-ink-muted"}`}>{course.summary}</p>
 
@@ -68,9 +74,17 @@ export function CourseCard({
               </li>
             ))}
           </ol>
-          <p className={`mt-6 border-t pt-5 text-sm font-semibold ${dark ? "border-white/10 text-forest-200" : "border-paper-3 text-ink-soft"}`}>
-            {topicCount}
-          </p>
+          <div
+            className={`mt-6 flex items-center justify-between gap-4 border-t pt-5 text-sm font-semibold ${
+              dark ? "border-white/10 text-forest-200" : "border-paper-3 text-ink-soft"
+            }`}
+          >
+            <span>{topicCount}</span>
+            <span aria-hidden className={`inline-flex items-center gap-2 ${dark ? "text-gold-300" : "text-forest-700"}`}>
+              {openLabel}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </span>
+          </div>
         </div>
       </article>
     </div>

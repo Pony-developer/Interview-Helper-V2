@@ -15,19 +15,34 @@ function splitLocale(pathname: string) {
   return { locale: routing.defaultLocale as string, path: pathname };
 }
 
+// Public pages that still read the visitor's session (to show and save progress). The proxy refreshes
+// the session for them, so Server Components never have to, but does not require a login.
+const SESSION_PREFIXES = ["/courses/"];
+
 function isProtected(path: string) {
   return PROTECTED_PREFIXES.some((prefix) => path === prefix || path.startsWith(prefix + "/"));
+}
+
+function needsSession(path: string) {
+  return SESSION_PREFIXES.some((prefix) => path.startsWith(prefix));
 }
 
 export default async function proxy(request: NextRequest) {
   const { locale, path } = splitLocale(request.nextUrl.pathname);
 
   // Public pages never touch the session on the server, so they stay static and fast.
-  if (!isProtected(path)) {
+  if (!isProtected(path) && !needsSession(path)) {
     return handleI18nRouting(request);
   }
 
   const { userId, pending } = await refreshSession(request);
+
+  if (!isProtected(path)) {
+    const response = handleI18nRouting(request);
+    pending.cookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+    Object.entries(pending.headers).forEach(([key, value]) => response.headers.set(key, value));
+    return response;
+  }
 
   let response: NextResponse;
   if (!userId) {

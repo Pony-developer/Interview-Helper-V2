@@ -11,9 +11,11 @@ import {
   foldKeymap,
   HighlightStyle,
   indentOnInput,
+  LanguageSupport,
+  StreamLanguage,
   syntaxHighlighting,
-  type LanguageSupport,
 } from "@codemirror/language";
+import { csharp } from "@codemirror/legacy-modes/mode/clike";
 import { Annotation, Compartment, EditorState, type Extension } from "@codemirror/state";
 import {
   drawSelection,
@@ -56,6 +58,9 @@ export function languageFor(hint: string | undefined): LanguageSupport | null {
     case "scss":
     case "less":
       return css();
+    case "cs":
+    case "csharp":
+      return new LanguageSupport(StreamLanguage.define(csharp));
     default:
       return null;
   }

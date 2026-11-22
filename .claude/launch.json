@@ -6,6 +6,13 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "assay-dev-local-content",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "-p", "3001"],
+      "env": { "NEXT_PUBLIC_SUPABASE_URL": "" },
+      "port": 3001
     }
   ]
 }
