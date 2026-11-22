@@ -4,6 +4,7 @@ import { isSupabaseConfigured } from "./env";
 describe("isSupabaseConfigured", () => {
   afterEach(() => vi.unstubAllEnvs());
 
+  
   const stub = (url: string, key = "publishable-test-key") => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", url);
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", key);
