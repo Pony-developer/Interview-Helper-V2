@@ -1,4 +1,4 @@
-import { Check, Minus, X } from "lucide-react";
+import { Award, Check, Minus, X } from "lucide-react";
 import type { Metadata } from "next";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { PageHero } from "@/components/site/PageHero";
@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { PillLink } from "@/components/ui/PillLink";
 import { Link } from "@/i18n/navigation";
 import { toLocale } from "@/i18n/locale";
+import { listMyCertificates } from "@/lib/data/certificates";
 import { loc } from "@/lib/i18n/localized";
 import { privatePageMetadata } from "@/lib/seo";
 import { computeMastery, type SelTask } from "@/lib/selection/select";
@@ -40,9 +41,10 @@ export default async function ProgressPage({ params }: PageProps<"/[locale]/prog
   const format = await getFormatter({ locale });
   const supabase = await createClient();
 
-  const [{ data: interviews }, { data: progress }] = await Promise.all([
+  const [{ data: interviews }, { data: progress }, certificates] = await Promise.all([
     supabase.from("interviews").select("id, status, grade, score, started_at, method").order("started_at", { ascending: false }).limit(12),
     supabase.from("user_task_progress").select("task_id, status, attempts, last_score, last_attempt_at"),
+    listMyCertificates(locale),
   ]);
 
   const attemptedIds = (progress ?? []).map((p) => p.task_id);
@@ -108,6 +110,36 @@ export default async function ProgressPage({ params }: PageProps<"/[locale]/prog
             </PillLink>
           </div>
         </PageHero>
+
+        {certificates.length ? (
+          <section aria-labelledby="certificates-title" className="mx-auto max-w-7xl px-5 pt-14 sm:px-8">
+            <h2 id="certificates-title" className="font-display text-2xl font-bold text-forest-700">
+              {t("certificates")}
+            </h2>
+            <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {certificates.map((c) => (
+                <li key={c.id}>
+                  <Link
+                    href={`/certificates/${c.id}`}
+                    className="group flex items-center gap-4 rounded-2xl border border-gold-300 bg-white p-4 shadow-card transition hover:border-gold-500"
+                  >
+                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-forest-900 text-gold-300">
+                      <Award aria-hidden className="h-6 w-6" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-display text-lg font-bold text-forest-700 group-hover:underline group-hover:decoration-gold-500 group-hover:underline-offset-4">
+                        {c.courseTitle}
+                      </span>
+                      <span className="block text-sm text-ink-muted">
+                        {format.dateTime(new Date(c.issuedAt), { dateStyle: "medium" })} · {c.scorePercent}%
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-14 sm:px-8 lg:grid-cols-[1fr_22rem]">
           <section aria-labelledby="mastery-title">

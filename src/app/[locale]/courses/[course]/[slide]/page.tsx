@@ -12,7 +12,8 @@ import { QuizSlide } from "@/components/courses/player/QuizSlide";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { toLocale } from "@/i18n/locale";
 import { Link } from "@/i18n/navigation";
-import { getCourseOutline, getCourseProgress, getCourseSlide } from "@/lib/data/course-player";
+import { CERTIFICATE_THRESHOLD } from "@/lib/data/certificates";
+import { coursePercent, getCourseOutline, getCourseProgress, getCourseSlide } from "@/lib/data/course-player";
 import { isAdmin } from "@/lib/auth/roles";
 import { localizedPath } from "@/lib/seo";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -66,7 +67,16 @@ export default async function CourseSlidePage({ params }: Params) {
       </span>
     ) : null;
 
-  const sidebar = <CourseSidebar outline={outline} progress={progress.bySlide} currentSlug={slide.slug} />;
+  const certificate = accounts
+    ? {
+        courseId: outline.id,
+        percent: coursePercent(outline, progress.bySlide),
+        certificateId: progress.certificateId,
+        signedIn: progress.signedIn,
+        threshold: CERTIFICATE_THRESHOLD,
+      }
+    : null;
+  const sidebar = <CourseSidebar outline={outline} progress={progress.bySlide} currentSlug={slide.slug} certificate={certificate} />;
   const done = all.filter((s) => progress.bySlide[s.id]?.completed).length;
 
   return (

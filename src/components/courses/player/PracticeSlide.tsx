@@ -6,6 +6,7 @@ import { useState, useTransition, type KeyboardEvent, type ReactNode } from "rea
 import { runPracticeAction, type RunResponse } from "@/app/actions/course";
 import { CodeEditor } from "@/components/admin/CodeEditor";
 import { useRouter } from "@/i18n/navigation";
+import { CertificateEarned } from "./CertificateMeter";
 
 const draftKey = (slideId: string) => `assay:course-draft:${slideId}`;
 
@@ -122,6 +123,8 @@ export function PracticeSlide({
           </button>
         </div>
       </div>
+
+      {!pending && outcome?.certificate?.new ? <CertificateEarned id={outcome.certificate.id} /> : null}
 
       {pending || response ? (
         <section aria-live="polite" aria-busy={pending} className="overflow-hidden rounded-3xl bg-forest-950 text-forest-50 shadow-card">

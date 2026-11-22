@@ -10,8 +10,10 @@ const slideId = z.string().min(1).max(200);
 const answersSchema = z.record(z.string().max(60), z.array(z.string().max(20)).max(10));
 const codeSchema = z.string().max(50_000);
 
-export type QuizOutcome = { score: number; max: number; results: Record<string, boolean>; saved: boolean };
-export type PracticeOutcome = { passed: boolean; score: number; max: number; saved: boolean };
+/** Set once the learner holds the course certificate; `new` on the submission that earned it. */
+export type CertificateRef = { id: string; new: boolean } | null;
+export type QuizOutcome = { score: number; max: number; results: Record<string, boolean>; saved: boolean; certificate?: CertificateRef };
+export type PracticeOutcome = { passed: boolean; score: number; max: number; saved: boolean; certificate?: CertificateRef };
 
 /** Same normalisation as private.normalize_output in the database. */
 const normalize = (s: string) =>
@@ -27,6 +29,16 @@ function localSlide(id: string) {
     .courses.find((c) => c.course === course)
     ?.modules.flatMap((m) => m.slides)
     .find((s) => s.slug === slug);
+}
+
+/** Issues the course certificate to a signed-in learner who already has 90% of the points. */
+export async function claimCertificateAction(courseId: string) {
+  if (!z.string().uuid().safeParse(courseId).success || !isSupabaseConfigured()) return { ok: false as const };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("course_claim_certificate", { p_course: courseId });
+  if (error) return { ok: false as const };
+  const result = data as { percent: number | null; certificate: CertificateRef };
+  return { ok: true as const, percent: result.percent, certificate: result.certificate };
 }
 
 export async function markLectureViewedAction(id: string) {

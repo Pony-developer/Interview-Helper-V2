@@ -6,6 +6,7 @@ import { useState, useTransition, type ReactNode } from "react";
 import { submitQuizAction, type QuizOutcome } from "@/app/actions/course";
 import { QuizStep } from "@/components/interview/QuizStep";
 import { useRouter } from "@/i18n/navigation";
+import { CertificateEarned } from "./CertificateMeter";
 
 export type QuizQuestionVM = { id: string; mode: "single" | "multi"; prompt: ReactNode; options: { id: string; content: ReactNode }[] };
 
@@ -96,6 +97,8 @@ export function QuizSlide({
           </section>
         );
       })}
+
+      {outcome?.certificate?.new ? <CertificateEarned id={outcome.certificate.id} /> : null}
 
       <div className="flex flex-col gap-4 rounded-3xl bg-forest-900 p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div aria-live="polite" className="min-h-[1.5rem]">

@@ -180,7 +180,36 @@
     "rights": "© {year} Assay. All rights reserved.",
     "madeFor": "Made for developers in Ukraine and everywhere else."
   },
+  "certificate": {
+    "eyebrow": "Certificate of completion",
+    "certifies": "This certifies that",
+    "completed": "has successfully completed the course",
+    "withScore": "with a score of {percent}%",
+    "id": "Certificate ID",
+    "verify": "Verify this certificate at",
+    "issuer": "Issued by Assay",
+    "seal": "Verified by Assay",
+    "print": "Print or save as PDF",
+    "copy": "Copy link",
+    "copied": "Link copied",
+    "linkedin": "Add to LinkedIn",
+    "backToCourse": "Back to the course",
+    "metaTitle": "{name} · {course} certificate",
+    "metaDescription": "{name} completed the {course} course on Assay with a score of {percent}%."
+  },
   "course": {
+    "certificateMeter": {
+      "label": "Certificate",
+      "score": "Your score: {percent}%",
+      "goal": "Score {threshold}% of the points to earn a certificate.",
+      "earned": "Certificate earned",
+      "view": "View certificate",
+      "claim": "Get your certificate",
+      "claiming": "Issuing…",
+      "signIn": "Sign in to earn a certificate.",
+      "new": "Congratulations! You've earned the certificate for this course.",
+      "error": "Couldn't issue the certificate. Try again."
+    },
     "contents": "Course contents",
     "allModules": "All modules",
     "progress": "{done} of {total} done",
@@ -558,6 +587,7 @@
   },
   "progressPage": {
     "metaTitle": "My progress",
+    "certificates": "Course certificates",
     "title": "Your mastery map",
     "intro": "Mastery is estimated from your recent results, weighted by difficulty. Older attempts count less over time.",
     "empty": "No attempts yet. Take your first interview to start the map.",

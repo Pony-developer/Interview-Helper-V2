@@ -455,3 +455,22 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Certificate pages print as one A4-landscape sheet: only the certificate, edge to edge. */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 8mm;
+  }
+  /* The site header, nav and footer, but not the certificate's own header and footer. */
+  body:has(.certificate-print) header:not(.certificate-print header),
+  body:has(.certificate-print) nav:not(.certificate-print nav),
+  body:has(.certificate-print) footer:not(.certificate-print footer) {
+    display: none !important;
+  }
+  .certificate-print {
+    animation: none !important;
+    aspect-ratio: auto;
+    height: calc(210mm - 16mm);
+  }
+}

@@ -20,7 +20,7 @@ export type CourseSlide = OutlineSlide & {
   practice: { language: "csharp"; starter: string } | null;
 };
 export type SlideProgress = { score: number; completed: boolean; attempts: number; lastCode: string | null };
-export type CourseProgress = { signedIn: boolean; bySlide: Record<string, SlideProgress> };
+export type CourseProgress = { signedIn: boolean; bySlide: Record<string, SlideProgress>; certificateId: string | null };
 
 /** Local ids (no database) are "<course>/<slide>", so actions can find the slide again. */
 export const localSlideId = (course: string, slug: string) => `${course}/${slug}`;
@@ -179,27 +179,38 @@ export async function getCourseSlide(outline: CourseOutline, slideSlug: string, 
 
 /** The signed-in visitor's progress in a course. Anonymous visitors get `signedIn: false`. */
 export async function getCourseProgress(outline: CourseOutline): Promise<CourseProgress> {
-  if (!isSupabaseConfigured()) return { signedIn: false, bySlide: {} };
+  if (!isSupabaseConfigured()) return { signedIn: false, bySlide: {}, certificateId: null };
   try {
     const supabase = await createClient();
     const { data: claims } = await supabase.auth.getClaims();
-    if (!claims?.claims?.sub) return { signedIn: false, bySlide: {} };
+    if (!claims?.claims?.sub) return { signedIn: false, bySlide: {}, certificateId: null };
 
     const ids = outline.modules.flatMap((m) => m.slides.map((s) => s.id));
-    if (ids.length === 0) return { signedIn: true, bySlide: {} };
-    const { data, error } = await supabase
-      .from("course_progress")
-      .select("slide_id, score, completed, attempts, last_code")
-      .in("slide_id", ids);
-    if (error) throw error;
+    const [progress, certificate] = await Promise.all([
+      ids.length
+        ? supabase.from("course_progress").select("slide_id, score, completed, attempts, last_code").in("slide_id", ids)
+        : Promise.resolve({ data: [], error: null }),
+      supabase.from("course_certificates").select("id").eq("course_id", outline.id).maybeSingle(),
+    ]);
+    if (progress.error) throw progress.error;
     return {
       signedIn: true,
       bySlide: Object.fromEntries(
-        data.map((r) => [r.slide_id, { score: r.score, completed: r.completed, attempts: r.attempts, lastCode: r.last_code }]),
+        (progress.data ?? []).map((r) => [r.slide_id, { score: r.score, completed: r.completed, attempts: r.attempts, lastCode: r.last_code }]),
       ),
+      certificateId: certificate.data?.id ?? null,
     };
   } catch (e) {
     console.error("getCourseProgress failed", e);
-    return { signedIn: false, bySlide: {} };
+    return { signedIn: false, bySlide: {}, certificateId: null };
   }
+}
+
+/** Share (0–100, rounded down) of the course's points earned, best score per graded slide. Null without graded slides. */
+export function coursePercent(outline: CourseOutline, bySlide: Record<string, SlideProgress>): number | null {
+  const graded = outline.modules.flatMap((m) => m.slides).filter((s) => s.maxScore > 0);
+  const total = graded.reduce((sum, s) => sum + s.maxScore, 0);
+  if (total === 0) return null;
+  const earned = graded.reduce((sum, s) => sum + Math.min(bySlide[s.id]?.score ?? 0, s.maxScore), 0);
+  return Math.floor((100 * earned) / total);
 }

@@ -5,12 +5,15 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import type { CourseOutline, SlideProgress } from "@/lib/data/course-player";
+import { CertificateMeter, type CertificateState } from "./CertificateMeter";
 import { KindIcon } from "./kind-icon";
 
 type Props = {
   outline: CourseOutline;
   progress: Record<string, SlideProgress>;
   currentSlug: string;
+  /** Null when the site has no accounts (nothing can be earned). */
+  certificate: CertificateState | null;
 };
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -61,7 +64,7 @@ function Ring({ done, total }: { done: number; total: number }) {
   );
 }
 
-export function CourseSidebar({ outline, progress, currentSlug }: Props) {
+export function CourseSidebar({ outline, progress, currentSlug, certificate }: Props) {
   const t = useTranslations("course");
   const currentModule = outline.modules.find((m) => m.slides.some((s) => s.slug === currentSlug)) ?? outline.modules[0];
   const [openModule, setOpenModule] = useState<string | null>(currentModule?.slug ?? null);
@@ -78,6 +81,7 @@ export function CourseSidebar({ outline, progress, currentSlug }: Props) {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-700">{t("contents")}</p>
         <h2 className="mt-3 font-display text-3xl font-extrabold leading-tight text-forest-700">{outline.title}</h2>
         <ProgressBar done={doneCount} total={all.length} label={t("progress", { done: doneCount, total: all.length })} />
+        {certificate ? <CertificateMeter state={certificate} /> : null}
         <ol className="mt-8 space-y-1">
           {outline.modules.map((m, i) => {
             const moduleDone = m.slides.filter((s) => isDone(s.id)).length;
@@ -122,6 +126,7 @@ export function CourseSidebar({ outline, progress, currentSlug }: Props) {
       </button>
       <h2 className="mt-4 font-display text-2xl font-extrabold leading-tight text-forest-700">{mod.title}</h2>
       <ProgressBar done={moduleDone} total={mod.slides.length} label={t("progress", { done: moduleDone, total: mod.slides.length })} />
+      {certificate?.certificateId ? <CertificateMeter state={certificate} /> : null}
 
       <ol className="relative mt-8">
         {mod.slides.map((s, i) => {

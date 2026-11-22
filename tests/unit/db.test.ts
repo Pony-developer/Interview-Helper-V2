@@ -540,6 +540,70 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
       });
     });
 
+    it("issues a course certificate at 90% of the points, once, and lets anyone verify it", async () => {
+      // A small course: a 1-point quiz and a 10-point practice (11 points; 90% needs 10).
+      const ids = await asUser(USER_A, async () => {
+        await db.query(`select public.admin_save_course($1::jsonb, true)`, [
+          JSON.stringify({ slug: "cert-course", title: L("Cert course"), summary: L("S"), topics: [], published: true }),
+        ]);
+        const moduleId = (
+          await db.query<{ id: string }>(`select public.admin_save_course_module($1::jsonb, true) as id`, [
+            JSON.stringify({ course: "cert-course", slug: "only", title: L("Only") }),
+          ])
+        ).rows[0].id;
+        const save = async (slide: Record<string, unknown>) =>
+          (await db.query<{ id: string }>(`select public.admin_save_course_slide($1::jsonb, true) as id`, [JSON.stringify({ course: "cert-course", module_id: moduleId, ...slide })])).rows[0].id;
+        return {
+          course: (await db.query<{ id: string }>(`select id from public.courses where slug = 'cert-course'`)).rows[0].id,
+          quiz: await save({
+            slug: "cert-quiz",
+            kind: "quiz",
+            title: L("Q"),
+            quiz: { questions: [{ id: "q1", mode: "single", prompt: L("?"), options: [{ id: "a", text: L("A") }, { id: "b", text: L("B") }], correct: ["a"] }] },
+          }),
+          practice: await save({
+            slug: "cert-practice",
+            kind: "practice",
+            title: L("P"),
+            body: L("Print ok"),
+            practice: { starter: "x", solution: "y", expected_output: "ok", max_score: 10 },
+          }),
+        };
+      });
+
+      type Cert = { id: string; new: boolean } | null;
+      await asUser(USER_B, async () => {
+        const quiz = (await db.query<{ r: { certificate: Cert } }>(`select public.course_submit_quiz($1, '{"q1":["a"]}') as r`, [ids.quiz])).rows[0].r;
+        expect(quiz.certificate).toBeNull();
+        const claim = (await db.query<{ r: { percent: number; certificate: Cert } }>(`select public.course_claim_certificate($1) as r`, [ids.course])).rows[0].r;
+        expect(claim).toEqual({ percent: 9, certificate: null });
+
+        const practice = (await db.query<{ r: { certificate: Cert } }>(`select public.course_submit_practice($1, 'code', 'ok') as r`, [ids.practice])).rows[0].r;
+        expect(practice.certificate).toMatchObject({ new: true });
+        const again = (await db.query<{ r: { certificate: Cert } }>(`select public.course_claim_certificate($1) as r`, [ids.course])).rows[0].r;
+        expect(again.certificate).toEqual({ id: practice.certificate!.id, new: false });
+
+        const name = (await db.query<{ display_name: string }>(`select display_name from public.profiles where id = $1`, [USER_B])).rows[0].display_name;
+        const mine = await db.query<{ holder_name: string; score_percent: number }>(`select holder_name, score_percent from public.course_certificates`);
+        expect(mine.rows).toEqual([{ holder_name: name, score_percent: 100 }]);
+        await expect(db.query(`insert into public.course_certificates (user_id, course_id, holder_name, score_percent) values ($1, $2, 'x', 100)`, [USER_B, ids.course])).rejects.toThrow();
+      });
+
+      const certId = (await db.query<{ id: string }>(`select id from public.course_certificates where user_id = $1`, [USER_B])).rows[0].id;
+      await asUser(USER_A, async () => {
+        const others = await db.query<{ n: number }>(`select count(*)::int as n from public.course_certificates`);
+        expect(others.rows[0].n).toBe(0); // Ada can't list Bob's certificates…
+      });
+      const publicView = await asUser(null, async () =>
+        (await db.query<{ c: Record<string, unknown> }>(`select public.get_course_certificate($1) as c`, [certId])).rows[0].c,
+      );
+      // …but anyone with the link can verify it.
+      expect(publicView).toMatchObject({ score_percent: 100, course_slug: "cert-course", course_title: { en: "Cert course" } });
+      await asUser(null, async () => {
+        await expect(db.query(`select public.course_claim_certificate($1)`, [ids.course])).rejects.toThrow(/permission denied/);
+      });
+    });
+
     it("unpublishes tasks used in interviews instead of deleting them", async () => {
       const used = (await db.query<{ slug: string }>(`select t.slug from public.interview_items ii join public.tasks t on t.id = ii.task_id limit 1`)).rows[0].slug;
       await asUser(USER_A, async () => {

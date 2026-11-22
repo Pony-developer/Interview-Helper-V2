@@ -66,6 +66,14 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      course_certificates: {
+        Row: { id: string; user_id: string; course_id: string; holder_name: string; score_percent: number; issued_at: string };
+        Insert: never;
+        Update: never;
+        Relationships: [
+          { foreignKeyName: "course_certificates_course_id_fkey"; columns: ["course_id"]; isOneToOne: false; referencedRelation: "courses"; referencedColumns: ["id"] },
+        ];
+      };
       course_modules: {
         Row: { id: string; course_id: string; slug: string; title: Localized; sort_order: number; source: ContentSource };
         Insert: never;
@@ -252,6 +260,8 @@ export type Database = {
       course_submit_quiz: { Args: { p_slide: string; p_answers: Json }; Returns: Json };
       course_submit_practice: { Args: { p_slide: string; p_code: string; p_output: string }; Returns: Json };
       course_save_code: { Args: { p_slide: string; p_code: string }; Returns: undefined };
+      course_claim_certificate: { Args: { p_course: string }; Returns: Json };
+      get_course_certificate: { Args: { p_id: string }; Returns: Json };
       admin_save_course: { Args: { p_course: Json; p_create: boolean }; Returns: string };
       admin_delete_course: { Args: { p_slug: string }; Returns: undefined };
       admin_save_course_module: { Args: { p_module: Json; p_create: boolean }; Returns: string };
