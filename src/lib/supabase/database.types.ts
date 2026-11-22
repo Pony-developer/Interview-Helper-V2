@@ -50,6 +50,21 @@ export type Database = {
           { foreignKeyName: "lectures_skill_id_fkey"; columns: ["skill_id"]; isOneToOne: false; referencedRelation: "skills"; referencedColumns: ["id"] },
         ];
       };
+      courses: {
+        Row: {
+          id: string;
+          slug: string;
+          title: Localized;
+          summary: Localized;
+          topics: Json;
+          sort_order: number;
+          published: boolean;
+          updated_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       tasks: {
         Row: {
           id: string;

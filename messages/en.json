@@ -24,6 +24,7 @@
     "home": "Home",
     "practice": "Practise",
     "lectures": "Lectures",
+    "courses": "Courses",
     "progress": "My progress",
     "howItWorks": "How it works",
     "faq": "FAQ",
@@ -178,6 +179,14 @@
     "learn": "Learn",
     "rights": "© {year} Assay. All rights reserved.",
     "madeFor": "Made for developers in Ukraine and everywhere else."
+  },
+  "courses": {
+    "title": "Courses",
+    "description": "Structured courses in C# and JavaScript, from the first class to the topics interviewers ask about.",
+    "intro": "Two structured tracks, built around the questions interviewers actually ask. Work through the topics in order.",
+    "topics": "What you will cover",
+    "topicCount": "{count, plural, one {# topic} other {# topics}}",
+    "empty": "Courses will appear here once they are added to the database."
   },
   "lectures": {
     "title": "Lecture library",

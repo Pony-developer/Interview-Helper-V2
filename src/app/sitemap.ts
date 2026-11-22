@@ -25,6 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     entry("/", 1),
     entry("/lectures", 0.8),
+    entry("/courses", 0.8),
     ...lectures.map((l) => entry(`/lectures/${l.slug}`, 0.6, l.updatedAt === new Date(0).toISOString() ? undefined : l.updatedAt)),
   ];
 }
