@@ -149,12 +149,12 @@ export default async function CourseSlidePage({ params }: Params) {
                 ) : null}
               </div>
 
-              <h1 className="mt-5 animate-rise font-display text-4xl font-extrabold leading-[1.08] text-forest-700 sm:text-5xl">{slide.title}</h1>
+              <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.08] text-forest-700 sm:text-5xl">{slide.title}</h1>
               <div className="gold-rule mt-6 w-24" />
 
               <div className="mt-10 space-y-8">
                 {slide.body ? (
-                  <article className="animate-rise rounded-3xl bg-white p-6 shadow-card ring-1 ring-paper-3 [animation-delay:80ms] sm:p-10">
+                  <article className="rounded-3xl bg-white p-6 shadow-card ring-1 ring-paper-3 sm:p-10">
                     <Markdown>{slide.body}</Markdown>
                   </article>
                 ) : null}
