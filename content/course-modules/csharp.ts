@@ -207,7 +207,7 @@ const EMPTY_MAIN = PROGRAM(`    static void Main()
         // Write your code here
     }`);
 
-/** The C# course: fifteen modules of lectures, quizzes and coding practices. */
+/** The C# course: sixteen modules of lectures, quizzes and coding practices. */
 export const csharpModules: ModuleDef[] = [
   {
     slug: "first-steps",
@@ -13723,6 +13723,382 @@ class Negate : Expr
         ),
         expectedOutput: "((2 + 3) * x)\n20\n3\n-(x + 10) = -14\n3\n(((2 + 3) * x) + -(x + 10))\n6\n4\nunknown variable\n",
         maxScore: 10,
+      },
+    ],
+  },
+  {
+    slug: "structs",
+    title: { en: "Structures", uk: "Структури" },
+    slides: [
+      { kind: "lecture", slug: "struct-declaration", title: { en: "Declaring a struct", uk: "Оголошення структури" } },
+      { kind: "lecture", slug: "struct-fields", title: { en: "Initializing struct fields", uk: "Ініціалізація полів структури" } },
+      {
+        kind: "quiz",
+        slug: "struct-or-class",
+        title: { en: "Struct or class?", uk: "Структура чи клас?" },
+        questions: [
+          {
+            id: "value-type",
+            mode: "single",
+            prompt: { en: "Which of these is a value type?", uk: "Який із цих типів є типом-значенням?" },
+            options: [
+              { id: "a", text: { en: "`struct Point`", uk: "`struct Point`" } },
+              { id: "b", text: { en: "`class Point`", uk: "`class Point`" } },
+              { id: "c", text: { en: "`string`", uk: "`string`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "struct-copy",
+            mode: "single",
+            prompt: {
+              en: "After `S b = a;` and `b.X = 5;`, what is `a.X`? (`S` is a struct)",
+              uk: "Після `S b = a;` і `b.X = 5;`, чому дорівнює `a.X`? (`S` — структура)",
+            },
+            options: [
+              { id: "a", text: { en: "Unchanged: the struct was copied", uk: "Не змінилося: структуру скопійовано" } },
+              { id: "b", text: { en: "5", uk: "5" } },
+              { id: "c", text: { en: "It does not compile", uk: "Не компілюється" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "small-value",
+            mode: "single",
+            prompt: {
+              en: "What is usually the best choice for a small immutable value, such as a 2D point?",
+              uk: "Що зазвичай найкраще для малого незмінного значення, наприклад двовимірної точки?",
+            },
+            options: [
+              { id: "a", text: { en: "A struct", uk: "Структура" } },
+              { id: "b", text: { en: "A class with a public list of objects", uk: "Клас із публічним списком об'єктів" } },
+              { id: "c", text: { en: "An interface", uk: "Інтерфейс" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "struct-limits",
+            mode: "single",
+            prompt: { en: "Which of these can a struct NOT do?", uk: "Що з цього структура НЕ може?" },
+            options: [
+              { id: "a", text: { en: "Implement an interface", uk: "Реалізувати інтерфейс" } },
+              { id: "b", text: { en: "Have a constructor with parameters", uk: "Мати конструктор з параметрами" } },
+              { id: "c", text: { en: "Inherit from a class", uk: "Успадковуватися від класу" } },
+            ],
+            correct: ["c"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "struct-passing", title: { en: "Passing a struct to a method", uk: "Передача структури в метод" } },
+      { kind: "lecture", slug: "ref-keyword", title: { en: "The ref keyword", uk: "Ключове слово ref" } },
+      {
+        kind: "quiz",
+        slug: "struct-memory-maps",
+        title: { en: "Memory maps", uk: "Карти пам'яті" },
+        questions: [
+          {
+            id: "struct-assign",
+            mode: "single",
+            prompt: {
+              en: "What does this print?\n\n```csharp\nstruct S { public int X; }\n\nS a = new S { X = 1 };\nS b = a;\nb.X = 5;\nConsole.WriteLine(a.X);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nstruct S { public int X; }\n\nS a = new S { X = 1 };\nS b = a;\nb.X = 5;\nConsole.WriteLine(a.X);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "5", uk: "5" } },
+              { id: "c", text: { en: "9", uk: "9" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "class-assign",
+            mode: "single",
+            prompt: {
+              en: "What does this print?\n\n```csharp\nclass C { public int X; }\n\nC a = new C { X = 1 };\nC b = a;\nb.X = 5;\nConsole.WriteLine(a.X);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nclass C { public int X; }\n\nC a = new C { X = 1 };\nC b = a;\nb.X = 5;\nConsole.WriteLine(a.X);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "5", uk: "5" } },
+              { id: "c", text: { en: "9", uk: "9" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "ref-int",
+            mode: "single",
+            prompt: {
+              en: "What does this print?\n\n```csharp\nstatic void Set(ref int n) { n = 9; }\n\nint v = 1;\nSet(ref v);\nConsole.WriteLine(v);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nstatic void Set(ref int n) { n = 9; }\n\nint v = 1;\nSet(ref v);\nConsole.WriteLine(v);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "5", uk: "5" } },
+              { id: "c", text: { en: "9", uk: "9" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "value-int",
+            mode: "single",
+            prompt: {
+              en: "What does this print?\n\n```csharp\nstatic void Set(int n) { n = 9; }\n\nint v = 1;\nSet(v);\nConsole.WriteLine(v);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nstatic void Set(int n) { n = 9; }\n\nint v = 1;\nSet(v);\nConsole.WriteLine(v);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "5", uk: "5" } },
+              { id: "c", text: { en: "9", uk: "9" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "struct-by-value",
+            mode: "single",
+            prompt: {
+              en: "What does this print?\n\n```csharp\nstruct S { public int X; }\nstatic void Set(S s) { s.X = 9; }\n\nS a = new S { X = 1 };\nSet(a);\nConsole.WriteLine(a.X);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nstruct S { public int X; }\nstatic void Set(S s) { s.X = 9; }\n\nS a = new S { X = 1 };\nSet(a);\nConsole.WriteLine(a.X);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "5", uk: "5" } },
+              { id: "c", text: { en: "9", uk: "9" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "class-reassign",
+            mode: "single",
+            prompt: {
+              en: "What does this print?\n\n```csharp\nclass C { public int X; }\nstatic void Replace(C c) { c = new C { X = 9 }; }\n\nC a = new C { X = 1 };\nReplace(a);\nConsole.WriteLine(a.X);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nclass C { public int X; }\nstatic void Replace(C c) { c = new C { X = 9 }; }\n\nC a = new C { X = 1 };\nReplace(a);\nConsole.WriteLine(a.X);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "5", uk: "5" } },
+              { id: "c", text: { en: "9", uk: "9" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "struct-by-ref",
+            mode: "single",
+            prompt: {
+              en: "What does this print?\n\n```csharp\nstruct S { public int X; }\nstatic void Set(ref S s) { s.X = 9; }\n\nS a = new S { X = 1 };\nSet(ref a);\nConsole.WriteLine(a.X);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nstruct S { public int X; }\nstatic void Set(ref S s) { s.X = 9; }\n\nS a = new S { X = 1 };\nSet(ref a);\nConsole.WriteLine(a.X);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "5", uk: "5" } },
+              { id: "c", text: { en: "9", uk: "9" } },
+            ],
+            correct: ["c"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "ref-practice",
+        title: { en: "Using ref", uk: "Застосування ref" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `struct Counter
+{
+    public int Value;
+
+    public void Add(int n)
+    {
+        Value += n;
+    }
+}`,
+          `        int a = 3, b = 7;
+        Swap(ref a, ref b);
+        Console.WriteLine(a + " " + b);
+        Double(ref a);
+        Console.WriteLine(a);
+
+        Counter c = new Counter();
+        c.Add(5);
+        Reset(ref c);
+        Console.WriteLine(c.Value);
+        c.Add(2);
+        Console.WriteLine(c.Value);
+
+        int x = 1;
+        Double(ref x);
+        Double(ref x);
+        Double(ref x);
+        Console.WriteLine(x);
+        Swap(ref x, ref x);
+        Console.WriteLine(x);`,
+          "",
+          `    // Exchanges the values of the two variables
+    static void Swap(ref int a, ref int b)
+    {
+        // Write your code here
+    }
+
+    // Doubles the value of the variable
+    static void Double(ref int x)
+    {
+        // Write your code here
+    }
+
+    // Sets the Value of the counter to 0
+    static void Reset(ref Counter counter)
+    {
+        // Write your code here
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          `struct Counter
+{
+    public int Value;
+
+    public void Add(int n)
+    {
+        Value += n;
+    }
+}`,
+          `        int a = 3, b = 7;
+        Swap(ref a, ref b);
+        Console.WriteLine(a + " " + b);
+        Double(ref a);
+        Console.WriteLine(a);
+
+        Counter c = new Counter();
+        c.Add(5);
+        Reset(ref c);
+        Console.WriteLine(c.Value);
+        c.Add(2);
+        Console.WriteLine(c.Value);
+
+        int x = 1;
+        Double(ref x);
+        Double(ref x);
+        Double(ref x);
+        Console.WriteLine(x);
+        Swap(ref x, ref x);
+        Console.WriteLine(x);`,
+          "",
+          `    // Exchanges the values of the two variables
+    static void Swap(ref int a, ref int b)
+    {
+        int t = a;
+        a = b;
+        b = t;
+    }
+
+    // Doubles the value of the variable
+    static void Double(ref int x)
+    {
+        x = x * 2;
+    }
+
+    // Sets the Value of the counter to 0
+    static void Reset(ref Counter counter)
+    {
+        counter.Value = 0;
+    }`,
+        ),
+        expectedOutput: "7 3\n14\n0\n2\n8\n8\n",
+      },
+      { kind: "lecture", slug: "boxing-unboxing", title: { en: "Boxing / unboxing", uk: "Boxing / unboxing" } },
+      {
+        kind: "quiz",
+        slug: "boxing-quiz",
+        title: { en: "Consequences of boxing", uk: "Наслідки boxing" },
+        questions: [
+          {
+            id: "boxing-copy",
+            mode: "single",
+            prompt: { en: "Which statement about boxing is true?", uk: "Яке твердження про boxing правильне?" },
+            options: [
+              { id: "a", text: { en: "Assigning an `int` to an `object` creates a new heap object that holds a copy of the value", uk: "Присвоєння `int` змінній `object` створює новий об'єкт у купі, що тримає копію значення" } },
+              { id: "b", text: { en: "The `int` variable becomes a reference, and nothing is copied", uk: "Змінна `int` стає посиланням, і нічого не копіюється" } },
+              { id: "c", text: { en: "It costs nothing: the compiler removes it", uk: "Це нічого не коштує: компілятор його прибирає" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "wrong-unbox",
+            mode: "single",
+            prompt: {
+              en: "What happens here?\n\n```csharp\nobject o = 5;\nlong n = (long)o;\n```",
+              uk: "Що станеться тут?\n\n```csharp\nobject o = 5;\nlong n = (long)o;\n```",
+            },
+            options: [
+              { id: "a", text: { en: "`n` becomes 5", uk: "`n` стає 5" } },
+              { id: "b", text: { en: "It does not compile", uk: "Не компілюється" } },
+              { id: "c", text: { en: "An `InvalidCastException` at run time: the box holds an `int`, not a `long`", uk: "`InvalidCastException` під час виконання: у коробці `int`, а не `long`" } },
+            ],
+            correct: ["c"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "struct-properties", title: { en: "Structs and properties", uk: "Структури і властивості" } },
+      { kind: "lecture", slug: "why-structs", title: { en: "Why do we need structs", uk: "Навіщо потрібні структури" } },
+      {
+        kind: "quiz",
+        slug: "structs-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "copy-vs-reference",
+            mode: "single",
+            prompt: { en: "What is the main difference between a struct and a class?", uk: "У чому головна різниця між структурою і класом?" },
+            options: [
+              { id: "a", text: { en: "On assignment a struct copies its data, while a class copies a reference", uk: "Під час присвоєння структура копіює свої дані, а клас копіює посилання" } },
+              { id: "b", text: { en: "A struct is always faster, and a class is always slower", uk: "Структура завжди швидша, а клас завжди повільніший" } },
+              { id: "c", text: { en: "A struct cannot have fields", uk: "Структура не може мати полів" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "struct-inherit",
+            mode: "single",
+            prompt: { en: "Can a struct inherit from a class?", uk: "Чи може структура успадковуватися від класу?" },
+            options: [
+              { id: "a", text: { en: "No", uk: "Ні" } },
+              { id: "b", text: { en: "Yes, always", uk: "Так, завжди" } },
+              { id: "c", text: { en: "Yes, if the class is `static`", uk: "Так, якщо клас `static`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "ref-meaning",
+            mode: "single",
+            prompt: { en: "What does `ref` mean in a parameter?", uk: "Що означає `ref` у параметрі?" },
+            options: [
+              { id: "a", text: { en: "The method receives the caller's variable itself, not a copy", uk: "Метод отримує саму змінну викликаючого, а не копію" } },
+              { id: "b", text: { en: "The parameter is read-only", uk: "Параметр доступний лише для читання" } },
+              { id: "c", text: { en: "The value is sent to another thread", uk: "Значення надсилається в інший потік" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "out-meaning",
+            mode: "single",
+            prompt: { en: "Which is true about an `out` parameter?", uk: "Що правильно про параметр `out`?" },
+            options: [
+              { id: "a", text: { en: "The method must assign it before it returns", uk: "Метод мусить присвоїти його до повернення" } },
+              { id: "b", text: { en: "It must have a value before the call", uk: "Перед викликом він мусить мати значення" } },
+              { id: "c", text: { en: "It cannot be used with structs", uk: "Його не можна вживати зі структурами" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "list-of-int",
+            mode: "single",
+            prompt: { en: "Why is `List<int>` faster than `ArrayList` for numbers?", uk: "Чому `List<int>` швидший за `ArrayList` для чисел?" },
+            options: [
+              { id: "a", text: { en: "`List<int>` stores plain integers, so there is no boxing", uk: "`List<int>` зберігає прості цілі, тож boxing немає" } },
+              { id: "b", text: { en: "`ArrayList` is only a name, it is the same class", uk: "`ArrayList` — лише назва, це той самий клас" } },
+              { id: "c", text: { en: "`List<int>` uses fewer digits", uk: "`List<int>` використовує менше цифр" } },
+            ],
+            correct: ["a"],
+          },
+        ],
       },
     ],
   },

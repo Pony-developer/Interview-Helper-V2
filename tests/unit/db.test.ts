@@ -119,6 +119,7 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
           "encapsulation",
           "abstraction",
           "polymorphism",
+          "structs",
         ]);
         const quiz = await db.query<{ quiz: { questions: Record<string, unknown>[] } }>(
           "select quiz from public.course_slides where slug = 'terminology'",
