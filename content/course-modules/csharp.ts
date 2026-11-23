@@ -1,10 +1,12 @@
 import { PROGRAM, PROGRAM_WITH } from "./csharp-code";
 import { concurrencyModule } from "./csharp-modules/concurrency";
 import { diAspnetModule } from "./csharp-modules/di-aspnet";
+import { dotnetPlatformModule } from "./csharp-modules/dotnet-platform";
 import { exceptionsAdvancedModule } from "./csharp-modules/exceptions-advanced";
 import { genericsAdvancedModule } from "./csharp-modules/generics-advanced";
 import { memoryGcModule } from "./csharp-modules/memory-gc";
 import { modernCsharpModule } from "./csharp-modules/modern-csharp";
+import { testingAdvancedModule } from "./csharp-modules/testing-advanced";
 import type { ModuleDef } from "./types";
 
 /**
@@ -17487,6 +17489,7 @@ class ClickCounter : IDisposable
     ],
   },
   exceptionsAdvancedModule,
+  dotnetPlatformModule,
   memoryGcModule,
   {
     slug: "multithreading",
@@ -18310,4 +18313,5 @@ class ClickCounter : IDisposable
   concurrencyModule,
   modernCsharpModule,
   diAspnetModule,
+  testingAdvancedModule,
 ];

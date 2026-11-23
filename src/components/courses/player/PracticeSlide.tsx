@@ -185,7 +185,7 @@ export function PracticeSlide({
 
       {!pending && outcome?.certificate?.new ? <CertificateEarned id={outcome.certificate.id} /> : null}
 
-      {pending || response ? (
+      {pending || response || sqlFailure ? (
         <section aria-live="polite" aria-busy={pending} className="overflow-hidden rounded-3xl bg-forest-950 text-forest-50 shadow-card">
           <header className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-3">
             <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] text-gold-300">

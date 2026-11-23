@@ -157,6 +157,8 @@ export async function runSql(
 ): Promise<SqlRunResult> {
   if (code.length > MAX_SQL) return { status: "unavailable", reason: "too-large" };
   const raw = parsers ?? (await rawParsers(db));
+  // The same output everywhere: UTC timestamps and ISO dates, whatever the browser's settings.
+  await db.exec("SET TimeZone = 'UTC'; SET DateStyle = 'ISO, YMD'; SET IntervalStyle = 'postgres'");
   if (setup.trim()) {
     try {
       await db.exec(setup);

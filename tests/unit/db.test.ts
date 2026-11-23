@@ -7,6 +7,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { databasesModules } from "@content/course-modules/databases";
 
 const USER_A = "00000000-0000-4000-8000-00000000000a";
 const USER_B = "00000000-0000-4000-8000-00000000000b";
@@ -78,14 +79,14 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
     });
   });
 
-  it("publishes the C# and JavaScript courses and hides drafts from anonymous users", async () => {
+  it("publishes the C#, JavaScript and Databases courses and hides drafts from anonymous users", async () => {
     await db.exec(`insert into public.courses (slug, title, summary, published) values ('draft-course', '{"en":"Draft"}', '{"en":"Draft"}', false)`);
     try {
       await asUser(null, async () => {
         const { rows } = await db.query<{ slug: string; topics: unknown[] }>(
           "select slug, topics from public.courses order by sort_order",
         );
-        expect(rows.map((r) => r.slug)).toEqual(["csharp", "javascript"]);
+        expect(rows.map((r) => r.slug)).toEqual(["csharp", "javascript", "databases"]);
         expect(rows.every((r) => Array.isArray(r.topics) && r.topics.length > 0)).toBe(true);
         await expect(db.query("insert into public.courses (slug, title, summary) values ('x', '{}', '{}')")).rejects.toThrow();
       });
@@ -137,6 +138,31 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
         await expect(db.query("select * from private.course_slide_keys")).rejects.toThrow(/permission denied/);
         await expect(db.query("select * from public.course_progress")).rejects.toThrow(/permission denied/);
       });
+    });
+
+    it("seeds the PostgreSQL practices with their setup script and grades their output", async () => {
+      const slide = databasesModules.flatMap((m) => m.slides).find((s) => s.slug === "first-query");
+      if (slide?.kind !== "practice") throw new Error("first-query practice not found");
+      const id = (
+        await db.query<{ id: string }>(
+          "select s.id from public.course_slides s join public.courses c on c.id = s.course_id where c.slug = 'databases' and s.slug = 'first-query'",
+        )
+      ).rows[0].id;
+      const result = await asUser(null, async () => {
+        const practice = (await db.query<{ practice: { language: string; setup: string; starter: string } }>(
+          "select practice from public.course_slides where id = $1",
+          [id],
+        )).rows[0].practice;
+        expect(practice.language).toBe("sql");
+        expect(practice.setup).toContain("CREATE TABLE categories");
+        expect(JSON.stringify(practice)).not.toContain(slide.solution.trim());
+        return {
+          right: (await db.query<{ r: { passed: boolean } }>("select public.course_submit_practice($1, '', $2) as r", [id, slide.expectedOutput])).rows[0].r,
+          wrong: (await db.query<{ r: { passed: boolean } }>("select public.course_submit_practice($1, '', 'nope') as r", [id])).rows[0].r,
+        };
+      });
+      expect(result.right.passed).toBe(true);
+      expect(result.wrong.passed).toBe(false);
     });
 
     it("grades quizzes for anonymous visitors without saving anything", async () => {
@@ -553,6 +579,32 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
           ["extra-notes", "Extra", "admin"],
           ["hello-world", "Edited hello", "admin"],
         ]);
+      });
+    });
+
+    it("lets admins save SQL practices with a setup script and rejects unknown languages", async () => {
+      await asUser(USER_A, async () => {
+        const moduleId = (
+          await db.query<{ id: string }>(
+            "select m.id from public.course_modules m join public.courses c on c.id = m.course_id where c.slug = 'databases' order by m.sort_order limit 1",
+          )
+        ).rows[0].id;
+        const slide = (language: string) => ({
+          course: "databases",
+          module_id: moduleId,
+          slug: `admin-sql-${language}`,
+          kind: "practice",
+          title: L("SQL"),
+          body: L("Select one"),
+          practice: { language, setup: "CREATE TABLE t (x int);", starter: "-- go", solution: "SELECT 1;", expected_output: "1", max_score: 2 },
+        });
+        const id = (await db.query<{ id: string }>("select public.admin_save_course_slide($1::jsonb, true) as id", [JSON.stringify(slide("sql"))])).rows[0].id;
+        const saved = (await db.query<{ s: { practice: Record<string, string> } }>("select public.admin_get_course_slide($1) as s", [id])).rows[0].s;
+        expect(saved.practice).toEqual({ language: "sql", setup: "CREATE TABLE t (x int);", starter: "-- go" });
+        await expect(
+          db.query("select public.admin_save_course_slide($1::jsonb, true)", [JSON.stringify(slide("cobol"))]),
+        ).rejects.toThrow(/Unknown practice language/);
+        await db.query("select public.admin_delete_course_slide($1)", [id]);
       });
     });
 
