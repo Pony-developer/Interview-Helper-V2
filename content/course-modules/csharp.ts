@@ -207,7 +207,7 @@ const EMPTY_MAIN = PROGRAM(`    static void Main()
         // Write your code here
     }`);
 
-/** The C# course: twenty-one modules of lectures, quizzes and coding practices. */
+/** The C# course: twenty-four modules of lectures, quizzes and coding practices. */
 export const csharpModules: ModuleDef[] = [
   {
     slug: "first-steps",
@@ -17151,6 +17151,1107 @@ class Negate : Expr
         ),
         expectedOutput: "5\n15.75\npear\napple kiwi pear\n",
         maxScore: 20,
+      },
+    ],
+  },
+  {
+    slug: "events",
+    title: { en: "Events", uk: "Події" },
+    slides: [
+      { kind: "lecture", slug: "events-intro", title: { en: "What is an event", uk: "Що таке подія" } },
+      { kind: "lecture", slug: "events-delegate", title: { en: "The event keyword", uk: "Ключове слово event" } },
+      {
+        kind: "practice",
+        slug: "event-basics",
+        title: { en: "Practice: Raising an event", uk: "Практика «Піднесення події»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class Counter
+{
+    public int Value { get; private set; }
+
+    // Declare the event Changed here, and raise it in Increment
+
+    public void Increment()
+    {
+        Value++;
+    }
+}`,
+          `        var counter = new Counter();
+        counter.Changed += () => Console.WriteLine("changed");
+        counter.Increment();
+        counter.Increment();
+        Console.WriteLine(counter.Value);
+        var quiet = new Counter();
+        quiet.Increment();
+        Console.WriteLine("quiet ok");`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Counter
+{
+    public int Value { get; private set; }
+
+    public event Action Changed;
+
+    public void Increment()
+    {
+        Value++;
+        Changed?.Invoke();
+    }
+}`,
+          `        var counter = new Counter();
+        counter.Changed += () => Console.WriteLine("changed");
+        counter.Increment();
+        counter.Increment();
+        Console.WriteLine(counter.Value);
+        var quiet = new Counter();
+        quiet.Increment();
+        Console.WriteLine("quiet ok");`,
+        ),
+        expectedOutput: "changed\nchanged\n2\nquiet ok\n",
+        maxScore: 5,
+      },
+      {
+        kind: "quiz",
+        slug: "events-quiz",
+        title: { en: "Events", uk: "Події" },
+        questions: [
+          {
+            id: "event-keyword",
+            mode: "single",
+            prompt: { en: "What does the keyword `event` add to a delegate field?", uk: "Що додає ключове слово `event` до поля-делегата?" },
+            options: [
+              { id: "a", text: { en: "Outside code can only subscribe and unsubscribe, not assign or invoke", uk: "Зовнішній код може лише підписуватися й відписуватися, але не присвоювати чи викликати" } },
+              { id: "b", text: { en: "The field becomes faster", uk: "Поле стає швидшим" } },
+              { id: "c", text: { en: "The field becomes a property", uk: "Поле стає властивістю" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "subscribe-operator",
+            mode: "single",
+            prompt: { en: "Which operator subscribes a handler to an event?", uk: "Який оператор підписує обробник на подію?" },
+            options: [
+              { id: "a", text: { en: "`+=`", uk: "`+=`" } },
+              { id: "b", text: { en: "`=`", uk: "`=`" } },
+              { id: "c", text: { en: "`=>`", uk: "`=>`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "who-raises",
+            mode: "single",
+            prompt: { en: "Who should raise an event?", uk: "Хто має піднімати подію?" },
+            options: [
+              { id: "a", text: { en: "The class that declares it", uk: "Клас, що її оголошує" } },
+              { id: "b", text: { en: "Any class that subscribes to it", uk: "Будь-який клас, що на неї підписаний" } },
+              { id: "c", text: { en: "Only the `Main` method", uk: "Лише метод `Main`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "no-subscribers",
+            mode: "single",
+            prompt: { en: "What happens when an event with no subscribers is raised with `?.Invoke`?", uk: "Що станеться, коли подію без підписників піднімають через `?.Invoke`?" },
+            options: [
+              { id: "a", text: { en: "Nothing: the call is skipped", uk: "Нічого: виклик пропускається" } },
+              { id: "b", text: { en: "A `NullReferenceException` is thrown", uk: "Кидається `NullReferenceException`" } },
+              { id: "c", text: { en: "The program stops", uk: "Програма зупиняється" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "event-handlers", title: { en: "EventHandler and EventArgs", uk: "EventHandler і EventArgs" } },
+      {
+        kind: "practice",
+        slug: "event-args",
+        title: { en: "Practice: Event data", uk: "Практика «Дані події»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Write the class TemperatureEventArgs (derived from EventArgs) and the class Thermometer here`,
+          `        var t = new Thermometer();
+        t.TemperatureChanged += (sender, e) => Console.WriteLine(e.Old + " -> " + e.New);
+        t.Set(20);
+        t.Set(20);
+        t.Set(25);`,
+        ),
+        solution: PROGRAM_WITH(
+          `class TemperatureEventArgs : EventArgs
+{
+    public int Old { get; }
+    public int New { get; }
+
+    public TemperatureEventArgs(int oldValue, int newValue)
+    {
+        Old = oldValue;
+        New = newValue;
+    }
+}
+
+class Thermometer
+{
+    private int current;
+
+    public event EventHandler<TemperatureEventArgs> TemperatureChanged;
+
+    public void Set(int value)
+    {
+        if (value == current)
+        {
+            return;
+        }
+        int old = current;
+        current = value;
+        OnTemperatureChanged(new TemperatureEventArgs(old, value));
+    }
+
+    protected virtual void OnTemperatureChanged(TemperatureEventArgs e)
+    {
+        TemperatureChanged?.Invoke(this, e);
+    }
+}`,
+          `        var t = new Thermometer();
+        t.TemperatureChanged += (sender, e) => Console.WriteLine(e.Old + " -> " + e.New);
+        t.Set(20);
+        t.Set(20);
+        t.Set(25);`,
+        ),
+        expectedOutput: "0 -> 20\n20 -> 25\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "events-vs-delegates", title: { en: "Events and delegates", uk: "Події і делегати" } },
+      { kind: "lecture", slug: "events-unsubscribe", title: { en: "Unsubscribing and memory leaks", uk: "Відписка і витоки пам'яті" } },
+      { kind: "lecture", slug: "events-lambda", title: { en: "Events and lambdas", uk: "Події і лямбди" } },
+      {
+        kind: "practice",
+        slug: "event-counter",
+        title: { en: "Practice: Click counter", uk: "Практика «Лічильник кліків»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class Button
+{
+    public event EventHandler Clicked;
+
+    public void Click()
+    {
+        Clicked?.Invoke(this, EventArgs.Empty);
+    }
+
+    public int Subscribers => Clicked == null ? 0 : Clicked.GetInvocationList().Length;
+}
+
+class ClickCounter : IDisposable
+{
+    public int Count { get; private set; }
+
+    // Write the constructor, OnClicked and Dispose here
+    public ClickCounter(Button button)
+    {
+    }
+
+    public void Dispose()
+    {
+    }
+}`,
+          `        var button = new Button();
+        var counter = new ClickCounter(button);
+        button.Click();
+        button.Click();
+        Console.WriteLine(counter.Count);
+        counter.Dispose();
+        button.Click();
+        Console.WriteLine(counter.Count);
+        Console.WriteLine(button.Subscribers);
+        var log = new List<string>();
+        button.Clicked += (s, e) => log.Add("A");
+        Console.WriteLine(button.Subscribers);
+        button.Click();
+        Console.WriteLine(string.Join(",", log.ToArray()));`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM_WITH(
+          `class Button
+{
+    public event EventHandler Clicked;
+
+    public void Click()
+    {
+        Clicked?.Invoke(this, EventArgs.Empty);
+    }
+
+    public int Subscribers => Clicked == null ? 0 : Clicked.GetInvocationList().Length;
+}
+
+class ClickCounter : IDisposable
+{
+    private readonly Button button;
+
+    public int Count { get; private set; }
+
+    public ClickCounter(Button button)
+    {
+        this.button = button;
+        button.Clicked += OnClicked;
+    }
+
+    private void OnClicked(object sender, EventArgs e)
+    {
+        Count++;
+    }
+
+    public void Dispose()
+    {
+        button.Clicked -= OnClicked;
+    }
+}`,
+          `        var button = new Button();
+        var counter = new ClickCounter(button);
+        button.Click();
+        button.Click();
+        Console.WriteLine(counter.Count);
+        counter.Dispose();
+        button.Click();
+        Console.WriteLine(counter.Count);
+        Console.WriteLine(button.Subscribers);
+        var log = new List<string>();
+        button.Clicked += (s, e) => log.Add("A");
+        Console.WriteLine(button.Subscribers);
+        button.Click();
+        Console.WriteLine(string.Join(",", log.ToArray()));`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "2\n2\n0\n1\nA\n",
+        maxScore: 10,
+      },
+      {
+        kind: "quiz",
+        slug: "events-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "handler-signature",
+            mode: "single",
+            prompt: { en: "What is the standard signature of a .NET event handler?", uk: "Яка стандартна сигнатура обробника події в .NET?" },
+            options: [
+              { id: "a", text: { en: "`void Handler(object sender, EventArgs e)`", uk: "`void Handler(object sender, EventArgs e)`" } },
+              { id: "b", text: { en: "`int Handler()`", uk: "`int Handler()`" } },
+              { id: "c", text: { en: "`void Handler(string text)`", uk: "`void Handler(string text)`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "sender-purpose",
+            mode: "single",
+            prompt: { en: "What is the purpose of the `sender` parameter?", uk: "Для чого потрібен параметр `sender`?" },
+            options: [
+              { id: "a", text: { en: "It tells the handler which object raised the event", uk: "Він каже обробнику, який об'єкт підняв подію" } },
+              { id: "b", text: { en: "It is the value carried by the event", uk: "Це значення, яке несе подія" } },
+              { id: "c", text: { en: "It is always `null`", uk: "Він завжди `null`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "eventhandler-generic",
+            mode: "single",
+            prompt: { en: "Why use `EventHandler<T>` instead of a custom delegate?", uk: "Навіщо використовувати `EventHandler<T>`, а не власний делегат?" },
+            options: [
+              { id: "a", text: { en: "It is the standard form that other .NET programmers recognise", uk: "Це стандартна форма, яку впізнають інші програмісти .NET" } },
+              { id: "b", text: { en: "It is faster", uk: "Він швидший" } },
+              { id: "c", text: { en: "It cannot carry data", uk: "Він не може нести дані" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "unsubscribe-reason",
+            mode: "single",
+            prompt: { en: "Why should a subscriber unsubscribe when it is no longer needed?", uk: "Навіщо підписнику відписуватися, коли він більше не потрібен?" },
+            options: [
+              { id: "a", text: { en: "To avoid a memory leak and calls to an object that is no longer used", uk: "Щоб уникнути витоку пам'яті та викликів об'єкта, який уже не використовується" } },
+              { id: "b", text: { en: "To make the event faster", uk: "Щоб подія працювала швидше" } },
+              { id: "c", text: { en: "Because the compiler requires it", uk: "Бо цього вимагає компілятор" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "lambda-unsubscribe",
+            mode: "single",
+            prompt: { en: "Why is it hard to unsubscribe a lambda?", uk: "Чому важко відписати лямбду?" },
+            options: [
+              { id: "a", text: { en: "Each lambda creates a new delegate, so a new lambda cannot remove the old one", uk: "Кожна лямбда створює новий делегат, тож нова лямбда не може прибрати стару" } },
+              { id: "b", text: { en: "Lambdas cannot be subscribed to events", uk: "На події не можна підписати лямбди" } },
+              { id: "c", text: { en: "Lambdas are always static", uk: "Лямбди завжди статичні" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "multithreading",
+    title: { en: "Multithreading", uk: "Багатопотоковість" },
+    slides: [
+      { kind: "lecture", slug: "threads-domains-processes", title: { en: "Threads, domains and processes", uk: "Треди, домени і процеси" } },
+      {
+        kind: "quiz",
+        slug: "processes-threads-quiz",
+        title: { en: "Processes and threads", uk: "Процеси і потоки" },
+        questions: [
+          {
+            id: "what-process",
+            mode: "single",
+            prompt: { en: "What is a process?", uk: "Що таке процес?" },
+            options: [
+              { id: "a", text: { en: "A running program with its own private memory", uk: "Запущена програма з власною приватною пам'яттю" } },
+              { id: "b", text: { en: "A single method", uk: "Один метод" } },
+              { id: "c", text: { en: "A type of variable", uk: "Тип змінної" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "what-thread",
+            mode: "single",
+            prompt: { en: "What is a thread?", uk: "Що таке потік?" },
+            options: [
+              { id: "a", text: { en: "A unit of execution inside a process; the threads of one process share its memory", uk: "Одиниця виконання всередині процесу; потоки одного процесу ділять його пам'ять" } },
+              { id: "b", text: { en: "A separate program with its own memory", uk: "Окрема програма з власною пам'яттю" } },
+              { id: "c", text: { en: "A kind of loop", uk: "Вид циклу" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "what-appdomain",
+            mode: "single",
+            prompt: { en: "What is an AppDomain?", uk: "Що таке AppDomain?" },
+            options: [
+              { id: "a", text: { en: "An isolated area inside one process, used by .NET to load and run code", uk: "Ізольована область всередині одного процесу, якою .NET завантажує й виконує код" } },
+              { id: "b", text: { en: "A computer on the network", uk: "Комп'ютер у мережі" } },
+              { id: "c", text: { en: "A way to draw windows", uk: "Спосіб малювати вікна" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "shared-memory",
+            mode: "single",
+            prompt: { en: "Which memory do the threads of one process share?", uk: "Яку пам'ять ділять потоки одного процесу?" },
+            options: [
+              { id: "a", text: { en: "The memory of that process", uk: "Пам'ять цього процесу" } },
+              { id: "b", text: { en: "Nothing: each thread has its own global variables", uk: "Нічого: кожен потік має власні глобальні змінні" } },
+              { id: "c", text: { en: "The memory of the other processes", uk: "Пам'ять інших процесів" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "process-cost",
+            mode: "single",
+            prompt: { en: "Why is creating a process more expensive than creating a thread?", uk: "Чому створення процесу дорожче за створення потоку?" },
+            options: [
+              { id: "a", text: { en: "A process needs its own memory space and resources", uk: "Процесу потрібні власний простір пам'яті та ресурси" } },
+              { id: "b", text: { en: "A process always runs slower", uk: "Процес завжди працює повільніше" } },
+              { id: "c", text: { en: "A thread cannot have a name", uk: "Потік не може мати назви" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "thread-outside",
+            mode: "single",
+            prompt: { en: "Can a thread exist outside any process?", uk: "Чи може потік існувати поза будь-яким процесом?" },
+            options: [
+              { id: "a", text: { en: "No: every thread belongs to a process", uk: "Ні: кожен потік належить процесу" } },
+              { id: "b", text: { en: "Yes, always", uk: "Так, завжди" } },
+              { id: "c", text: { en: "Only on Linux", uk: "Лише в Linux" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "thread-class", title: { en: "The Thread class", uk: "Клас Thread" } },
+      { kind: "lecture", slug: "begininvoke", title: { en: "BeginInvoke", uk: "BeginInvoke" } },
+      { kind: "lecture", slug: "parallel", title: { en: "Parallel", uk: "Parallel" } },
+      { kind: "lecture", slug: "shared-resources-lock", title: { en: "Shared resources and lock", uk: "Спільні ресурси та lock" } },
+      {
+        kind: "quiz",
+        slug: "threads-locks-quiz",
+        title: { en: "Threads and locks", uk: "Потоки і блокування" },
+        questions: [
+          {
+            id: "lock-guarantee",
+            mode: "single",
+            prompt: { en: "What does `lock (sync)` guarantee?", uk: "Що гарантує `lock (sync)`?" },
+            options: [
+              { id: "a", text: { en: "Only one thread at a time runs the block guarded by that object", uk: "Лише один потік одночасно виконує блок, захищений цим об'єктом" } },
+              { id: "b", text: { en: "The block runs faster", uk: "Блок виконується швидше" } },
+              { id: "c", text: { en: "The block cannot throw an exception", uk: "Блок не може кидати виняток" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "lock-object",
+            mode: "single",
+            prompt: { en: "Why should the lock object be private and readonly?", uk: "Чому об'єкт-замок має бути приватним і readonly?" },
+            options: [
+              { id: "a", text: { en: "So that no other code can lock on it by mistake", uk: "Щоб жоден інший код не заблокував його помилково" } },
+              { id: "b", text: { en: "Because it must be a string", uk: "Бо він має бути рядком" } },
+              { id: "c", text: { en: "So that it is saved to disk", uk: "Щоб його зберігали на диск" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "race",
+            mode: "single",
+            prompt: { en: "What is a race condition?", uk: "Що таке гонка (race condition)?" },
+            options: [
+              { id: "a", text: { en: "The result depends on the timing of threads that access shared data", uk: "Результат залежить від часу роботи потоків, що звертаються до спільних даних" } },
+              { id: "b", text: { en: "A contest between programmers", uk: "Змагання між програмістами" } },
+              { id: "c", text: { en: "A thread that never ends", uk: "Потік, який ніколи не завершується" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "deadlock",
+            mode: "single",
+            prompt: { en: "What is a deadlock?", uk: "Що таке взаємне блокування (deadlock)?" },
+            options: [
+              { id: "a", text: { en: "Two or more threads wait for each other forever", uk: "Два або більше потоків чекають одне на одного вічно" } },
+              { id: "b", text: { en: "A thread that runs too fast", uk: "Потік, що працює надто швидко" } },
+              { id: "c", text: { en: "A program that uses too much memory", uk: "Програма, що використовує забагато пам'яті" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "interlocked",
+            mode: "single",
+            prompt: { en: "Which method increments a shared `int` safely without a lock?", uk: "Який метод безпечно збільшує спільний `int` без замка?" },
+            options: [
+              { id: "a", text: { en: "`Interlocked.Increment`", uk: "`Interlocked.Increment`" } },
+              { id: "b", text: { en: "`Thread.Sleep`", uk: "`Thread.Sleep`" } },
+              { id: "c", text: { en: "`Task.Delay`", uk: "`Task.Delay`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "ui-waits-lock",
+            mode: "single",
+            prompt: { en: "What happens if the UI thread waits for a long lock that a background thread holds?", uk: "Що станеться, якщо потік UI чекає на довгий замок, який тримає фоновий потік?" },
+            options: [
+              { id: "a", text: { en: "The window freezes", uk: "Вікно завмирає" } },
+              { id: "b", text: { en: "The program does not compile", uk: "Програма не компілюється" } },
+              { id: "c", text: { en: "The background thread is stopped", uk: "Фоновий потік зупиняється" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "slow-lock",
+            mode: "single",
+            prompt: { en: "What is the danger of doing slow work inside a lock?", uk: "Яка небезпека в повільній роботі всередині замка?" },
+            options: [
+              { id: "a", text: { en: "Other threads wait for a long time", uk: "Інші потоки довго чекають" } },
+              { id: "b", text: { en: "The lock is released automatically", uk: "Замок звільняється автоматично" } },
+              { id: "c", text: { en: "The compiler refuses to build the program", uk: "Компілятор відмовляється збирати програму" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "gui-thread-blocking", title: { en: "Blocking the GUI thread", uk: "Блокування потоку GUI" } },
+      { kind: "lecture", slug: "gui-async", title: { en: "Asynchronous operations in the GUI", uk: "Асинхронні операції в GUI" } },
+      { kind: "lecture", slug: "gui-async-await", title: { en: "async, await", uk: "async, await" } },
+      { kind: "lecture", slug: "backgroundworker", title: { en: "BackgroundWorker", uk: "BackgroundWorker" } },
+      { kind: "lecture", slug: "extra-materials", title: { en: "Additional materials", uk: "Додаткові матеріали" } },
+      {
+        kind: "quiz",
+        slug: "threads-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "gui-freeze",
+            mode: "single",
+            prompt: { en: "Why does a GUI freeze when a long operation runs on the UI thread?", uk: "Чому GUI завмирає, коли довга операція виконується в потоці UI?" },
+            options: [
+              { id: "a", text: { en: "The UI thread cannot process messages while it runs the operation", uk: "Потік UI не може обробляти повідомлення, поки виконує операцію" } },
+              { id: "b", text: { en: "The compiler blocks the window", uk: "Компілятор блокує вікно" } },
+              { id: "c", text: { en: "The graphics card is busy", uk: "Відеокарта зайнята" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "label-update",
+            mode: "single",
+            prompt: { en: "How should a background thread update a label in WinForms?", uk: "Як фоновий потік має оновити мітку у WinForms?" },
+            options: [
+              { id: "a", text: { en: "By marshalling to the UI thread with `Invoke` or `BeginInvoke`", uk: "Маршалінгом у потік UI через `Invoke` або `BeginInvoke`" } },
+              { id: "b", text: { en: "By writing to the label directly, because it is safe", uk: "Записом у мітку напряму, бо це безпечно" } },
+              { id: "c", text: { en: "By calling `Thread.Sleep`", uk: "Викликом `Thread.Sleep`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "parallel-for",
+            mode: "single",
+            prompt: { en: "What does `Parallel.For` do?", uk: "Що робить `Parallel.For`?" },
+            options: [
+              { id: "a", text: { en: "It runs the iterations on several threads when possible", uk: "Виконує ітерації в кількох потоках, коли це можливо" } },
+              { id: "b", text: { en: "It runs the loop slower to save power", uk: "Виконує цикл повільніше, щоб заощадити енергію" } },
+              { id: "c", text: { en: "It creates a new process for each iteration", uk: "Створює новий процес для кожної ітерації" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "backgroundworker-use",
+            mode: "single",
+            prompt: { en: "What is `BackgroundWorker` good for?", uk: "Для чого добрий `BackgroundWorker`?" },
+            options: [
+              { id: "a", text: { en: "Running work in the background and reporting progress to the UI safely", uk: "Виконання роботи у фоні з безпечним повідомленням прогресу в UI" } },
+              { id: "b", text: { en: "Drawing graphics", uk: "Малювання графіки" } },
+              { id: "c", text: { en: "Compiling code", uk: "Компіляція коду" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "async-waits",
+            mode: "single",
+            prompt: { en: "Why use `async/await` for file or network waits instead of a thread?", uk: "Навіщо для очікування файлу чи мережі використовувати `async/await`, а не потік?" },
+            options: [
+              { id: "a", text: { en: "A waiting task does not occupy a thread, so the thread can do other work", uk: "Задача, що чекає, не займає потік, тож потік може робити іншу роботу" } },
+              { id: "b", text: { en: "Threads are not allowed to wait", uk: "Потокам не дозволено чекати" } },
+              { id: "c", text: { en: "`async` makes the file faster", uk: "`async` робить файл швидшим" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "thread-ai",
+        title: { en: "Practice: Thread for AI", uk: "Практика «Потік для AI»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class ThinkingThread
+{
+    private readonly int seed;
+    private readonly object sync = new object();
+    private int result;
+    private bool done;
+    private Thread thread;
+
+    public ThinkingThread(int seed)
+    {
+        this.seed = seed;
+    }
+
+    // Write Start, Work, Wait, Result and Done here
+    public void Start()
+    {
+    }
+
+    public void Wait()
+    {
+    }
+
+    public int Result => result;
+
+    public bool Done => done;
+}`,
+          `        var a = new ThinkingThread(3);
+        a.Start();
+        var b = new ThinkingThread(5);
+        b.Start();
+        a.Wait();
+        b.Wait();
+        Console.WriteLine(a.Result);
+        Console.WriteLine(b.Result);
+        Console.WriteLine(a.Done && b.Done);
+        var c = new ThinkingThread(1);
+        Console.WriteLine(c.Done);`,
+          "using System.Threading;",
+          `    // A slow computation that stands for the AI's thinking
+    public static int Think(int seed)
+    {
+        long work = 0;
+        for (int i = 0; i < 300000 * seed; i++)
+        {
+            work += i % 3;
+        }
+        return seed * seed * 100 + (work > 0 ? 0 : 1);
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          `class ThinkingThread
+{
+    private readonly int seed;
+    private readonly object sync = new object();
+    private int result;
+    private bool done;
+    private Thread thread;
+
+    public ThinkingThread(int seed)
+    {
+        this.seed = seed;
+    }
+
+    public void Start()
+    {
+        thread = new Thread(Work);
+        thread.Start();
+    }
+
+    private void Work()
+    {
+        int value = Program.Think(seed);
+        lock (sync)
+        {
+            result = value;
+            done = true;
+        }
+    }
+
+    public void Wait()
+    {
+        if (thread != null)
+        {
+            thread.Join();
+        }
+    }
+
+    public int Result
+    {
+        get
+        {
+            lock (sync)
+            {
+                return result;
+            }
+        }
+    }
+
+    public bool Done
+    {
+        get
+        {
+            lock (sync)
+            {
+                return done;
+            }
+        }
+    }
+}`,
+          `        var a = new ThinkingThread(3);
+        a.Start();
+        var b = new ThinkingThread(5);
+        b.Start();
+        a.Wait();
+        b.Wait();
+        Console.WriteLine(a.Result);
+        Console.WriteLine(b.Result);
+        Console.WriteLine(a.Done && b.Done);
+        var c = new ThinkingThread(1);
+        Console.WriteLine(c.Done);`,
+          "using System.Threading;",
+          `    // A slow computation that stands for the AI's thinking
+    public static int Think(int seed)
+    {
+        long work = 0;
+        for (int i = 0; i < 300000 * seed; i++)
+        {
+            work += i % 3;
+        }
+        return seed * seed * 100 + (work > 0 ? 0 : 1);
+    }`,
+        ),
+        expectedOutput: "900\n2500\nTrue\nFalse\n",
+        maxScore: 20,
+      },
+      {
+        kind: "practice",
+        slug: "parallel-ai",
+        title: { en: "Practice: Parallel AI", uk: "Практика «Паралельний AI»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints an array of numbers on one line, separated by spaces
+    static void Show(int[] values)
+    {
+        string text = "";
+        foreach (int v in values)
+        {
+            text += (text == "" ? "" : " ") + v;
+        }
+        Console.WriteLine(text);
+    }
+
+    // A slow computation that stands for the AI's thinking
+    public static int Think(int seed)
+    {
+        long work = 0;
+        for (int i = 0; i < 300000 * seed; i++)
+        {
+            work += i % 3;
+        }
+        return seed * seed * 100 + (work > 0 ? 0 : 1);
+    }
+
+    // The results of Think for every seed, computed in parallel; element i is Think(seeds[i])
+    static int[] ThinkAll(int[] seeds)
+    {
+        // Write your code here
+        return new int[seeds.Length];
+    }
+
+    // The sum of Think over all seeds, computed in parallel
+    static int TotalScore(int[] seeds)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // The seed whose Think result is the largest
+    static int BestSeed(int[] seeds)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    static void Main()
+    {
+        int[] seeds = { 1, 2, 3, 4, 5 };
+        Show(ThinkAll(seeds));
+        Console.WriteLine(TotalScore(seeds));
+        Console.WriteLine(BestSeed(seeds));
+    }`, "using System.Collections.Generic;\nusing System.Linq;\nusing System.Threading;\nusing System.Threading.Tasks;"),
+        solution: PROGRAM(`    // Prints an array of numbers on one line, separated by spaces
+    static void Show(int[] values)
+    {
+        string text = "";
+        foreach (int v in values)
+        {
+            text += (text == "" ? "" : " ") + v;
+        }
+        Console.WriteLine(text);
+    }
+
+    // A slow computation that stands for the AI's thinking
+    public static int Think(int seed)
+    {
+        long work = 0;
+        for (int i = 0; i < 300000 * seed; i++)
+        {
+            work += i % 3;
+        }
+        return seed * seed * 100 + (work > 0 ? 0 : 1);
+    }
+
+    // The results of Think for every seed, computed in parallel; element i is Think(seeds[i])
+    static int[] ThinkAll(int[] seeds)
+    {
+        int[] results = new int[seeds.Length];
+        Parallel.For(0, seeds.Length, i =>
+        {
+            results[i] = Think(seeds[i]);
+        });
+        return results;
+    }
+
+    // The sum of Think over all seeds, computed in parallel
+    static int TotalScore(int[] seeds)
+    {
+        int total = 0;
+        Parallel.ForEach(seeds, s =>
+        {
+            Interlocked.Add(ref total, Think(s));
+        });
+        return total;
+    }
+
+    // The seed whose Think result is the largest
+    static int BestSeed(int[] seeds)
+    {
+        int[] scores = ThinkAll(seeds);
+        int best = 0;
+        for (int i = 1; i < scores.Length; i++)
+        {
+            if (scores[i] > scores[best])
+            {
+                best = i;
+            }
+        }
+        return seeds[best];
+    }
+
+    static void Main()
+    {
+        int[] seeds = { 1, 2, 3, 4, 5 };
+        Show(ThinkAll(seeds));
+        Console.WriteLine(TotalScore(seeds));
+        Console.WriteLine(BestSeed(seeds));
+    }`, "using System.Collections.Generic;\nusing System.Linq;\nusing System.Threading;\nusing System.Threading.Tasks;"),
+        expectedOutput: "100 400 900 1600 2500\n5500\n5\n",
+        maxScore: 20,
+      },
+    ],
+  },
+  {
+    slug: "async-tasks",
+    title: { en: "Async and tasks", uk: "Async і задачі" },
+    slides: [
+      { kind: "lecture", slug: "task-basics", title: { en: "Tasks", uk: "Задачі" } },
+      { kind: "lecture", slug: "task-run", title: { en: "Task.Run and continuations", uk: "Task.Run і продовження" } },
+      { kind: "lecture", slug: "async-await-basics", title: { en: "async and await", uk: "async і await" } },
+      {
+        kind: "practice",
+        slug: "async-sum",
+        title: { en: "Practice: Async sum", uk: "Практика «Асинхронна сума»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Waits 10 milliseconds and returns twice the value
+    static async Task<int> DoubleLaterAsync(int x)
+    {
+        await Task.Delay(10);
+        return 2 * x;
+    }
+
+    // Awaits DoubleLaterAsync for each item one after another, and returns the sum
+    static Task<int> SumOfDoublesAsync(int[] xs)
+    {
+        // Write your code here
+        return Task.FromResult(0);
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(SumOfDoublesAsync(new[] { 1, 2, 3 }).Result);
+        Console.WriteLine(DoubleLaterAsync(5).Result);
+    }`, "using System.Threading.Tasks;"),
+        solution: PROGRAM(`    // Waits 10 milliseconds and returns twice the value
+    static async Task<int> DoubleLaterAsync(int x)
+    {
+        await Task.Delay(10);
+        return 2 * x;
+    }
+
+    // Awaits DoubleLaterAsync for each item one after another, and returns the sum
+    static async Task<int> SumOfDoublesAsync(int[] xs)
+    {
+        int sum = 0;
+        foreach (int x in xs)
+        {
+            sum += await DoubleLaterAsync(x);
+        }
+        return sum;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(SumOfDoublesAsync(new[] { 1, 2, 3 }).Result);
+        Console.WriteLine(DoubleLaterAsync(5).Result);
+    }`, "using System.Threading.Tasks;"),
+        expectedOutput: "12\n10\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "task-whenall", title: { en: "WhenAll and WhenAny", uk: "WhenAll і WhenAny" } },
+      { kind: "lecture", slug: "task-exceptions", title: { en: "Exceptions in tasks", uk: "Виключення в задачах" } },
+      { kind: "lecture", slug: "task-cancellation", title: { en: "Cancellation", uk: "Скасування" } },
+      { kind: "lecture", slug: "async-void-pitfalls", title: { en: "async void and async Task", uk: "async void і async Task" } },
+      {
+        kind: "quiz",
+        slug: "async-quiz",
+        title: { en: "Tasks and await", uk: "Задачі і await" },
+        questions: [
+          {
+            id: "task-run-meaning",
+            mode: "single",
+            prompt: { en: "What does `Task.Run` do?", uk: "Що робить `Task.Run`?" },
+            options: [
+              { id: "a", text: { en: "Starts a piece of work on a pool thread and returns a task for it", uk: "Запускає роботу в потоці з пулу і повертає для неї задачу" } },
+              { id: "b", text: { en: "Runs the work on the UI thread", uk: "Виконує роботу в потоці UI" } },
+              { id: "c", text: { en: "Deletes a task", uk: "Видаляє задачу" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "async-return-type",
+            mode: "single",
+            prompt: { en: "What is the return type of an `async` method that returns an `int`?", uk: "Який тип значення має `async`-метод, що повертає `int`?" },
+            options: [
+              { id: "a", text: { en: "`Task<int>`", uk: "`Task<int>`" } },
+              { id: "b", text: { en: "`int`", uk: "`int`" } },
+              { id: "c", text: { en: "`void`", uk: "`void`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "await-thread",
+            mode: "single",
+            prompt: { en: "What does `await` do to the calling thread?", uk: "Що `await` робить з викликаючим потоком?" },
+            options: [
+              { id: "a", text: { en: "It does not block: the method returns to its caller until the task is done", uk: "Не блокує: метод повертається до викликаючого, доки задачу не завершено" } },
+              { id: "b", text: { en: "It stops the thread forever", uk: "Назавжди зупиняє потік" } },
+              { id: "c", text: { en: "It creates a new process", uk: "Створює новий процес" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "delay-vs-sleep",
+            mode: "single",
+            prompt: { en: "What does `Task.Delay` do, compared with `Thread.Sleep`?", uk: "Що робить `Task.Delay` порівняно з `Thread.Sleep`?" },
+            options: [
+              { id: "a", text: { en: "It waits without occupying a thread", uk: "Чекає, не займаючи потік" } },
+              { id: "b", text: { en: "It is faster in the same way", uk: "Він так само швидший" } },
+              { id: "c", text: { en: "It cannot be awaited", uk: "Його не можна очікувати" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "async-whenall",
+        title: { en: "Practice: Async WhenAll", uk: "Практика «Async WhenAll»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Waits a moment, returns x * x, and throws ArgumentException for a negative number
+    static async Task<int> SquareLaterAsync(int x)
+    {
+        await Task.Delay(x < 0 ? 1 : Math.Max(1, 10 - x));
+        if (x < 0)
+        {
+            throw new ArgumentException("negative: " + x);
+        }
+        return x * x;
+    }
+
+    // All squares, in the order of the inputs; all tasks start at once
+    static Task<int[]> SquareAllAsync(int[] inputs)
+    {
+        // Write your code here
+        return Task.FromResult(new int[inputs.Length]);
+    }
+
+    // The square of x, or 0 if x is negative
+    static Task<int> SafeSquareAsync(int x)
+    {
+        // Write your code here
+        return Task.FromResult(0);
+    }
+
+    // The sum of SafeSquareAsync over all inputs, computed together
+    static Task<int> SafeSumAsync(int[] inputs)
+    {
+        // Write your code here
+        return Task.FromResult(0);
+    }
+
+    static void Main()
+    {
+        int[] squares = SquareAllAsync(new[] { 3, 1, 4 }).Result;
+        Console.WriteLine(squares[0] + " " + squares[1] + " " + squares[2]);
+        Console.WriteLine(SafeSumAsync(new[] { 2, -1, 3 }).Result);
+    }`, "using System.Linq;\nusing System.Threading.Tasks;"),
+        solution: PROGRAM(`    // Waits a moment, returns x * x, and throws ArgumentException for a negative number
+    static async Task<int> SquareLaterAsync(int x)
+    {
+        await Task.Delay(x < 0 ? 1 : Math.Max(1, 10 - x));
+        if (x < 0)
+        {
+            throw new ArgumentException("negative: " + x);
+        }
+        return x * x;
+    }
+
+    // All squares, in the order of the inputs; all tasks start at once
+    static async Task<int[]> SquareAllAsync(int[] inputs)
+    {
+        Task<int>[] tasks = inputs.Select(x => SquareLaterAsync(x)).ToArray();
+        return await Task.WhenAll(tasks);
+    }
+
+    // The square of x, or 0 if x is negative
+    static async Task<int> SafeSquareAsync(int x)
+    {
+        try
+        {
+            return await SquareLaterAsync(x);
+        }
+        catch (ArgumentException)
+        {
+            return 0;
+        }
+    }
+
+    // The sum of SafeSquareAsync over all inputs, computed together
+    static async Task<int> SafeSumAsync(int[] inputs)
+    {
+        Task<int>[] tasks = inputs.Select(x => SafeSquareAsync(x)).ToArray();
+        int[] results = await Task.WhenAll(tasks);
+        return results.Sum();
+    }
+
+    static void Main()
+    {
+        int[] squares = SquareAllAsync(new[] { 3, 1, 4 }).Result;
+        Console.WriteLine(squares[0] + " " + squares[1] + " " + squares[2]);
+        Console.WriteLine(SafeSumAsync(new[] { 2, -1, 3 }).Result);
+    }`, "using System.Linq;\nusing System.Threading.Tasks;"),
+        expectedOutput: "9 1 16\n13\n",
+        maxScore: 10,
+      },
+      {
+        kind: "quiz",
+        slug: "async-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "return-type-choice",
+            mode: "single",
+            prompt: { en: "Which return type should an `async` method have, unless it is an event handler?", uk: "Який тип значення має мати `async`-метод, якщо він не є обробником події?" },
+            options: [
+              { id: "a", text: { en: "`Task` or `Task<T>`", uk: "`Task` або `Task<T>`" } },
+              { id: "b", text: { en: "`void`", uk: "`void`" } },
+              { id: "c", text: { en: "`object`", uk: "`object`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "async-void-danger",
+            mode: "single",
+            prompt: { en: "Why are exceptions in `async void` dangerous?", uk: "Чому винятки в `async void` небезпечні?" },
+            options: [
+              { id: "a", text: { en: "The caller cannot catch them, so they may crash the program", uk: "Викликаючий не може їх перехопити, тож вони можуть зупинити програму" } },
+              { id: "b", text: { en: "They are always ignored", uk: "Їх завжди ігнорують" } },
+              { id: "c", text: { en: "They are faster", uk: "Вони швидші" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "whenall-result",
+            mode: "single",
+            prompt: { en: "What does `Task.WhenAll` give for tasks of type `Task<int>`?", uk: "Що дає `Task.WhenAll` для задач типу `Task<int>`?" },
+            options: [
+              { id: "a", text: { en: "An array of results, in the order of the tasks", uk: "Масив результатів у порядку задач" } },
+              { id: "b", text: { en: "Only the first result", uk: "Лише перший результат" } },
+              { id: "c", text: { en: "A string", uk: "Рядок" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "cancelled-await",
+            mode: "single",
+            prompt: { en: "What does awaiting a cancelled task throw?", uk: "Що кидає очікування скасованої задачі?" },
+            options: [
+              { id: "a", text: { en: "`OperationCanceledException`", uk: "`OperationCanceledException`" } },
+              { id: "b", text: { en: "`NullReferenceException`", uk: "`NullReferenceException`" } },
+              { id: "c", text: { en: "Nothing", uk: "Нічого" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "cooperative",
+            mode: "single",
+            prompt: { en: "What is cooperative cancellation?", uk: "Що таке кооперативне скасування?" },
+            options: [
+              { id: "a", text: { en: "The work checks the token and stops itself when asked", uk: "Робота перевіряє токен і сама зупиняється, коли її попросили" } },
+              { id: "b", text: { en: "The operating system kills the task at once", uk: "Операційна система миттєво вбиває задачу" } },
+              { id: "c", text: { en: "The task cancels itself after a year", uk: "Задача скасовується сама через рік" } },
+            ],
+            correct: ["a"],
+          },
+        ],
       },
     ],
   },

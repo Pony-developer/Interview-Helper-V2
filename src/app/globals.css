@@ -48,6 +48,16 @@
   --animate-rise: rise 0.9s cubic-bezier(0.2, 0.7, 0.1, 1) both;
   --animate-fade: fade 0.8s ease both;
   --animate-shimmer: shimmer 2.4s linear infinite;
+  --animate-link-progress: link-progress 8s cubic-bezier(0.1, 0.7, 0.2, 1) both;
+
+  @keyframes link-progress {
+    from {
+      transform: scaleX(0.04);
+    }
+    to {
+      transform: scaleX(0.92);
+    }
+  }
 
   @keyframes rise {
     from {

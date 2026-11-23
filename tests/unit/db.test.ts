@@ -125,6 +125,9 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
           "lists-and-dictionaries",
           "delegates",
           "linq",
+          "events",
+          "multithreading",
+          "async-tasks",
         ]);
         const quiz = await db.query<{ quiz: { questions: Record<string, unknown>[] } }>(
           "select quiz from public.course_slides where slug = 'terminology'",
