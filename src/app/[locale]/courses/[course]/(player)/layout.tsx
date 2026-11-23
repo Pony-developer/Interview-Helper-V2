@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { CourseSidebar } from "@/components/courses/player/CourseSidebar";
 import { MobileContents } from "@/components/courses/player/MobileContents";
+import { SlideFrame } from "@/components/courses/player/SlideFrame";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { toLocale } from "@/i18n/locale";
 import { CERTIFICATE_THRESHOLD } from "@/lib/data/certificates";
@@ -51,7 +52,7 @@ export default async function CoursePlayerLayout({ children, params }: Props) {
           <MobileContents done={done} total={all.length}>
             {sidebar}
           </MobileContents>
-          {children}
+          <SlideFrame>{children}</SlideFrame>
         </main>
       </div>
     </>
