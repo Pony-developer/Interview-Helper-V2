@@ -78,6 +78,13 @@ export const paths: PathContent[] = [
           uk: "Тепер сама платформа: таблиці Dataverse, рішення та ALM, SDK, плагіни в конвеєрі подій, Custom API, інтеграції, скрипти форм і модель безпеки. Саме тут C# і SQL із перших двох етапів перетворюються на роботу з Dynamics 365.",
         },
       },
+      {
+        course: "frontend-interview",
+        why: {
+          en: "Dynamics developers also own the client side: form scripts, web resources and PCF controls. This stage prepares you for the frontend questions of the interview.",
+          uk: "Розробник Dynamics відповідає й за клієнтську частину: скрипти форм, веб-ресурси та PCF-контроли. Цей етап готує до frontend-питань співбесіди.",
+        },
+      },
     ],
     practiceSkills: ["dynamics-crm", "csharp", "sql"],
   },

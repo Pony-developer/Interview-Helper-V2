@@ -1,11 +1,20 @@
-import { clientModule } from "./dynamics-crm-modules/client";
+import {
+  clientAdvancedModule,
+  clientBestPracticesModule,
+  clientModule,
+  sampleAppModule,
+  webResourcesModule,
+} from "./dynamics-crm-modules/client";
+import { executeModule } from "./dynamics-crm-modules/execute";
 import { extensibilityModule } from "./dynamics-crm-modules/extensibility";
 import { platformModule } from "./dynamics-crm-modules/platform";
+import { pluginFundamentalsModule } from "./dynamics-crm-modules/plugin-fundamentals";
 import { pluginQualityModule } from "./dynamics-crm-modules/plugin-quality";
-import { pluginsModule } from "./dynamics-crm-modules/plugins";
 import { sdkModule } from "./dynamics-crm-modules/sdk";
 import { securityModule } from "./dynamics-crm-modules/security";
 import { solutionsModule } from "./dynamics-crm-modules/solutions";
+import { webApiModule } from "./dynamics-crm-modules/web-api";
+import { workflowsModule } from "./dynamics-crm-modules/workflows";
 import type { ModuleDef } from "./types";
 
 /**
@@ -20,9 +29,16 @@ export const dynamicsCrmModules: ModuleDef[] = [
   platformModule,
   solutionsModule,
   sdkModule,
-  pluginsModule,
+  pluginFundamentalsModule,
+  workflowsModule,
+  executeModule,
   pluginQualityModule,
   extensibilityModule,
   clientModule,
+  clientAdvancedModule,
+  clientBestPracticesModule,
+  webResourcesModule,
+  webApiModule,
+  sampleAppModule,
   securityModule,
 ];

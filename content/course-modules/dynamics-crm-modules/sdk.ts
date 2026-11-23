@@ -1,7 +1,7 @@
 import type { ModuleDef } from "../types";
 
 /** Two Dataverse tables with their real logical names, cut down to a few columns. */
-const CRM = `-- statecode: 0 = Active, 1 = Inactive
+export const CRM = `-- statecode: 0 = Active, 1 = Inactive
 CREATE TABLE account (
     accountid integer PRIMARY KEY,
     name      text NOT NULL,
@@ -30,9 +30,9 @@ INSERT INTO contact (contactid, fullname, parentcustomerid, statecode, emailaddr
     (3, 'Iryna Bondar', 1, 1, NULL),
     (4, 'Maksym Kravets', 2, 0, 'maksym@fabrikam.com'),
     (5, 'Sofia Tkachenko', 2, 1, NULL),
-    (6, 'Andrii Shevchenko', 3, 0, NULL),
+    (6, 'Andrii Shevchenko', 3, 0, 'andrii@northwind.com'),
     (7, 'Daria Lysenko', 5, 0, 'daria@litware.com'),
-    (8, 'Petro Hnatiuk', NULL, 0, NULL);
+    (8, 'Petro Hnatiuk', NULL, 0, 'petro@example.com');
 `;
 
 export const sdkModule: ModuleDef = {
