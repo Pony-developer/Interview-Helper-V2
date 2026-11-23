@@ -11,6 +11,7 @@ export async function SiteHeader() {
     { href: "/practice", label: t("practice") },
     { href: "/lectures", label: t("lectures") },
     { href: "/courses", label: t("courses") },
+    { href: "/paths", label: t("paths") },
     { href: "/#how-it-works", label: t("howItWorks") },
     { href: "/#faq", label: t("faq") },
   ];

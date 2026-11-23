@@ -47,7 +47,7 @@ export function CourseCard({
           {number}
         </span>
 
-        <div className="relative">
+        <div className="relative flex flex-1 flex-col">
           <div className="gold-rule w-20 transition-[width] duration-300 group-hover:w-full" />
           <h2 className={`mt-6 font-display text-4xl font-extrabold leading-tight sm:text-5xl ${dark ? "text-white" : "text-forest-700"}`}>
             <Link href={`/courses/${course.slug}`} className="rounded-lg after:absolute after:inset-0 after:content-['']">
@@ -61,7 +61,7 @@ export function CourseCard({
           >
             {topicsLabel}
           </h3>
-          <ol className="mt-4 list-none">
+          <ol className="mt-4 flex-1 list-none">
             {course.topics.map((topic, i) => (
               <li
                 key={topic}

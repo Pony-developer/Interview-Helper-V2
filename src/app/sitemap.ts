@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import { getLectures } from "@/lib/data/lectures";
+import { pathSlugs } from "@/lib/data/paths";
 import { localizedPath } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site";
 
@@ -26,6 +27,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/", 1),
     entry("/lectures", 0.8),
     entry("/courses", 0.8),
+    entry("/paths", 0.8),
+    ...pathSlugs().map((slug) => entry(`/paths/${slug}`, 0.7)),
     ...lectures.map((l) => entry(`/lectures/${l.slug}`, 0.6, l.updatedAt === new Date(0).toISOString() ? undefined : l.updatedAt)),
   ];
 }

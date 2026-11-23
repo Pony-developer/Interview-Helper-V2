@@ -314,6 +314,21 @@
       stroke-dashoffset: 0;
     }
   }
+  /* Career-path route line: grows down from the first stage */
+  .route-vein {
+    transform-origin: top;
+    animation: vein-grow 1.6s cubic-bezier(0.2, 0.7, 0.1, 1) 0.2s both;
+  }
+  @keyframes vein-grow {
+    from {
+      transform: scaleY(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .route-vein {
+      animation: none;
+    }
+  }
   @keyframes node-pulse {
     0%,
     100% {
