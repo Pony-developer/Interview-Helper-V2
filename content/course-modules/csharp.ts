@@ -3084,6 +3084,88 @@ export const csharpModules: ModuleDef[] = [
       { kind: "lecture", slug: "arrays-basics", title: { en: "Working with arrays", uk: "Робота з масивами" } },
       {
         kind: "practice",
+        slug: "even-array",
+        title: { en: "Even array", uk: "Парний масив" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Show(int[] numbers)
+    {
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            if (i > 0) Console.Write(" ");
+            Console.Write(numbers[i]);
+        }
+        Console.WriteLine();
+    }
+
+    // The first count positive even numbers: 2, 4, 6, ...
+    static int[] EvenNumbers(int count)
+    {
+        // Write your code here
+        return new int[0];
+    }
+
+    // True when every element is even (an empty array gives true)
+    static bool AllEven(int[] numbers)
+    {
+        // Write your code here
+        return false;
+    }
+
+    static void Main()
+    {
+        Show(EvenNumbers(5));
+        Show(EvenNumbers(1));
+        Show(EvenNumbers(0));
+        Show(EvenNumbers(8));
+        Console.WriteLine(AllEven(new[] { 2, 4, 6 }));
+        Console.WriteLine(AllEven(new[] { 2, 3 }));
+        Console.WriteLine(AllEven(new int[0]));
+    }`),
+        solution: PROGRAM(`    static void Show(int[] numbers)
+    {
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            if (i > 0) Console.Write(" ");
+            Console.Write(numbers[i]);
+        }
+        Console.WriteLine();
+    }
+
+    // The first count positive even numbers: 2, 4, 6, ...
+    static int[] EvenNumbers(int count)
+    {
+        int[] result = new int[count];
+        for (int i = 0; i < count; i++)
+        {
+            result[i] = 2 * (i + 1);
+        }
+        return result;
+    }
+
+    // True when every element is even (an empty array gives true)
+    static bool AllEven(int[] numbers)
+    {
+        foreach (int n in numbers)
+        {
+            if (n % 2 != 0) return false;
+        }
+        return true;
+    }
+
+    static void Main()
+    {
+        Show(EvenNumbers(5));
+        Show(EvenNumbers(1));
+        Show(EvenNumbers(0));
+        Show(EvenNumbers(8));
+        Console.WriteLine(AllEven(new[] { 2, 4, 6 }));
+        Console.WriteLine(AllEven(new[] { 2, 3 }));
+        Console.WriteLine(AllEven(new int[0]));
+    }`),
+        expectedOutput: "2 4 6 8 10\n2\n\n2 4 6 8 10 12 14 16\nTrue\nFalse\nTrue\n",
+      },
+      {
+        kind: "practice",
         slug: "index-of-max",
         title: { en: "Index of the maximum", uk: "Індекс максимуму" },
         language: "csharp",
@@ -3118,6 +3200,853 @@ export const csharpModules: ModuleDef[] = [
     }`),
         expectedOutput: "1\n1\n0\n-1\n",
       },
+      {
+        kind: "practice",
+        slug: "count-matches",
+        title: { en: "Counting", uk: "Підрахунок" },
+        language: "csharp",
+        starter: PROGRAM(`    // How many elements are less than zero
+    static int CountNegative(int[] numbers)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    // How many elements are equal to value
+    static int CountValue(int[] numbers, int value)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    // How many elements are between low and high, both ends included
+    static int CountInRange(int[] numbers, int low, int high)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Main()
+    {
+        int[] data = { 5, -3, 8, 5, 0, -1, 5, 12 };
+        Console.WriteLine(CountNegative(data));
+        Console.WriteLine(CountValue(data, 5));
+        Console.WriteLine(CountValue(data, 7));
+        Console.WriteLine(CountInRange(data, 0, 8));
+        Console.WriteLine(CountInRange(new int[0], 0, 8));
+    }`),
+        solution: PROGRAM(`    // How many elements are less than zero
+    static int CountNegative(int[] numbers)
+    {
+        int count = 0;
+        foreach (int n in numbers)
+        {
+            if (n < 0) count++;
+        }
+        return count;
+    }
+
+    // How many elements are equal to value
+    static int CountValue(int[] numbers, int value)
+    {
+        int count = 0;
+        foreach (int n in numbers)
+        {
+            if (n == value) count++;
+        }
+        return count;
+    }
+
+    // How many elements are between low and high, both ends included
+    static int CountInRange(int[] numbers, int low, int high)
+    {
+        int count = 0;
+        foreach (int n in numbers)
+        {
+            if (n >= low && n <= high) count++;
+        }
+        return count;
+    }
+
+    static void Main()
+    {
+        int[] data = { 5, -3, 8, 5, 0, -1, 5, 12 };
+        Console.WriteLine(CountNegative(data));
+        Console.WriteLine(CountValue(data, 5));
+        Console.WriteLine(CountValue(data, 7));
+        Console.WriteLine(CountInRange(data, 0, 8));
+        Console.WriteLine(CountInRange(new int[0], 0, 8));
+    }`),
+        expectedOutput: "2\n3\n0\n5\n0\n",
+      },
+      {
+        kind: "practice",
+        slug: "find-subarray",
+        title: { en: "Finding an array in an array", uk: "Пошук масиву в масиві" },
+        language: "csharp",
+        starter: PROGRAM(`    // The index where the first occurrence of the whole sequence part starts,
+    // or -1 if it does not occur. An empty part is found at index 0.
+    static int IndexOfSub(int[] numbers, int[] part)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Main()
+    {
+        int[] a = { 1, 2, 3, 2, 3, 4, 2, 3, 4, 5 };
+        Console.WriteLine(IndexOfSub(a, new[] { 2, 3, 4 }));
+        Console.WriteLine(IndexOfSub(a, new[] { 4, 5 }));
+        Console.WriteLine(IndexOfSub(a, new[] { 5, 6 }));
+        Console.WriteLine(IndexOfSub(a, new[] { 1 }));
+        Console.WriteLine(IndexOfSub(a, new int[0]));
+        Console.WriteLine(IndexOfSub(new[] { 1, 2 }, new[] { 1, 2, 3 }));
+        Console.WriteLine(IndexOfSub(a, new[] { 3, 2, 3 }));
+    }`),
+        solution: PROGRAM(`    // The index where the first occurrence of the whole sequence part starts,
+    // or -1 if it does not occur. An empty part is found at index 0.
+    static int IndexOfSub(int[] numbers, int[] part)
+    {
+        for (int start = 0; start <= numbers.Length - part.Length; start++)
+        {
+            bool match = true;
+            for (int k = 0; k < part.Length; k++)
+            {
+                if (numbers[start + k] != part[k])
+                {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) return start;
+        }
+        return -1;
+    }
+
+    static void Main()
+    {
+        int[] a = { 1, 2, 3, 2, 3, 4, 2, 3, 4, 5 };
+        Console.WriteLine(IndexOfSub(a, new[] { 2, 3, 4 }));
+        Console.WriteLine(IndexOfSub(a, new[] { 4, 5 }));
+        Console.WriteLine(IndexOfSub(a, new[] { 5, 6 }));
+        Console.WriteLine(IndexOfSub(a, new[] { 1 }));
+        Console.WriteLine(IndexOfSub(a, new int[0]));
+        Console.WriteLine(IndexOfSub(new[] { 1, 2 }, new[] { 1, 2, 3 }));
+        Console.WriteLine(IndexOfSub(a, new[] { 3, 2, 3 }));
+    }`),
+        expectedOutput: "3\n8\n-1\n0\n0\n-1\n2\n",
+      },
+      { kind: "lecture", slug: "array-notation", title: { en: "Short forms of array notation", uk: "Короткі форми запису масивів" } },
+      {
+        kind: "practice",
+        slug: "tarot",
+        title: { en: "Tarot cards", uk: "Карти Таро" },
+        language: "csharp",
+        starter: PROGRAM(`    static string[] GetDeck()
+    {
+        return new[]
+        {
+            "The Fool", "The Magician", "The High Priestess", "The Empress",
+            "The Emperor", "The Hierophant", "The Lovers", "The Chariot",
+            "Strength", "The Hermit", "Wheel of Fortune", "Justice",
+            "The Hanged Man", "Death", "Temperance", "The Devil",
+            "The Tower", "The Star", "The Moon", "The Sun",
+            "Judgement", "The World",
+        };
+    }
+
+    // Three cards for the number n: indexes n % 22, n * 7 % 22 and n * n % 22
+    static string[] Spread(int n)
+    {
+        // Write your code here
+        return new string[3];
+    }
+
+    static void Main()
+    {
+        foreach (int n in new[] { 5, 10, 21 })
+        {
+            string[] cards = Spread(n);
+            Console.WriteLine(n + ": " + cards[0] + " | " + cards[1] + " | " + cards[2]);
+        }
+    }`),
+        solution: PROGRAM(`    static string[] GetDeck()
+    {
+        return new[]
+        {
+            "The Fool", "The Magician", "The High Priestess", "The Empress",
+            "The Emperor", "The Hierophant", "The Lovers", "The Chariot",
+            "Strength", "The Hermit", "Wheel of Fortune", "Justice",
+            "The Hanged Man", "Death", "Temperance", "The Devil",
+            "The Tower", "The Star", "The Moon", "The Sun",
+            "Judgement", "The World",
+        };
+    }
+
+    // Three cards for the number n: indexes n % 22, n * 7 % 22 and n * n % 22
+    static string[] Spread(int n)
+    {
+        string[] deck = GetDeck();
+        return new[]
+        {
+            deck[n % deck.Length],
+            deck[n * 7 % deck.Length],
+            deck[n * n % deck.Length],
+        };
+    }
+
+    static void Main()
+    {
+        foreach (int n in new[] { 5, 10, 21 })
+        {
+            string[] cards = Spread(n);
+            Console.WriteLine(n + ": " + cards[0] + " | " + cards[1] + " | " + cards[2]);
+        }
+    }`),
+        expectedOutput:
+          "5: The Hierophant | Death | The Empress\n10: Wheel of Fortune | The Emperor | The Hanged Man\n21: The World | The Devil | The Magician\n",
+      },
+      { kind: "lecture", slug: "reference-vs-value", title: { en: "Reference types and value types", uk: "Посилальні та значеннєві типи" } },
+      { kind: "lecture", slug: "passing-arrays", title: { en: "Passing an array to a method", uk: "Передача масиву в метод" } },
+      { kind: "lecture", slug: "array-class", title: { en: "The Array class", uk: "Клас Array" } },
+      {
+        kind: "practice",
+        slug: "power-array",
+        title: { en: "Raise an array to a power", uk: "Піднести масив до степеня" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Show(int[] numbers)
+    {
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            if (i > 0) Console.Write(" ");
+            Console.Write(numbers[i]);
+        }
+        Console.WriteLine();
+    }
+
+    // Raises every element to the given power, IN PLACE (power 0 gives 1)
+    static void RaiseToPower(int[] numbers, int power)
+    {
+        // Write your code here
+    }
+
+    // Returns a NEW array of the powers; the original stays unchanged
+    static int[] Powers(int[] numbers, int power)
+    {
+        // Write your code here
+        return numbers;
+    }
+
+    static void Main()
+    {
+        int[] a = { 1, 2, 3, 4 };
+        RaiseToPower(a, 3);
+        Show(a);
+
+        int[] b = { 2, -3, 0, 5 };
+        RaiseToPower(b, 2);
+        Show(b);
+
+        int[] c = { 7, 8 };
+        RaiseToPower(c, 0);
+        Show(c);
+
+        int[] d = new int[0];
+        RaiseToPower(d, 5);
+        Show(d);
+
+        int[] original = { 2, 3 };
+        int[] cubes = Powers(original, 3);
+        Show(original);
+        Show(cubes);
+    }`),
+        solution: PROGRAM(`    static void Show(int[] numbers)
+    {
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            if (i > 0) Console.Write(" ");
+            Console.Write(numbers[i]);
+        }
+        Console.WriteLine();
+    }
+
+    // Raises every element to the given power, IN PLACE (power 0 gives 1)
+    static void RaiseToPower(int[] numbers, int power)
+    {
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            int result = 1;
+            for (int k = 0; k < power; k++)
+            {
+                result *= numbers[i];
+            }
+            numbers[i] = result;
+        }
+    }
+
+    // Returns a NEW array of the powers; the original stays unchanged
+    static int[] Powers(int[] numbers, int power)
+    {
+        int[] copy = (int[])numbers.Clone();
+        RaiseToPower(copy, power);
+        return copy;
+    }
+
+    static void Main()
+    {
+        int[] a = { 1, 2, 3, 4 };
+        RaiseToPower(a, 3);
+        Show(a);
+
+        int[] b = { 2, -3, 0, 5 };
+        RaiseToPower(b, 2);
+        Show(b);
+
+        int[] c = { 7, 8 };
+        RaiseToPower(c, 0);
+        Show(c);
+
+        int[] d = new int[0];
+        RaiseToPower(d, 5);
+        Show(d);
+
+        int[] original = { 2, 3 };
+        int[] cubes = Powers(original, 3);
+        Show(original);
+        Show(cubes);
+    }`),
+        expectedOutput: "1 8 27 64\n4 9 0 25\n1 1\n\n2 3\n8 27\n",
+      },
+      { kind: "lecture", slug: "multidim", title: { en: "Multidimensional arrays", uk: "Багатовимірні масиви" } },
+      { kind: "lecture", slug: "jagged", title: { en: "Arrays of arrays", uk: "Масиви масивів" } },
+      {
+        kind: "quiz",
+        slug: "arrays-quiz",
+        title: { en: "Arrays quiz", uk: "Тест: масиви" },
+        questions: [
+          {
+            id: "default",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nint[] a = new int[4];\nConsole.WriteLine(a[3]);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nint[] a = new int[4];\nConsole.WriteLine(a[3]);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "0", uk: "0" } },
+              { id: "b", text: { en: "4", uk: "4" } },
+              { id: "c", text: { en: "Nothing: the array has no values yet", uk: "Нічого: у масиві ще немає значень" } },
+              { id: "d", text: { en: "It crashes with `IndexOutOfRangeException`", uk: "Він аварійно завершується з `IndexOutOfRangeException`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "out-of-range",
+            mode: "single",
+            prompt: {
+              en: "What happens with this code?\n\n```csharp\nint[] a = { 1, 2, 3 };\nConsole.WriteLine(a[a.Length]);\n```",
+              uk: "Що станеться з цим кодом?\n\n```csharp\nint[] a = { 1, 2, 3 };\nConsole.WriteLine(a[a.Length]);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "It prints 3", uk: "Він надрукує 3" } },
+              { id: "b", text: { en: "It prints 0", uk: "Він надрукує 0" } },
+              { id: "c", text: { en: "It does not compile", uk: "Він не компілюється" } },
+              { id: "d", text: { en: "It crashes with `IndexOutOfRangeException`", uk: "Він аварійно завершується з `IndexOutOfRangeException`" } },
+            ],
+            correct: ["d"],
+          },
+          {
+            id: "alias",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nint[] a = { 1, 2, 3 };\nint[] b = a;\nb[0] = 9;\nConsole.WriteLine(a[0]);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nint[] a = { 1, 2, 3 };\nint[] b = a;\nb[0] = 9;\nConsole.WriteLine(a[0]);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "9", uk: "9" } },
+              { id: "c", text: { en: "0", uk: "0" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "equals",
+            mode: "single",
+            prompt: {
+              en: "What does `Console.WriteLine(new[] { 1, 2 } == new[] { 1, 2 });` print?",
+              uk: "Що друкує `Console.WriteLine(new[] { 1, 2 } == new[] { 1, 2 });`?",
+            },
+            options: [
+              { id: "a", text: { en: "True, because the contents are equal", uk: "True, бо вміст однаковий" } },
+              { id: "b", text: { en: "False, because they are two different arrays", uk: "False, бо це два різні масиви" } },
+              { id: "c", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "reassign",
+            mode: "single",
+            prompt: {
+              en: "What does this program print?\n\n```csharp\nstatic void Change(int[] x)\n{\n    x = new int[] { 9 };\n}\n\nstatic void Main()\n{\n    int[] a = { 1 };\n    Change(a);\n    Console.WriteLine(a[0]);\n}\n```",
+              uk: "Що друкує ця програма?\n\n```csharp\nstatic void Change(int[] x)\n{\n    x = new int[] { 9 };\n}\n\nstatic void Main()\n{\n    int[] a = { 1 };\n    Change(a);\n    Console.WriteLine(a[0]);\n}\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "9", uk: "9" } },
+              { id: "c", text: { en: "0", uk: "0" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "length-2d",
+            mode: "single",
+            prompt: {
+              en: "What is the value of `m.Length` for `int[,] m = new int[3, 4];`?",
+              uk: "Чому дорівнює `m.Length` для `int[,] m = new int[3, 4];`?",
+            },
+            options: [
+              { id: "a", text: { en: "3", uk: "3" } },
+              { id: "b", text: { en: "4", uk: "4" } },
+              { id: "c", text: { en: "7", uk: "7" } },
+              { id: "d", text: { en: "12", uk: "12" } },
+            ],
+            correct: ["d"],
+          },
+          {
+            id: "valid-declarations",
+            mode: "multi",
+            prompt: { en: "Which declarations compile?", uk: "Які оголошення компілюються?" },
+            options: [
+              { id: "a", text: { en: "`int[] a = { 1, 2, 3 };`", uk: "`int[] a = { 1, 2, 3 };`" } },
+              { id: "b", text: { en: "`var a = new[] { 1, 2, 3 };`", uk: "`var a = new[] { 1, 2, 3 };`" } },
+              { id: "c", text: { en: "`int[] a; a = { 1, 2, 3 };`", uk: "`int[] a; a = { 1, 2, 3 };`" } },
+              { id: "d", text: { en: "`int[] a = new int[3] { 1, 2, 3 };`", uk: "`int[] a = new int[3] { 1, 2, 3 };`" } },
+              { id: "e", text: { en: "`int[] a = new int[2] { 1, 2, 3 };`", uk: "`int[] a = new int[2] { 1, 2, 3 };`" } },
+            ],
+            correct: ["a", "b", "d"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "tic-tac-toe",
+        title: { en: "* Tic-tac-toe", uk: "* Хрестики-нулики" },
+        language: "csharp",
+        starter: PROGRAM(`    // Builds the board from text such as "XXX/OO./..." ('.' is an empty cell)
+    static char[,] Parse(string text)
+    {
+        char[,] board = new char[3, 3];
+        for (int r = 0; r < 3; r++)
+        {
+            for (int c = 0; c < 3; c++)
+            {
+                board[r, c] = text[r * 4 + c];
+            }
+        }
+        return board;
+    }
+
+    // 'X' or 'O' if that player has three in a row, otherwise '-'
+    static char Winner(char[,] board)
+    {
+        // Write your code here
+        return '-';
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Winner(Parse("XXX/OO./...")));
+        Console.WriteLine(Winner(Parse("XO./XO./.O.")));
+        Console.WriteLine(Winner(Parse("XOO/OXO/OOX")));
+        Console.WriteLine(Winner(Parse("OOX/OXO/XOO")));
+        Console.WriteLine(Winner(Parse("XOX/XOO/OXX")));
+        Console.WriteLine(Winner(Parse("XO./.X./..O")));
+        Console.WriteLine(Winner(Parse("OOO/XX./X..")));
+    }`),
+        solution: PROGRAM(`    // Builds the board from text such as "XXX/OO./..." ('.' is an empty cell)
+    static char[,] Parse(string text)
+    {
+        char[,] board = new char[3, 3];
+        for (int r = 0; r < 3; r++)
+        {
+            for (int c = 0; c < 3; c++)
+            {
+                board[r, c] = text[r * 4 + c];
+            }
+        }
+        return board;
+    }
+
+    // 'X' or 'O' if that player has three in a row, otherwise '-'
+    static char Winner(char[,] board)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (board[i, 0] != '.' && board[i, 0] == board[i, 1] && board[i, 1] == board[i, 2])
+            {
+                return board[i, 0];
+            }
+            if (board[0, i] != '.' && board[0, i] == board[1, i] && board[1, i] == board[2, i])
+            {
+                return board[0, i];
+            }
+        }
+        if (board[1, 1] != '.')
+        {
+            bool mainDiagonal = board[0, 0] == board[1, 1] && board[1, 1] == board[2, 2];
+            bool otherDiagonal = board[0, 2] == board[1, 1] && board[1, 1] == board[2, 0];
+            if (mainDiagonal || otherDiagonal)
+            {
+                return board[1, 1];
+            }
+        }
+        return '-';
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Winner(Parse("XXX/OO./...")));
+        Console.WriteLine(Winner(Parse("XO./XO./.O.")));
+        Console.WriteLine(Winner(Parse("XOO/OXO/OOX")));
+        Console.WriteLine(Winner(Parse("OOX/OXO/XOO")));
+        Console.WriteLine(Winner(Parse("XOX/XOO/OXX")));
+        Console.WriteLine(Winner(Parse("XO./.X./..O")));
+        Console.WriteLine(Winner(Parse("OOO/XX./X..")));
+    }`),
+        expectedOutput: "X\nO\nX\nX\n-\n-\nO\n",
+      },
+      {
+        kind: "quiz",
+        slug: "arrays-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "jagged-null",
+            mode: "single",
+            prompt: {
+              en: "What is `rows[0]` right after `int[][] rows = new int[3][];`?",
+              uk: "Чому дорівнює `rows[0]` одразу після `int[][] rows = new int[3][];`?",
+            },
+            options: [
+              { id: "a", text: { en: "An empty array", uk: "Порожній масив" } },
+              { id: "b", text: { en: "An array of three zeros", uk: "Масив із трьох нулів" } },
+              { id: "c", text: { en: "`null`", uk: "`null`" } },
+              { id: "d", text: { en: "The code does not compile", uk: "Код не компілюється" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "reference-types",
+            mode: "multi",
+            prompt: { en: "Which of these are reference types?", uk: "Які з цих типів є посилальними?" },
+            options: [
+              { id: "a", text: { en: "`int`", uk: "`int`" } },
+              { id: "b", text: { en: "`int[]`", uk: "`int[]`" } },
+              { id: "c", text: { en: "`string`", uk: "`string`" } },
+              { id: "d", text: { en: "`double`", uk: "`double`" } },
+              { id: "e", text: { en: "`char`", uk: "`char`" } },
+            ],
+            correct: ["b", "c"],
+          },
+          {
+            id: "sort",
+            mode: "single",
+            prompt: { en: "What does `Array.Sort(a)` do?", uk: "Що робить `Array.Sort(a)`?" },
+            options: [
+              { id: "a", text: { en: "Sorts the array `a` in place and returns nothing", uk: "Сортує масив `a` на місці й нічого не повертає" } },
+              { id: "b", text: { en: "Returns a new sorted array and leaves `a` unchanged", uk: "Повертає новий відсортований масив і лишає `a` без змін" } },
+              { id: "c", text: { en: "Only checks whether `a` is sorted", uk: "Лише перевіряє, чи `a` відсортований" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "indexof",
+            mode: "single",
+            prompt: {
+              en: "What does `Array.IndexOf(a, 7)` return if the array contains no 7?",
+              uk: "Що повертає `Array.IndexOf(a, 7)`, якщо в масиві немає 7?",
+            },
+            options: [
+              { id: "a", text: { en: "0", uk: "0" } },
+              { id: "b", text: { en: "-1", uk: "-1" } },
+              { id: "c", text: { en: "`null`", uk: "`null`" } },
+              { id: "d", text: { en: "It throws an exception", uk: "Він кидає виняток" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "params",
+            mode: "single",
+            prompt: {
+              en: "The method adds up all its arguments: `static int Sum(params int[] numbers)`. What does `Sum()` return?",
+              uk: "Метод додає всі свої аргументи: `static int Sum(params int[] numbers)`. Що повертає `Sum()`?",
+            },
+            options: [
+              { id: "a", text: { en: "0, because `numbers` is an empty array", uk: "0, бо `numbers` — порожній масив" } },
+              { id: "b", text: { en: "`null`", uk: "`null`" } },
+              { id: "c", text: { en: "Nothing: the call does not compile", uk: "Нічого: виклик не компілюється" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "read-2d",
+            mode: "single",
+            prompt: {
+              en: "Which expression reads the element in row 1 and column 2 of the rectangular array `int[,] m`?",
+              uk: "Який вираз читає елемент у рядку 1 і стовпчику 2 прямокутного масиву `int[,] m`?",
+            },
+            options: [
+              { id: "a", text: { en: "`m[1][2]`", uk: "`m[1][2]`" } },
+              { id: "b", text: { en: "`m[1, 2]`", uk: "`m[1, 2]`" } },
+              { id: "c", text: { en: "`m(1, 2)`", uk: "`m(1, 2)`" } },
+              { id: "d", text: { en: "`m[2, 1]`", uk: "`m[2, 1]`" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "jagged-when",
+            mode: "single",
+            prompt: {
+              en: "When is an array of arrays (`int[][]`) a better choice than a rectangular array (`int[,]`)?",
+              uk: "Коли масив масивів (`int[][]`) краще за прямокутний масив (`int[,]`)?",
+            },
+            options: [
+              { id: "a", text: { en: "When the rows have different lengths", uk: "Коли рядки мають різну довжину" } },
+              { id: "b", text: { en: "When all the rows are the same length", uk: "Коли всі рядки однакової довжини" } },
+              { id: "c", text: { en: "When there are exactly two rows", uk: "Коли рядків рівно два" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "histogram",
+        title: { en: "Practice: Histogram", uk: "Практика «Гістограма»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Draws vertical bars for digits 0..9, then a line of '-' and the values themselves
+    static void PrintHistogram(int[] values)
+    {
+        // Write your code here
+    }
+
+    static void Main()
+    {
+        PrintHistogram(new[] { 3, 1, 4, 2 });
+        Console.WriteLine("===");
+        PrintHistogram(new[] { 5, 0, 2 });
+    }`),
+        solution: PROGRAM(`    // Draws vertical bars for digits 0..9, then a line of '-' and the values themselves
+    static void PrintHistogram(int[] values)
+    {
+        int max = 0;
+        for (int i = 0; i < values.Length; i++)
+        {
+            if (values[i] > max) max = values[i];
+        }
+
+        for (int level = max; level >= 1; level--)
+        {
+            for (int i = 0; i < values.Length; i++)
+            {
+                Console.Write(values[i] >= level ? "#" : ".");
+            }
+            Console.WriteLine();
+        }
+
+        for (int i = 0; i < values.Length; i++)
+        {
+            Console.Write("-");
+        }
+        Console.WriteLine();
+
+        for (int i = 0; i < values.Length; i++)
+        {
+            Console.Write(values[i]);
+        }
+        Console.WriteLine();
+    }
+
+    static void Main()
+    {
+        PrintHistogram(new[] { 3, 1, 4, 2 });
+        Console.WriteLine("===");
+        PrintHistogram(new[] { 5, 0, 2 });
+    }`),
+        expectedOutput: "..#.\n#.#.\n#.##\n####\n----\n3142\n===\n#..\n#..\n#..\n#.#\n#.#\n---\n502\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "heat-map",
+        title: { en: "Practice: Heat map", uk: "Практика «Теплова карта»" },
+        language: "csharp",
+        starter: PROGRAM(`    const string Ramp = ".:-=+*#%@X";
+
+    // Prints one text line per row; every cell becomes the Ramp symbol of its value
+    static void Render(int[,] grid)
+    {
+        // Write your code here
+    }
+
+    // The position "row,column" of the largest value (the first one in reading order)
+    static string Hottest(int[,] grid)
+    {
+        // Write your code here
+        return "";
+    }
+
+    static void Main()
+    {
+        int[,] grid =
+        {
+            { 0, 1, 2, 1, 0 },
+            { 1, 3, 5, 3, 1 },
+            { 2, 5, 9, 5, 2 },
+            { 1, 3, 5, 3, 1 },
+        };
+        Render(grid);
+        Console.WriteLine(Hottest(grid));
+
+        int[,] ties = { { 9, 0 }, { 0, 9 } };
+        Render(ties);
+        Console.WriteLine(Hottest(ties));
+    }`),
+        solution: PROGRAM(`    const string Ramp = ".:-=+*#%@X";
+
+    // Prints one text line per row; every cell becomes the Ramp symbol of its value
+    static void Render(int[,] grid)
+    {
+        for (int row = 0; row < grid.GetLength(0); row++)
+        {
+            for (int col = 0; col < grid.GetLength(1); col++)
+            {
+                Console.Write(Ramp[grid[row, col]]);
+            }
+            Console.WriteLine();
+        }
+    }
+
+    // The position "row,column" of the largest value (the first one in reading order)
+    static string Hottest(int[,] grid)
+    {
+        int bestRow = 0;
+        int bestCol = 0;
+        for (int row = 0; row < grid.GetLength(0); row++)
+        {
+            for (int col = 0; col < grid.GetLength(1); col++)
+            {
+                if (grid[row, col] > grid[bestRow, bestCol])
+                {
+                    bestRow = row;
+                    bestCol = col;
+                }
+            }
+        }
+        return bestRow + "," + bestCol;
+    }
+
+    static void Main()
+    {
+        int[,] grid =
+        {
+            { 0, 1, 2, 1, 0 },
+            { 1, 3, 5, 3, 1 },
+            { 2, 5, 9, 5, 2 },
+            { 1, 3, 5, 3, 1 },
+        };
+        Render(grid);
+        Console.WriteLine(Hottest(grid));
+
+        int[,] ties = { { 9, 0 }, { 0, 9 } };
+        Render(ties);
+        Console.WriteLine(Hottest(ties));
+    }`),
+        expectedOutput: ".:-:.\n:=*=:\n-*X*-\n:=*=:\n2,2\nX.\n.X\n0,0\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "names-facts",
+        title: { en: "Practice: Facts about names", uk: "Практика «Цікаве про імена»" },
+        language: "csharp",
+        starter: PROGRAM(`    // The longest name (the first one if several tie); "" for an empty array
+    static string Longest(string[] names)
+    {
+        // Write your code here
+        return "";
+    }
+
+    // How many names end with the given letter (an exact match)
+    static int CountEndingWith(string[] names, char letter)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    // The average length of a name; 0 for an empty array
+    static double AverageLength(string[] names)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Main()
+    {
+        string[] names = { "Olena", "Bohdan", "Iryna", "Taras", "Oksana", "Andriy", "Maryna" };
+        Console.WriteLine(Longest(names));
+        Console.WriteLine(CountEndingWith(names, 'a'));
+        Console.WriteLine(CountEndingWith(names, 'y'));
+        Console.WriteLine(Math.Round(AverageLength(names), 2));
+        Console.WriteLine("[" + Longest(new string[0]) + "]");
+        Console.WriteLine(Math.Round(AverageLength(new string[0]), 2));
+    }`),
+        solution: PROGRAM(`    // The longest name (the first one if several tie); "" for an empty array
+    static string Longest(string[] names)
+    {
+        string best = "";
+        foreach (string name in names)
+        {
+            if (name.Length > best.Length) best = name;
+        }
+        return best;
+    }
+
+    // How many names end with the given letter (an exact match)
+    static int CountEndingWith(string[] names, char letter)
+    {
+        int count = 0;
+        foreach (string name in names)
+        {
+            if (name.Length > 0 && name[name.Length - 1] == letter) count++;
+        }
+        return count;
+    }
+
+    // The average length of a name; 0 for an empty array
+    static double AverageLength(string[] names)
+    {
+        if (names.Length == 0) return 0;
+        int total = 0;
+        foreach (string name in names)
+        {
+            total += name.Length;
+        }
+        return (double)total / names.Length;
+    }
+
+    static void Main()
+    {
+        string[] names = { "Olena", "Bohdan", "Iryna", "Taras", "Oksana", "Andriy", "Maryna" };
+        Console.WriteLine(Longest(names));
+        Console.WriteLine(CountEndingWith(names, 'a'));
+        Console.WriteLine(CountEndingWith(names, 'y'));
+        Console.WriteLine(Math.Round(AverageLength(names), 2));
+        Console.WriteLine("[" + Longest(new string[0]) + "]");
+        Console.WriteLine(Math.Round(AverageLength(new string[0]), 2));
+    }`),
+        expectedOutput: "Bohdan\n4\n1\n5.57\n[]\n0\n",
+        maxScore: 10,
+      },
     ],
   },
   {
@@ -3125,6 +4054,79 @@ export const csharpModules: ModuleDef[] = [
     title: { en: "Collections, strings, files", uk: "Колекції, рядки, файли" },
     slides: [
       { kind: "lecture", slug: "lists-dictionaries-strings", title: { en: "Lists, dictionaries and strings", uk: "Списки, словники та рядки" } },
+      { kind: "lecture", slug: "lists", title: { en: "Lists", uk: "Списки" } },
+      {
+        kind: "practice",
+        slug: "stranger-cipher",
+        title: { en: "The stranger's cipher", uk: "Шифр незнайомки" },
+        language: "csharp",
+        starter: PROGRAM(`    // Moves every English letter forward by shift places (wrapping around),
+    // keeps the case, and leaves all other characters unchanged
+    static string Encrypt(string text, int shift)
+    {
+        // Write your code here
+        return text;
+    }
+
+    // Undoes Encrypt with the same shift
+    static string Decrypt(string text, int shift)
+    {
+        // Write your code here
+        return text;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Encrypt("Hello, World!", 3));
+        Console.WriteLine(Encrypt("xyz", 3));
+        Console.WriteLine(Encrypt("Abc", -1));
+        Console.WriteLine(Encrypt("Test", 29));
+        Console.WriteLine(Decrypt("Khoor, Zruog!", 3));
+        Console.WriteLine(Decrypt(Encrypt("Attack at dawn", 7), 7));
+    }`),
+        solution: PROGRAM(`    static char ShiftLetter(char c, int shift)
+    {
+        if (c >= 'a' && c <= 'z')
+        {
+            return (char)('a' + ((c - 'a' + shift) % 26 + 26) % 26);
+        }
+        if (c >= 'A' && c <= 'Z')
+        {
+            return (char)('A' + ((c - 'A' + shift) % 26 + 26) % 26);
+        }
+        return c;
+    }
+
+    // Moves every English letter forward by shift places (wrapping around),
+    // keeps the case, and leaves all other characters unchanged
+    static string Encrypt(string text, int shift)
+    {
+        string result = "";
+        foreach (char c in text)
+        {
+            result += ShiftLetter(c, shift);
+        }
+        return result;
+    }
+
+    // Undoes Encrypt with the same shift
+    static string Decrypt(string text, int shift)
+    {
+        return Encrypt(text, -shift);
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Encrypt("Hello, World!", 3));
+        Console.WriteLine(Encrypt("xyz", 3));
+        Console.WriteLine(Encrypt("Abc", -1));
+        Console.WriteLine(Encrypt("Test", 29));
+        Console.WriteLine(Decrypt("Khoor, Zruog!", 3));
+        Console.WriteLine(Decrypt(Encrypt("Attack at dawn", 7), 7));
+    }`),
+        expectedOutput: "Khoor, Zruog!\nabc\nZab\nWhvw\nHello, World!\nAttack at dawn\n",
+      },
+      { kind: "lecture", slug: "dictionaries", title: { en: "Dictionaries", uk: "Словники" } },
       {
         kind: "practice",
         slug: "word-frequency",
@@ -3162,6 +4164,908 @@ export const csharpModules: ModuleDef[] = [
         ),
         expectedOutput: "the: 3\ncat: 1\nand: 2\ndog: 1\nbird: 1\n",
       },
+      {
+        kind: "practice",
+        slug: "contacts",
+        title: { en: "Useful acquaintances", uk: "Корисні знайомства" },
+        language: "csharp",
+        starter: PROGRAM(
+          `    // A dictionary from a name to a phone. If a name repeats, the last phone wins.
+    static Dictionary<string, string> BuildBook(string[] names, string[] phones)
+    {
+        // Write your code here
+        return new Dictionary<string, string>();
+    }
+
+    // The phone of the name, or "unknown"
+    static string Lookup(Dictionary<string, string> book, string name)
+    {
+        // Write your code here
+        return "";
+    }
+
+    // Moves an entry to a new name. false (and no change) if oldName is missing
+    // or newName is already taken.
+    static bool Rename(Dictionary<string, string> book, string oldName, string newName)
+    {
+        // Write your code here
+        return false;
+    }
+
+    static void Main()
+    {
+        var book = BuildBook(new[] { "Ann", "Bo", "Cy", "Ann" }, new[] { "111", "222", "333", "444" });
+        Console.WriteLine(Lookup(book, "Ann"));
+        Console.WriteLine(Lookup(book, "Dan"));
+        Console.WriteLine(Rename(book, "Bo", "Bob"));
+        Console.WriteLine(Lookup(book, "Bo"));
+        Console.WriteLine(Lookup(book, "Bob"));
+        Console.WriteLine(Rename(book, "Zed", "Z"));
+        Console.WriteLine(Rename(book, "Ann", "Cy"));
+        Console.WriteLine(book.Count);
+    }`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM(
+          `    // A dictionary from a name to a phone. If a name repeats, the last phone wins.
+    static Dictionary<string, string> BuildBook(string[] names, string[] phones)
+    {
+        var book = new Dictionary<string, string>();
+        for (int i = 0; i < names.Length; i++)
+        {
+            book[names[i]] = phones[i];
+        }
+        return book;
+    }
+
+    // The phone of the name, or "unknown"
+    static string Lookup(Dictionary<string, string> book, string name)
+    {
+        string phone;
+        if (book.TryGetValue(name, out phone))
+        {
+            return phone;
+        }
+        return "unknown";
+    }
+
+    // Moves an entry to a new name. false (and no change) if oldName is missing
+    // or newName is already taken.
+    static bool Rename(Dictionary<string, string> book, string oldName, string newName)
+    {
+        if (!book.ContainsKey(oldName) || book.ContainsKey(newName))
+        {
+            return false;
+        }
+        string phone = book[oldName];
+        book.Remove(oldName);
+        book[newName] = phone;
+        return true;
+    }
+
+    static void Main()
+    {
+        var book = BuildBook(new[] { "Ann", "Bo", "Cy", "Ann" }, new[] { "111", "222", "333", "444" });
+        Console.WriteLine(Lookup(book, "Ann"));
+        Console.WriteLine(Lookup(book, "Dan"));
+        Console.WriteLine(Rename(book, "Bo", "Bob"));
+        Console.WriteLine(Lookup(book, "Bo"));
+        Console.WriteLine(Lookup(book, "Bob"));
+        Console.WriteLine(Rename(book, "Zed", "Z"));
+        Console.WriteLine(Rename(book, "Ann", "Cy"));
+        Console.WriteLine(book.Count);
+    }`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "444\nunknown\nTrue\nunknown\n222\nFalse\nFalse\n3\n",
+      },
+      { kind: "lecture", slug: "strings-vs-arrays", title: { en: "Comparing strings and arrays", uk: "Порівняння рядків і масивів" } },
+      {
+        kind: "practice",
+        slug: "anagrams",
+        title: { en: "Anagrams", uk: "Анаграми" },
+        language: "csharp",
+        starter: PROGRAM(`    // True when both texts have the same letters in the same quantities.
+    // The case and the spaces are ignored.
+    static bool AreAnagrams(string a, string b)
+    {
+        // Write your code here
+        return false;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(AreAnagrams("Listen", "Silent"));
+        Console.WriteLine(AreAnagrams("Dormitory", "Dirty room"));
+        Console.WriteLine(AreAnagrams("abc", "abd"));
+        Console.WriteLine(AreAnagrams("", ""));
+        Console.WriteLine(AreAnagrams("a gentleman", "elegant man"));
+        Console.WriteLine(AreAnagrams("Hello", "World"));
+        Console.WriteLine(AreAnagrams("aab", "abb"));
+    }`),
+        solution: PROGRAM(`    static string SortedLetters(string text)
+    {
+        char[] letters = text.Replace(" ", "").ToLower().ToCharArray();
+        Array.Sort(letters);
+        return new string(letters);
+    }
+
+    // True when both texts have the same letters in the same quantities.
+    // The case and the spaces are ignored.
+    static bool AreAnagrams(string a, string b)
+    {
+        return SortedLetters(a) == SortedLetters(b);
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(AreAnagrams("Listen", "Silent"));
+        Console.WriteLine(AreAnagrams("Dormitory", "Dirty room"));
+        Console.WriteLine(AreAnagrams("abc", "abd"));
+        Console.WriteLine(AreAnagrams("", ""));
+        Console.WriteLine(AreAnagrams("a gentleman", "elegant man"));
+        Console.WriteLine(AreAnagrams("Hello", "World"));
+        Console.WriteLine(AreAnagrams("aab", "abb"));
+    }`),
+        expectedOutput: "True\nTrue\nFalse\nTrue\nTrue\nFalse\nFalse\n",
+      },
+      {
+        kind: "quiz",
+        slug: "memory-maps",
+        title: { en: "Memory maps", uk: "Карти пам'яті" },
+        questions: [
+          {
+            id: "list-alias",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nvar a = new List<int> { 1, 2 };\nvar b = a;\nb.Add(3);\nConsole.WriteLine(a.Count);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nvar a = new List<int> { 1, 2 };\nvar b = a;\nb.Add(3);\nConsole.WriteLine(a.Count);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "2", uk: "2" } },
+              { id: "b", text: { en: "3", uk: "3" } },
+              { id: "c", text: { en: "1", uk: "1" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "string-copy",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nstring s1 = \"ab\";\nstring s2 = s1;\ns2 += \"c\";\nConsole.WriteLine(s1);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nstring s1 = \"ab\";\nstring s2 = s1;\ns2 += \"c\";\nConsole.WriteLine(s1);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "`abc`", uk: "`abc`" } },
+              { id: "b", text: { en: "`ab`", uk: "`ab`" } },
+              { id: "c", text: { en: "`c`", uk: "`c`" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "dictionary-alias",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nvar d = new Dictionary<string, int> { { \"a\", 1 } };\nvar e = d;\ne[\"a\"] = 5;\nConsole.WriteLine(d[\"a\"]);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nvar d = new Dictionary<string, int> { { \"a\", 1 } };\nvar e = d;\ne[\"a\"] = 5;\nConsole.WriteLine(d[\"a\"]);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "5", uk: "5" } },
+              { id: "c", text: { en: "It throws `KeyNotFoundException`", uk: "Він кидає `KeyNotFoundException`" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "clone",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nint[] x = { 1, 2, 3 };\nint[] y = (int[])x.Clone();\ny[0] = 9;\nConsole.WriteLine(x[0]);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nint[] x = { 1, 2, 3 };\nint[] y = (int[])x.Clone();\ny[0] = 9;\nConsole.WriteLine(x[0]);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "9", uk: "9" } },
+              { id: "c", text: { en: "0", uk: "0" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "benford",
+        title: { en: "Benford's law", uk: "Закон Бенфорда" },
+        language: "csharp",
+        starter: PROGRAM(`    // The first count Fibonacci numbers: 1, 1, 2, 3, 5, ...
+    static long[] Fibonacci(int count)
+    {
+        // Write your code here
+        return new long[0];
+    }
+
+    // The first digit of a positive number
+    static int FirstDigit(long n)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    // counts[d] is how many numbers start with the digit d (counts[0] stays 0)
+    static int[] CountFirstDigits(long[] numbers)
+    {
+        // Write your code here
+        return new int[10];
+    }
+
+    static void Main()
+    {
+        long[] fib = Fibonacci(50);
+        int[] counts = CountFirstDigits(fib);
+        for (int d = 1; d <= 9; d++)
+        {
+            Console.WriteLine(d + ": " + counts[d]);
+        }
+    }`),
+        solution: PROGRAM(`    // The first count Fibonacci numbers: 1, 1, 2, 3, 5, ...
+    static long[] Fibonacci(int count)
+    {
+        long[] result = new long[count];
+        for (int i = 0; i < count; i++)
+        {
+            result[i] = i < 2 ? 1 : result[i - 1] + result[i - 2];
+        }
+        return result;
+    }
+
+    // The first digit of a positive number
+    static int FirstDigit(long n)
+    {
+        while (n >= 10)
+        {
+            n /= 10;
+        }
+        return (int)n;
+    }
+
+    // counts[d] is how many numbers start with the digit d (counts[0] stays 0)
+    static int[] CountFirstDigits(long[] numbers)
+    {
+        int[] counts = new int[10];
+        foreach (long n in numbers)
+        {
+            counts[FirstDigit(n)]++;
+        }
+        return counts;
+    }
+
+    static void Main()
+    {
+        long[] fib = Fibonacci(50);
+        int[] counts = CountFirstDigits(fib);
+        for (int d = 1; d <= 9; d++)
+        {
+            Console.WriteLine(d + ": " + counts[d]);
+        }
+    }`),
+        expectedOutput: "1: 16\n2: 9\n3: 6\n4: 4\n5: 4\n6: 3\n7: 3\n8: 3\n9: 2\n",
+      },
+      {
+        kind: "practice",
+        slug: "split-join",
+        title: { en: "Split and Join", uk: "Split і Join" },
+        language: "csharp",
+        starter: PROGRAM(`    // The words in the reverse order, separated by single spaces
+    static string ReverseWords(string text)
+    {
+        // Write your code here
+        return "";
+    }
+
+    // The first letters of the words, in capitals
+    static string Acronym(string phrase)
+    {
+        // Write your code here
+        return "";
+    }
+
+    // The number of words, however many spaces separate them
+    static int CountWords(string text)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine("[" + ReverseWords("the quick brown fox") + "]");
+        Console.WriteLine("[" + ReverseWords("  hello   world ") + "]");
+        Console.WriteLine("[" + ReverseWords("") + "]");
+        Console.WriteLine(Acronym("portable network graphics"));
+        Console.WriteLine(Acronym("as soon as possible"));
+        Console.WriteLine(CountWords("  many   spaces  here "));
+        Console.WriteLine(CountWords(""));
+    }`),
+        solution: PROGRAM(`    static string[] SplitWords(string text)
+    {
+        return text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    // The words in the reverse order, separated by single spaces
+    static string ReverseWords(string text)
+    {
+        string[] words = SplitWords(text);
+        Array.Reverse(words);
+        return string.Join(" ", words);
+    }
+
+    // The first letters of the words, in capitals
+    static string Acronym(string phrase)
+    {
+        string result = "";
+        foreach (string word in SplitWords(phrase))
+        {
+            result += char.ToUpper(word[0]);
+        }
+        return result;
+    }
+
+    // The number of words, however many spaces separate them
+    static int CountWords(string text)
+    {
+        return SplitWords(text).Length;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine("[" + ReverseWords("the quick brown fox") + "]");
+        Console.WriteLine("[" + ReverseWords("  hello   world ") + "]");
+        Console.WriteLine("[" + ReverseWords("") + "]");
+        Console.WriteLine(Acronym("portable network graphics"));
+        Console.WriteLine(Acronym("as soon as possible"));
+        Console.WriteLine(CountWords("  many   spaces  here "));
+        Console.WriteLine(CountWords(""));
+    }`),
+        expectedOutput: "[fox brown quick the]\n[world hello]\n[]\nPNG\nASAP\n3\n0\n",
+      },
+      { kind: "lecture", slug: "stringbuilder", title: { en: "StringBuilder", uk: "StringBuilder" } },
+      {
+        kind: "practice",
+        slug: "stranger-again",
+        title: { en: "The stranger again", uk: "Знову незнайомка" },
+        language: "csharp",
+        starter: PROGRAM(
+          `    // Vigenere cipher for capital letters. Other characters are copied unchanged
+    // and do not use up a letter of the key. Build the result with a StringBuilder.
+    static string Encrypt(string text, string key)
+    {
+        // Write your code here
+        return text;
+    }
+
+    static string Decrypt(string text, string key)
+    {
+        // Write your code here
+        return text;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Encrypt("ATTACK AT DAWN", "LEMON"));
+        Console.WriteLine(Decrypt("LXFOPV EF RNHR", "LEMON"));
+        Console.WriteLine(Encrypt("HELLO", "A"));
+        Console.WriteLine(Encrypt("HELLO", "B"));
+        Console.WriteLine(Decrypt("IFMMP", "B"));
+    }`,
+          "using System.Text;",
+        ),
+        solution: PROGRAM(
+          `    // direction is 1 to encrypt and -1 to decrypt
+    static string Crypt(string text, string key, int direction)
+    {
+        var sb = new StringBuilder();
+        int k = 0;
+        foreach (char c in text)
+        {
+            if (c >= 'A' && c <= 'Z')
+            {
+                int shift = key[k % key.Length] - 'A';
+                int position = ((c - 'A' + direction * shift) % 26 + 26) % 26;
+                sb.Append((char)('A' + position));
+                k++;
+            }
+            else
+            {
+                sb.Append(c);
+            }
+        }
+        return sb.ToString();
+    }
+
+    // Vigenere cipher for capital letters. Other characters are copied unchanged
+    // and do not use up a letter of the key. Build the result with a StringBuilder.
+    static string Encrypt(string text, string key)
+    {
+        return Crypt(text, key, 1);
+    }
+
+    static string Decrypt(string text, string key)
+    {
+        return Crypt(text, key, -1);
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Encrypt("ATTACK AT DAWN", "LEMON"));
+        Console.WriteLine(Decrypt("LXFOPV EF RNHR", "LEMON"));
+        Console.WriteLine(Encrypt("HELLO", "A"));
+        Console.WriteLine(Encrypt("HELLO", "B"));
+        Console.WriteLine(Decrypt("IFMMP", "B"));
+    }`,
+          "using System.Text;",
+        ),
+        expectedOutput: "LXFOPV EF RNHR\nATTACK AT DAWN\nHELLO\nIFMMP\nHELLO\n",
+      },
+      { kind: "lecture", slug: "special-chars", title: { en: "Special characters", uk: "Спеціальні символи" } },
+      { kind: "lecture", slug: "formatted-output", title: { en: "Formatted output", uk: "Форматований вивід" } },
+      {
+        kind: "practice",
+        slug: "receipt",
+        title: { en: "Text generation: a receipt", uk: "Генерація текстів: чек" },
+        language: "csharp",
+        starter: PROGRAM(
+          `    // One line per item: {name,-10}{quantity,3} x {price,7:F2} = {total,8:F2}
+    // then 34 hyphens, then "TOTAL" left-aligned in 26 characters and the grand total in 8.
+    // The lines are separated by \\n, with no line break at the end.
+    static string Receipt(string[] names, int[] quantities, double[] prices)
+    {
+        // Write your code here
+        return "";
+    }
+
+    static void Main()
+    {
+        string[] names = { "Tea", "Coffee", "Cake" };
+        int[] quantities = { 2, 1, 3 };
+        double[] prices = { 3.5, 4.25, 12.9 };
+        Console.WriteLine(Receipt(names, quantities, prices));
+    }`,
+          "using System.Collections.Generic;\nusing System.Globalization;",
+        ),
+        solution: PROGRAM(
+          `    // One line per item: {name,-10}{quantity,3} x {price,7:F2} = {total,8:F2}
+    // then 34 hyphens, then "TOTAL" left-aligned in 26 characters and the grand total in 8.
+    // The lines are separated by \\n, with no line break at the end.
+    static string Receipt(string[] names, int[] quantities, double[] prices)
+    {
+        var lines = new List<string>();
+        double grand = 0;
+        for (int i = 0; i < names.Length; i++)
+        {
+            double total = quantities[i] * prices[i];
+            grand += total;
+            lines.Add(string.Format(CultureInfo.InvariantCulture,
+                "{0,-10}{1,3} x {2,7:F2} = {3,8:F2}", names[i], quantities[i], prices[i], total));
+        }
+        lines.Add(new string('-', 34));
+        lines.Add(string.Format(CultureInfo.InvariantCulture, "{0,-26}{1,8:F2}", "TOTAL", grand));
+        return string.Join("\\n", lines);
+    }
+
+    static void Main()
+    {
+        string[] names = { "Tea", "Coffee", "Cake" };
+        int[] quantities = { 2, 1, 3 };
+        double[] prices = { 3.5, 4.25, 12.9 };
+        Console.WriteLine(Receipt(names, quantities, prices));
+    }`,
+          "using System.Collections.Generic;\nusing System.Globalization;",
+        ),
+        expectedOutput:
+          "Tea         2 x    3.50 =     7.00\nCoffee      1 x    4.25 =     4.25\nCake        3 x   12.90 =    38.70\n----------------------------------\nTOTAL                        49.95\n",
+      },
+      {
+        kind: "quiz",
+        slug: "strings-work-quiz",
+        title: { en: "Working with strings", uk: "Робота зі рядками" },
+        questions: [
+          {
+            id: "split-count",
+            mode: "single",
+            prompt: {
+              en: "What is the value of `\"a,b,,c\".Split(',').Length`?",
+              uk: "Чому дорівнює `\"a,b,,c\".Split(',').Length`?",
+            },
+            options: [
+              { id: "a", text: { en: "3", uk: "3" } },
+              { id: "b", text: { en: "4", uk: "4" } },
+              { id: "c", text: { en: "5", uk: "5" } },
+              { id: "d", text: { en: "2", uk: "2" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "join",
+            mode: "single",
+            prompt: {
+              en: "What does `string.Join(\"-\", new[] { \"a\", \"b\", \"c\" })` return?",
+              uk: "Що повертає `string.Join(\"-\", new[] { \"a\", \"b\", \"c\" })`?",
+            },
+            options: [
+              { id: "a", text: { en: "`a-b-c`", uk: "`a-b-c`" } },
+              { id: "b", text: { en: "`-a-b-c-`", uk: "`-a-b-c-`" } },
+              { id: "c", text: { en: "`abc-`", uk: "`abc-`" } },
+              { id: "d", text: { en: "`a b c`", uk: "`a b c`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "builder",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nvar sb = new StringBuilder();\nsb.Append(\"ab\").Append(1);\nConsole.WriteLine(sb.ToString());\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nvar sb = new StringBuilder();\nsb.Append(\"ab\").Append(1);\nConsole.WriteLine(sb.ToString());\n```",
+            },
+            options: [
+              { id: "a", text: { en: "`ab1`", uk: "`ab1`" } },
+              { id: "b", text: { en: "`1ab`", uk: "`1ab`" } },
+              { id: "c", text: { en: "`ab`", uk: "`ab`" } },
+              { id: "d", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "alignment",
+            mode: "single",
+            prompt: {
+              en: "What does `Console.WriteLine($\"[{42,6}]\");` print between the brackets?",
+              uk: "Що друкує `Console.WriteLine($\"[{42,6}]\");` між дужками?",
+            },
+            options: [
+              { id: "a", text: { en: "The number 42 right-aligned in a field 6 characters wide", uk: "Число 42, вирівняне праворуч у полі шириною 6 символів" } },
+              { id: "b", text: { en: "The number 42 left-aligned in a field 6 characters wide", uk: "Число 42, вирівняне ліворуч у полі шириною 6 символів" } },
+              { id: "c", text: { en: "The number 42 with leading zeros: 000042", uk: "Число 42 з ведучими нулями: 000042" } },
+              { id: "d", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "char-arithmetic",
+            mode: "single",
+            prompt: { en: "What is the value of `(char)('a' + 2)`?", uk: "Чому дорівнює `(char)('a' + 2)`?" },
+            options: [
+              { id: "a", text: { en: "`'c'`", uk: "`'c'`" } },
+              { id: "b", text: { en: "`99`", uk: "`99`" } },
+              { id: "c", text: { en: "`\"a2\"`", uk: "`\"a2\"`" } },
+              { id: "d", text: { en: "`'b'`", uk: "`'b'`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "equality",
+            mode: "multi",
+            prompt: { en: "Which expressions are `true`?", uk: "Які вирази істинні?" },
+            options: [
+              { id: "a", text: { en: "`\"abc\" == \"abc\"`", uk: "`\"abc\" == \"abc\"`" } },
+              { id: "b", text: { en: "`\"abc\" == \"ABC\"`", uk: "`\"abc\" == \"ABC\"`" } },
+              { id: "c", text: { en: "`string.Equals(\"abc\", \"ABC\", StringComparison.OrdinalIgnoreCase)`", uk: "`string.Equals(\"abc\", \"ABC\", StringComparison.OrdinalIgnoreCase)`" } },
+              { id: "d", text: { en: "`\"abc\".Equals(\"ABC\")`", uk: "`\"abc\".Equals(\"ABC\")`" } },
+              { id: "e", text: { en: "`\"abc\" != \"abd\"`", uk: "`\"abc\" != \"abd\"`" } },
+            ],
+            correct: ["a", "c", "e"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "files-and-dirs", title: { en: "Files and directories", uk: "Файли та каталоги" } },
+      { kind: "lecture", slug: "encoding-files", title: { en: "Encodings and working with files", uk: "Кодування та робота з файлами" } },
+      {
+        kind: "quiz",
+        slug: "files-quiz",
+        title: { en: "Working with files", uk: "Робота з файлами" },
+        questions: [
+          {
+            id: "read-all",
+            mode: "single",
+            prompt: {
+              en: "Which call reads a whole small text file into one string?",
+              uk: "Який виклик читає цілий невеликий текстовий файл в один рядок?",
+            },
+            options: [
+              { id: "a", text: { en: "`File.ReadAllText(path)`", uk: "`File.ReadAllText(path)`" } },
+              { id: "b", text: { en: "`Path.ReadAllText(path)`", uk: "`Path.ReadAllText(path)`" } },
+              { id: "c", text: { en: "`Directory.ReadAllText(path)`", uk: "`Directory.ReadAllText(path)`" } },
+              { id: "d", text: { en: "`File.Exists(path)`", uk: "`File.Exists(path)`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "path-combine",
+            mode: "single",
+            prompt: {
+              en: "Why is `Path.Combine(\"data\", \"a.txt\")` better than `\"data\" + \"/\" + \"a.txt\"`?",
+              uk: "Чому `Path.Combine(\"data\", \"a.txt\")` краще за `\"data\" + \"/\" + \"a.txt\"`?",
+            },
+            options: [
+              { id: "a", text: { en: "It uses the separator of the current system and avoids a doubled separator", uk: "Він використовує роздільник поточної системи й уникає подвоєного роздільника" } },
+              { id: "b", text: { en: "It checks that the file exists", uk: "Він перевіряє, що файл існує" } },
+              { id: "c", text: { en: "It creates the file", uk: "Він створює файл" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "extension",
+            mode: "single",
+            prompt: {
+              en: "What does `Path.GetExtension(\"report.final.pdf\")` return?",
+              uk: "Що повертає `Path.GetExtension(\"report.final.pdf\")`?",
+            },
+            options: [
+              { id: "a", text: { en: "`.pdf`", uk: "`.pdf`" } },
+              { id: "b", text: { en: "`pdf`", uk: "`pdf`" } },
+              { id: "c", text: { en: "`.final.pdf`", uk: "`.final.pdf`" } },
+              { id: "d", text: { en: "`report`", uk: "`report`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "missing-file",
+            mode: "single",
+            prompt: {
+              en: "Which exception does `File.ReadAllText` throw when the file does not exist?",
+              uk: "Який виняток кидає `File.ReadAllText`, коли файлу не існує?",
+            },
+            options: [
+              { id: "a", text: { en: "`FormatException`", uk: "`FormatException`" } },
+              { id: "b", text: { en: "`FileNotFoundException`", uk: "`FileNotFoundException`" } },
+              { id: "c", text: { en: "`NullReferenceException`", uk: "`NullReferenceException`" } },
+              { id: "d", text: { en: "None: it returns an empty string", uk: "Жодного: він повертає порожній рядок" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "utf8-bytes",
+            mode: "single",
+            prompt: {
+              en: "How many bytes does `Encoding.UTF8.GetBytes(\"Привіт\")` return?",
+              uk: "Скільки байтів повертає `Encoding.UTF8.GetBytes(\"Привіт\")`?",
+            },
+            options: [
+              { id: "a", text: { en: "6", uk: "6" } },
+              { id: "b", text: { en: "12", uk: "12" } },
+              { id: "c", text: { en: "24", uk: "24" } },
+              { id: "d", text: { en: "3", uk: "3" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "using",
+            mode: "single",
+            prompt: {
+              en: "What does `using (var reader = new StreamReader(path)) { ... }` guarantee?",
+              uk: "Що гарантує `using (var reader = new StreamReader(path)) { ... }`?",
+            },
+            options: [
+              { id: "a", text: { en: "The file is closed when the block ends, even if an exception occurs", uk: "Файл закривається, коли блок завершується, навіть якщо виникає виняток" } },
+              { id: "b", text: { en: "The file is created if it is missing", uk: "Файл створюється, якщо його немає" } },
+              { id: "c", text: { en: "The file is deleted afterwards", uk: "Файл видаляється після цього" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "quiz",
+        slug: "collections-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "modify-foreach",
+            mode: "single",
+            prompt: {
+              en: "What happens when you add an element to a `List<T>` inside a `foreach` over that same list?",
+              uk: "Що станеться, коли додати елемент до `List<T>` всередині `foreach` по тому самому списку?",
+            },
+            options: [
+              { id: "a", text: { en: "It throws `InvalidOperationException`", uk: "Він кидає `InvalidOperationException`" } },
+              { id: "b", text: { en: "The new element is visited too", uk: "Новий елемент теж буде відвідано" } },
+              { id: "c", text: { en: "The new element is ignored", uk: "Новий елемент ігнорується" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "missing-key",
+            mode: "single",
+            prompt: {
+              en: "What happens when you read `d[\"x\"]` and the dictionary has no key `\"x\"`?",
+              uk: "Що станеться, коли прочитати `d[\"x\"]`, а ключа `\"x\"` у словнику немає?",
+            },
+            options: [
+              { id: "a", text: { en: "It returns `null`", uk: "Він повертає `null`" } },
+              { id: "b", text: { en: "It returns 0", uk: "Він повертає 0" } },
+              { id: "c", text: { en: "It throws `KeyNotFoundException`", uk: "Він кидає `KeyNotFoundException`" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "try-get",
+            mode: "single",
+            prompt: {
+              en: "What does `d.TryGetValue(\"x\", out int v)` do when the key `\"x\"` is missing in a `Dictionary<string, int>`?",
+              uk: "Що робить `d.TryGetValue(\"x\", out int v)`, коли ключа `\"x\"` немає в `Dictionary<string, int>`?",
+            },
+            options: [
+              { id: "a", text: { en: "It returns `false`, and `v` is 0", uk: "Він повертає `false`, а `v` дорівнює 0" } },
+              { id: "b", text: { en: "It throws an exception", uk: "Він кидає виняток" } },
+              { id: "c", text: { en: "It returns `true` and adds the key", uk: "Він повертає `true` і додає ключ" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "which-structure",
+            mode: "single",
+            prompt: {
+              en: "You often have to find a value by its name among thousands of pairs. Which structure fits best?",
+              uk: "Вам часто потрібно знаходити значення за іменем серед тисяч пар. Яка структура підходить найкраще?",
+            },
+            options: [
+              { id: "a", text: { en: "`Dictionary<string, T>`", uk: "`Dictionary<string, T>`" } },
+              { id: "b", text: { en: "A `List<T>` that you scan from the start every time", uk: "`List<T>`, який щоразу переглядають із початку" } },
+              { id: "c", text: { en: "A `string` that holds all the pairs as text", uk: "`string`, що містить усі пари як текст" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "concat-loop",
+            mode: "single",
+            prompt: {
+              en: "You build a long text from 100 000 small pieces in a loop. What is the right tool?",
+              uk: "Ви складаєте довгий текст зі 100 000 дрібних шматків у циклі. Який інструмент правильний?",
+            },
+            options: [
+              { id: "a", text: { en: "`StringBuilder`", uk: "`StringBuilder`" } },
+              { id: "b", text: { en: "`+=` on a `string`", uk: "`+=` для `string`" } },
+              { id: "c", text: { en: "`Split`", uk: "`Split`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "reverse-string",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nchar[] letters = \"abc\".ToCharArray();\nArray.Reverse(letters);\nConsole.WriteLine(new string(letters));\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nchar[] letters = \"abc\".ToCharArray();\nArray.Reverse(letters);\nConsole.WriteLine(new string(letters));\n```",
+            },
+            options: [
+              { id: "a", text: { en: "`cba`", uk: "`cba`" } },
+              { id: "b", text: { en: "`abc`", uk: "`abc`" } },
+              { id: "c", text: { en: "`System.Char[]`", uk: "`System.Char[]`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "read-all-lines",
+            mode: "single",
+            prompt: {
+              en: "What type does `File.ReadAllLines(path)` return?",
+              uk: "Який тип повертає `File.ReadAllLines(path)`?",
+            },
+            options: [
+              { id: "a", text: { en: "`string`", uk: "`string`" } },
+              { id: "b", text: { en: "`string[]`", uk: "`string[]`" } },
+              { id: "c", text: { en: "`char[]`", uk: "`char[]`" } },
+              { id: "d", text: { en: "`Dictionary<int, string>`", uk: "`Dictionary<int, string>`" } },
+            ],
+            correct: ["b"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "ini-parser",
+        title: { en: "Practice: Parser", uk: "Практика «Парсер»" },
+        language: "csharp",
+        starter: PROGRAM(
+          `    // Reads INI-style text line by line and returns the settings.
+    // Keys inside a [section] are stored as "section.key".
+    static Dictionary<string, string> Parse(string text)
+    {
+        // Write your code here
+        return new Dictionary<string, string>();
+    }
+
+    static void Main()
+    {
+        string text = "# settings\\n" +
+                      "name = Assay\\n" +
+                      "[server]\\n" +
+                      "host = localhost\\n" +
+                      "port = 8080\\n" +
+                      "\\n" +
+                      "[user]\\n" +
+                      "name = Ann\\n" +
+                      "; a comment\\n" +
+                      " lang = uk \\n" +
+                      "oops, this line has no equals sign\\n" +
+                      "[links]\\n" +
+                      "url = http://x.org/?a=b\\n";
+
+        var settings = Parse(text);
+        var keys = new List<string>(settings.Keys);
+        keys.Sort(StringComparer.Ordinal);
+        foreach (string key in keys)
+        {
+            Console.WriteLine(key + " = " + settings[key]);
+        }
+    }`,
+          "using System.Collections.Generic;\nusing System.IO;",
+        ),
+        solution: PROGRAM(
+          `    // Reads INI-style text line by line and returns the settings.
+    // Keys inside a [section] are stored as "section.key".
+    static Dictionary<string, string> Parse(string text)
+    {
+        var settings = new Dictionary<string, string>();
+        string section = "";
+        var reader = new StringReader(text);
+        string line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            line = line.Trim();
+            if (line.Length == 0 || line.StartsWith("#") || line.StartsWith(";"))
+            {
+                continue;
+            }
+            if (line.StartsWith("[") && line.EndsWith("]"))
+            {
+                section = line.Substring(1, line.Length - 2).Trim();
+                continue;
+            }
+            int equals = line.IndexOf('=');
+            if (equals < 0)
+            {
+                continue;
+            }
+            string key = line.Substring(0, equals).Trim();
+            string value = line.Substring(equals + 1).Trim();
+            if (section.Length > 0)
+            {
+                key = section + "." + key;
+            }
+            settings[key] = value;
+        }
+        return settings;
+    }
+
+    static void Main()
+    {
+        string text = "# settings\\n" +
+                      "name = Assay\\n" +
+                      "[server]\\n" +
+                      "host = localhost\\n" +
+                      "port = 8080\\n" +
+                      "\\n" +
+                      "[user]\\n" +
+                      "name = Ann\\n" +
+                      "; a comment\\n" +
+                      " lang = uk \\n" +
+                      "oops, this line has no equals sign\\n" +
+                      "[links]\\n" +
+                      "url = http://x.org/?a=b\\n";
+
+        var settings = Parse(text);
+        var keys = new List<string>(settings.Keys);
+        keys.Sort(StringComparer.Ordinal);
+        foreach (string key in keys)
+        {
+            Console.WriteLine(key + " = " + settings[key]);
+        }
+    }`,
+          "using System.Collections.Generic;\nusing System.IO;",
+        ),
+        expectedOutput:
+          "links.url = http://x.org/?a=b\nname = Assay\nserver.host = localhost\nserver.port = 8080\nuser.lang = uk\nuser.name = Ann\n",
+        maxScore: 10,
+      },
     ],
   },
   {
@@ -3169,6 +5073,46 @@ export const csharpModules: ModuleDef[] = [
     title: { en: "Testing", uk: "Тестування" },
     slides: [
       { kind: "lecture", slug: "why-test", title: { en: "Checking your code with tests", uk: "Перевірка коду тестами" } },
+      {
+        kind: "quiz",
+        slug: "testing-quiz",
+        title: { en: "Testing", uk: "Тестування" },
+        questions: [
+          {
+            id: "what-is-test",
+            mode: "single",
+            prompt: { en: "What is a test?", uk: "Що таке тест?" },
+            options: [
+              {
+                id: "a",
+                text: {
+                  en: "Code that runs your code with a known input and checks the result",
+                  uk: "Код, що запускає ваш код зі відомими вхідними даними й перевіряє результат",
+                },
+              },
+              { id: "b", text: { en: "A comment that explains what the code does", uk: "Коментар, що пояснює, що робить код" } },
+              { id: "c", text: { en: "A compiler warning", uk: "Попередження компілятора" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "red-green",
+            mode: "single",
+            prompt: {
+              en: "You have found a bug. What is the best first step in the \"red, then green\" approach?",
+              uk: "Ви знайшли помилку. Який найкращий перший крок у підході «спершу червоний, потім зелений»?",
+            },
+            options: [
+              { id: "a", text: { en: "Fix the code right away", uk: "Одразу виправити код" } },
+              { id: "b", text: { en: "Write a test that reproduces the bug and fails", uk: "Написати тест, що відтворює помилку й падає" } },
+              { id: "c", text: { en: "Delete the code that looks wrong", uk: "Видалити код, який виглядає хибним" } },
+            ],
+            correct: ["b"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "test-libraries", title: { en: "Test libraries", uk: "Бібліотеки для тестування" } },
+      { kind: "lecture", slug: "unit-tests", title: { en: "Unit tests", uk: "Модульні тести" } },
       {
         kind: "practice",
         slug: "capitalize",
@@ -3218,6 +5162,783 @@ export const csharpModules: ModuleDef[] = [
         Check("", "");
     }`),
         expectedOutput: 'ok: "hello" -> "Hello"\nok: "a" -> "A"\nok: "Already" -> "Already"\nok: "" -> ""\n',
+      },
+      {
+        kind: "practice",
+        slug: "slugify",
+        title: { en: "Make the tests green: slugs", uk: "Зробіть тести зеленими: слаги" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Check(string name, string actual, string expected)
+    {
+        if (actual == expected)
+        {
+            Console.WriteLine("ok: " + name);
+        }
+        else
+        {
+            Console.WriteLine("FAIL: " + name + " (expected \\"" + expected + "\\", got \\"" + actual + "\\")");
+        }
+    }
+
+    // Lower case; every run of characters that are not letters or digits becomes
+    // a single '-'; no '-' at the start or at the end.
+    static string Slugify(string title)
+    {
+        // Write your code here
+        return title;
+    }
+
+    static void Main()
+    {
+        Check("simple", Slugify("Hello World"), "hello-world");
+        Check("punctuation", Slugify("Hello, World!"), "hello-world");
+        Check("many spaces", Slugify("  a   b  "), "a-b");
+        Check("digits", Slugify("C# 7.0 rocks"), "c-7-0-rocks");
+        Check("empty", Slugify(""), "");
+        Check("only symbols", Slugify("!!!"), "");
+        Check("already a slug", Slugify("already-a-slug"), "already-a-slug");
+    }`),
+        solution: PROGRAM(`    static void Check(string name, string actual, string expected)
+    {
+        if (actual == expected)
+        {
+            Console.WriteLine("ok: " + name);
+        }
+        else
+        {
+            Console.WriteLine("FAIL: " + name + " (expected \\"" + expected + "\\", got \\"" + actual + "\\")");
+        }
+    }
+
+    // Lower case; every run of characters that are not letters or digits becomes
+    // a single '-'; no '-' at the start or at the end.
+    static string Slugify(string title)
+    {
+        string result = "";
+        bool separatorWaiting = false;
+        foreach (char c in title)
+        {
+            if (char.IsLetterOrDigit(c))
+            {
+                if (separatorWaiting && result.Length > 0)
+                {
+                    result += "-";
+                }
+                separatorWaiting = false;
+                result += char.ToLower(c);
+            }
+            else
+            {
+                separatorWaiting = true;
+            }
+        }
+        return result;
+    }
+
+    static void Main()
+    {
+        Check("simple", Slugify("Hello World"), "hello-world");
+        Check("punctuation", Slugify("Hello, World!"), "hello-world");
+        Check("many spaces", Slugify("  a   b  "), "a-b");
+        Check("digits", Slugify("C# 7.0 rocks"), "c-7-0-rocks");
+        Check("empty", Slugify(""), "");
+        Check("only symbols", Slugify("!!!"), "");
+        Check("already a slug", Slugify("already-a-slug"), "already-a-slug");
+    }`),
+        expectedOutput:
+          "ok: simple\nok: punctuation\nok: many spaces\nok: digits\nok: empty\nok: only symbols\nok: already a slug\n",
+      },
+      { kind: "lecture", slug: "more-tests", title: { en: "More tests!", uk: "Більше тестів!" } },
+      {
+        kind: "quiz",
+        slug: "unit-tests-quiz",
+        title: { en: "Unit tests", uk: "Модульні тести" },
+        questions: [
+          {
+            id: "act",
+            mode: "single",
+            prompt: {
+              en: "In the \"Arrange, Act, Assert\" structure, which step calls the method under test?",
+              uk: "У структурі «Arrange, Act, Assert» який крок викликає метод, що тестується?",
+            },
+            options: [
+              { id: "a", text: { en: "Arrange", uk: "Arrange" } },
+              { id: "b", text: { en: "Act", uk: "Act" } },
+              { id: "c", text: { en: "Assert", uk: "Assert" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "expected-first",
+            mode: "single",
+            prompt: {
+              en: "In `Assert.Equal(5, result)` of xUnit, which argument is the expected value?",
+              uk: "В `Assert.Equal(5, result)` з xUnit який аргумент є очікуваним значенням?",
+            },
+            options: [
+              { id: "a", text: { en: "The first one, `5`", uk: "Перший, `5`" } },
+              { id: "b", text: { en: "The second one, `result`", uk: "Другий, `result`" } },
+              { id: "c", text: { en: "Neither: both are equal", uk: "Жоден: обидва рівні" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "not-first",
+            mode: "single",
+            prompt: {
+              en: "Which of these is NOT a property of a good unit test?",
+              uk: "Що з наведеного НЕ є властивістю доброго модульного тесту?",
+            },
+            options: [
+              { id: "a", text: { en: "It is fast", uk: "Він швидкий" } },
+              { id: "b", text: { en: "It does not depend on other tests", uk: "Він не залежить від інших тестів" } },
+              { id: "c", text: { en: "It only passes when another test has run before it", uk: "Він проходить, лише якщо перед ним виконався інший тест" } },
+              { id: "d", text: { en: "It gives the same result every time", uk: "Він дає однаковий результат щоразу" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "datetime-now",
+            mode: "single",
+            prompt: {
+              en: "Why is a method that reads `DateTime.Now` inside hard to test?",
+              uk: "Чому метод, що всередині читає `DateTime.Now`, важко тестувати?",
+            },
+            options: [
+              { id: "a", text: { en: "The result changes with the time, so the test is not repeatable", uk: "Результат змінюється з часом, тож тест не відтворюваний" } },
+              { id: "b", text: { en: "`DateTime` cannot be used in tests", uk: "`DateTime` не можна використовувати в тестах" } },
+              { id: "c", text: { en: "It is too slow", uk: "Він занадто повільний" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "median",
+        title: { en: "Fix the failing tests: median", uk: "Виправте тести, що падають: медіана" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Check(string name, double actual, double expected)
+    {
+        Console.WriteLine((Math.Abs(actual - expected) < 1e-9 ? "ok" : "FAIL") + ": " + name);
+    }
+
+    static string Text(int[] numbers)
+    {
+        string text = "";
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            if (i > 0) text += ",";
+            text += numbers[i];
+        }
+        return text;
+    }
+
+    // The middle value of the sorted numbers; for an even count, the average of the two
+    // middle ones; 0 for an empty array. The array that is passed in must not be changed.
+    static double Median(int[] numbers)
+    {
+        Array.Sort(numbers);
+        return numbers[numbers.Length / 2];
+    }
+
+    static void Main()
+    {
+        Check("odd length", Median(new[] { 3, 1, 2 }), 2);
+        Check("even length", Median(new[] { 4, 1, 3, 2 }), 2.5);
+        Check("one element", Median(new[] { 7 }), 7);
+        Check("negative numbers", Median(new[] { -5, -1, -3 }), -3);
+        Check("duplicates", Median(new[] { 5, 5, 1, 1 }), 3);
+
+        int[] original = { 3, 1, 2 };
+        Median(original);
+        Console.WriteLine((Text(original) == "3,1,2" ? "ok" : "FAIL") + ": input unchanged");
+
+        Check("empty array", Median(new int[0]), 0);
+    }`),
+        solution: PROGRAM(`    static void Check(string name, double actual, double expected)
+    {
+        Console.WriteLine((Math.Abs(actual - expected) < 1e-9 ? "ok" : "FAIL") + ": " + name);
+    }
+
+    static string Text(int[] numbers)
+    {
+        string text = "";
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            if (i > 0) text += ",";
+            text += numbers[i];
+        }
+        return text;
+    }
+
+    // The middle value of the sorted numbers; for an even count, the average of the two
+    // middle ones; 0 for an empty array. The array that is passed in must not be changed.
+    static double Median(int[] numbers)
+    {
+        if (numbers.Length == 0)
+        {
+            return 0;
+        }
+        int[] sorted = (int[])numbers.Clone();
+        Array.Sort(sorted);
+        int middle = sorted.Length / 2;
+        if (sorted.Length % 2 == 1)
+        {
+            return sorted[middle];
+        }
+        return (sorted[middle - 1] + sorted[middle]) / 2.0;
+    }
+
+    static void Main()
+    {
+        Check("odd length", Median(new[] { 3, 1, 2 }), 2);
+        Check("even length", Median(new[] { 4, 1, 3, 2 }), 2.5);
+        Check("one element", Median(new[] { 7 }), 7);
+        Check("negative numbers", Median(new[] { -5, -1, -3 }), -3);
+        Check("duplicates", Median(new[] { 5, 5, 1, 1 }), 3);
+
+        int[] original = { 3, 1, 2 };
+        Median(original);
+        Console.WriteLine((Text(original) == "3,1,2" ? "ok" : "FAIL") + ": input unchanged");
+
+        Check("empty array", Median(new int[0]), 0);
+    }`),
+        expectedOutput:
+          "ok: odd length\nok: even length\nok: one element\nok: negative numbers\nok: duplicates\nok: input unchanged\nok: empty array\n",
+      },
+      { kind: "lecture", slug: "test-coverage", title: { en: "Test coverage", uk: "Покриття тестами" } },
+      { kind: "lecture", slug: "functional-testing", title: { en: "Functional testing", uk: "Функціональне тестування" } },
+      { kind: "lecture", slug: "value-of-testing", title: { en: "The value of testing", uk: "Значення тестування" } },
+      { kind: "lecture", slug: "introducing-tests", title: { en: "Introducing tests", uk: "Впровадження тестів" } },
+      { kind: "lecture", slug: "running-tests", title: { en: "Tutorial: running tests", uk: "Туторіал із запуску тестів" } },
+      {
+        kind: "quiz",
+        slug: "unit-tests-2-quiz",
+        title: { en: "Unit tests 2", uk: "Модульні тести 2" },
+        questions: [
+          {
+            id: "boundary",
+            mode: "single",
+            prompt: {
+              en: "Which pair of inputs checks the border of the condition `age >= 18` best?",
+              uk: "Яка пара вхідних даних найкраще перевіряє межу умови `age >= 18`?",
+            },
+            options: [
+              { id: "a", text: { en: "`5` and `50`", uk: "`5` та `50`" } },
+              { id: "b", text: { en: "`17` and `18`", uk: "`17` та `18`" } },
+              { id: "c", text: { en: "`18` and `19`", uk: "`18` та `19`" } },
+              { id: "d", text: { en: "`0` and `100`", uk: "`0` та `100`" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "coverage-meaning",
+            mode: "single",
+            prompt: {
+              en: "What does 100% line coverage mean?",
+              uk: "Що означає 100% покриття рядків?",
+            },
+            options: [
+              { id: "a", text: { en: "Every line of code ran during the tests, which does not mean that the results were checked", uk: "Кожен рядок коду виконався під час тестів, що не означає, що результати перевірено" } },
+              { id: "b", text: { en: "The program has no bugs", uk: "У програмі немає помилок" } },
+              { id: "c", text: { en: "Every possible input has been tried", uk: "Перепробувано всі можливі вхідні дані" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "no-assert",
+            mode: "single",
+            prompt: {
+              en: "A test calls `Calculator.Add(2, 3)` and has no assertion. What does a pass prove?",
+              uk: "Тест викликає `Calculator.Add(2, 3)` і не має жодної перевірки. Що доводить його успіх?",
+            },
+            options: [
+              { id: "a", text: { en: "That `Add` returns 5", uk: "Що `Add` повертає 5" } },
+              { id: "b", text: { en: "Only that the call does not throw an exception", uk: "Лише те, що виклик не кидає виняток" } },
+              { id: "c", text: { en: "That `Add` is correct for all inputs", uk: "Що `Add` правильний для всіх вхідних даних" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "mutant",
+            mode: "single",
+            prompt: {
+              en: "In mutation testing, a mutant survived: all the tests still passed after the code was changed. What does it mean?",
+              uk: "У мутаційному тестуванні мутант вижив: усі тести й далі проходили після зміни коду. Що це означає?",
+            },
+            options: [
+              { id: "a", text: { en: "The tests do not notice this kind of change", uk: "Тести не помічають такої зміни" } },
+              { id: "b", text: { en: "The code is perfect", uk: "Код ідеальний" } },
+              { id: "c", text: { en: "The tests are too slow", uk: "Тести занадто повільні" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "pyramid",
+            mode: "single",
+            prompt: {
+              en: "According to the test pyramid, which kind of test should be the most numerous?",
+              uk: "За пірамідою тестування, яких тестів має бути найбільше?",
+            },
+            options: [
+              { id: "a", text: { en: "End-to-end tests", uk: "Наскрізних тестів" } },
+              { id: "b", text: { en: "Integration tests", uk: "Інтеграційних тестів" } },
+              { id: "c", text: { en: "Unit tests", uk: "Модульних тестів" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "flaky",
+            mode: "multi",
+            prompt: {
+              en: "Which of these can make a test flaky (sometimes passing and sometimes failing with the same code)?",
+              uk: "Що з наведеного може зробити тест нестабільним (то проходить, то падає з тим самим кодом)?",
+            },
+            options: [
+              { id: "a", text: { en: "Random numbers without a fixed seed", uk: "Випадкові числа без фіксованого зерна" } },
+              { id: "b", text: { en: "A call to a real web service", uk: "Виклик справжнього вебсервісу" } },
+              { id: "c", text: { en: "A dependence on the current time", uk: "Залежність від поточного часу" } },
+              { id: "d", text: { en: "A fixed input and an exact expected value", uk: "Фіксовані вхідні дані та точне очікуване значення" } },
+            ],
+            correct: ["a", "b", "c"],
+          },
+        ],
+      },
+      {
+        kind: "quiz",
+        slug: "testing-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "characterization",
+            mode: "single",
+            prompt: {
+              en: "What is the purpose of a characterization test for old code?",
+              uk: "Яка мета характеризаційного тесту для старого коду?",
+            },
+            options: [
+              { id: "a", text: { en: "To record what the code does now, so that you can refactor safely", uk: "Зафіксувати, що код робить зараз, щоб безпечно рефакторити" } },
+              { id: "b", text: { en: "To prove that the code is correct", uk: "Довести, що код правильний" } },
+              { id: "c", text: { en: "To measure how fast the code is", uk: "Виміряти, наскільки код швидкий" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "black-box",
+            mode: "single",
+            prompt: {
+              en: "A tester checks the program only through its inputs and outputs, without reading the code. What is this called?",
+              uk: "Тестувальник перевіряє програму лише через її входи та виходи, не читаючи код. Як це називається?",
+            },
+            options: [
+              { id: "a", text: { en: "White-box testing", uk: "Тестування білої скриньки" } },
+              { id: "b", text: { en: "Black-box testing", uk: "Тестування чорної скриньки" } },
+              { id: "c", text: { en: "Mutation testing", uk: "Мутаційне тестування" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "regression",
+            mode: "single",
+            prompt: { en: "What does a regression test check?", uk: "Що перевіряє регресійний тест?" },
+            options: [
+              { id: "a", text: { en: "That something that used to work still works after a change", uk: "Що те, що працювало, працює й після зміни" } },
+              { id: "b", text: { en: "That the program starts at all", uk: "Що програма взагалі запускається" } },
+              { id: "c", text: { en: "How many users the program can serve", uk: "Скільком користувачам може слугувати програма" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "smoke",
+            mode: "single",
+            prompt: { en: "What is a smoke test?", uk: "Що таке димовий тест?" },
+            options: [
+              { id: "a", text: { en: "A minimal check that the program starts and the main path works", uk: "Мінімальна перевірка, що програма запускається й основний шлях працює" } },
+              { id: "b", text: { en: "A test of how the program behaves under heavy load", uk: "Тест того, як програма поводиться під великим навантаженням" } },
+              { id: "c", text: { en: "A test that checks every line of code", uk: "Тест, що перевіряє кожен рядок коду" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "tdd-order",
+            mode: "single",
+            prompt: { en: "What is the order of the TDD cycle?", uk: "Який порядок у циклі TDD?" },
+            options: [
+              { id: "a", text: { en: "Green, red, refactor", uk: "Зелений, червоний, рефакторинг" } },
+              { id: "b", text: { en: "Red, green, refactor", uk: "Червоний, зелений, рефакторинг" } },
+              { id: "c", text: { en: "Refactor, red, green", uk: "Рефакторинг, червоний, зелений" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "test-names",
+            mode: "single",
+            prompt: {
+              en: "Why do names such as `IsLeapYear_Year1900_ReturnsFalse` help?",
+              uk: "Чим допомагають назви на кшталт `IsLeapYear_Year1900_ReturnsFalse`?",
+            },
+            options: [
+              { id: "a", text: { en: "A failing test tells what broke before anyone opens the code", uk: "Тест, що падає, повідомляє, що зламалося, ще до того, як хтось відкриє код" } },
+              { id: "b", text: { en: "The framework requires long names", uk: "Фреймворк вимагає довгих назв" } },
+              { id: "c", text: { en: "They make the tests run faster", uk: "Вони прискорюють виконання тестів" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "quoted-fields",
+        title: { en: "Practice: Quoted fields", uk: "Практика «Поля в лапках»" },
+        language: "csharp",
+        starter: PROGRAM(
+          `    // Splits a CSV line into fields. A field that starts with a quote may contain commas,
+    // and "" inside it means one quote. The quotes around a field are not part of it.
+    static List<string> SplitCsv(string line)
+    {
+        // The simple version below does not understand quotes yet
+        return new List<string>(line.Split(','));
+    }
+
+    static void Show(string line)
+    {
+        List<string> fields = SplitCsv(line);
+        Console.WriteLine(fields.Count + ": [" + string.Join("|", fields) + "]");
+    }
+
+    static void Main()
+    {
+        Show("a,b,c");
+        Show("\\"a,b\\",c");
+        Show("\\"say \\"\\"hi\\"\\"\\",x");
+        Show(",,");
+        Show("");
+        Show("\\"\\",a");
+        Show(" a , b ");
+        Show("\\"x\\"");
+    }`,
+          "using System.Collections.Generic;\nusing System.Text;",
+        ),
+        solution: PROGRAM(
+          `    // Splits a CSV line into fields. A field that starts with a quote may contain commas,
+    // and "" inside it means one quote. The quotes around a field are not part of it.
+    static List<string> SplitCsv(string line)
+    {
+        var fields = new List<string>();
+        var field = new StringBuilder();
+        bool inQuotes = false;
+
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (inQuotes)
+            {
+                if (c == '"')
+                {
+                    if (i + 1 < line.Length && line[i + 1] == '"')
+                    {
+                        field.Append('"');
+                        i++;
+                    }
+                    else
+                    {
+                        inQuotes = false;
+                    }
+                }
+                else
+                {
+                    field.Append(c);
+                }
+            }
+            else if (c == '"' && field.Length == 0)
+            {
+                inQuotes = true;
+            }
+            else if (c == ',')
+            {
+                fields.Add(field.ToString());
+                field.Clear();
+            }
+            else
+            {
+                field.Append(c);
+            }
+        }
+        fields.Add(field.ToString());
+        return fields;
+    }
+
+    static void Show(string line)
+    {
+        List<string> fields = SplitCsv(line);
+        Console.WriteLine(fields.Count + ": [" + string.Join("|", fields) + "]");
+    }
+
+    static void Main()
+    {
+        Show("a,b,c");
+        Show("\\"a,b\\",c");
+        Show("\\"say \\"\\"hi\\"\\"\\",x");
+        Show(",,");
+        Show("");
+        Show("\\"\\",a");
+        Show(" a , b ");
+        Show("\\"x\\"");
+    }`,
+          "using System.Collections.Generic;\nusing System.Text;",
+        ),
+        expectedOutput: '3: [a|b|c]\n2: [a,b|c]\n2: [say "hi"|x]\n3: [||]\n1: []\n2: [|a]\n2: [ a | b ]\n1: [x]\n',
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "clamp-tests",
+        title: { en: "Practice: Testing", uk: "Практика «Тестування»" },
+        language: "csharp",
+        starter: PROGRAM(`    static int ClampCorrect(int value, int min, int max)
+    {
+        if (value < min) return min;
+        if (value > max) return max;
+        return value;
+    }
+
+    static int NoLowerBound(int value, int min, int max)
+    {
+        if (value > max) return max;
+        return value;
+    }
+
+    static int NoUpperBound(int value, int min, int max)
+    {
+        if (value < min) return min;
+        return value;
+    }
+
+    static int ExclusiveMax(int value, int min, int max)
+    {
+        if (value >= max) return max - 1;
+        if (value < min) return min;
+        return value;
+    }
+
+    static int SwappedBounds(int value, int min, int max)
+    {
+        if (value < min) return max;
+        if (value > max) return min;
+        return value;
+    }
+
+    static int ReturnsMinInside(int value, int min, int max)
+    {
+        if (value < min) return min;
+        if (value > max) return max;
+        return min;
+    }
+
+    static int WrongLowerValue(int value, int min, int max)
+    {
+        if (value < min) return min + 1;
+        if (value > max) return max;
+        return value;
+    }
+
+    // Runs YOUR tests on the given implementation of Clamp.
+    // Returns true if all of them pass, and false as soon as one fails.
+    static bool TestsAccept(Func<int, int, int, int> clamp)
+    {
+        // Write your tests here. For example:
+        // if (clamp(5, 0, 10) != 5) return false;
+        return true;
+    }
+
+    static void Report(string name, Func<int, int, int, int> implementation)
+    {
+        Console.WriteLine(name + ": " + (TestsAccept(implementation) ? "accepted" : "rejected"));
+    }
+
+    static void Main()
+    {
+        Report("ClampCorrect", ClampCorrect);
+        Report("NoLowerBound", NoLowerBound);
+        Report("NoUpperBound", NoUpperBound);
+        Report("ExclusiveMax", ExclusiveMax);
+        Report("SwappedBounds", SwappedBounds);
+        Report("ReturnsMinInside", ReturnsMinInside);
+        Report("WrongLowerValue", WrongLowerValue);
+    }`),
+        solution: PROGRAM(`    static int ClampCorrect(int value, int min, int max)
+    {
+        if (value < min) return min;
+        if (value > max) return max;
+        return value;
+    }
+
+    static int NoLowerBound(int value, int min, int max)
+    {
+        if (value > max) return max;
+        return value;
+    }
+
+    static int NoUpperBound(int value, int min, int max)
+    {
+        if (value < min) return min;
+        return value;
+    }
+
+    static int ExclusiveMax(int value, int min, int max)
+    {
+        if (value >= max) return max - 1;
+        if (value < min) return min;
+        return value;
+    }
+
+    static int SwappedBounds(int value, int min, int max)
+    {
+        if (value < min) return max;
+        if (value > max) return min;
+        return value;
+    }
+
+    static int ReturnsMinInside(int value, int min, int max)
+    {
+        if (value < min) return min;
+        if (value > max) return max;
+        return min;
+    }
+
+    static int WrongLowerValue(int value, int min, int max)
+    {
+        if (value < min) return min + 1;
+        if (value > max) return max;
+        return value;
+    }
+
+    // Runs YOUR tests on the given implementation of Clamp.
+    // Returns true if all of them pass, and false as soon as one fails.
+    static bool TestsAccept(Func<int, int, int, int> clamp)
+    {
+        if (clamp(5, 0, 10) != 5) return false;     // inside the range
+        if (clamp(-3, 0, 10) != 0) return false;    // below the range
+        if (clamp(15, 0, 10) != 10) return false;   // above the range
+        if (clamp(0, 0, 10) != 0) return false;     // exactly at min
+        if (clamp(10, 0, 10) != 10) return false;   // exactly at max
+        return true;
+    }
+
+    static void Report(string name, Func<int, int, int, int> implementation)
+    {
+        Console.WriteLine(name + ": " + (TestsAccept(implementation) ? "accepted" : "rejected"));
+    }
+
+    static void Main()
+    {
+        Report("ClampCorrect", ClampCorrect);
+        Report("NoLowerBound", NoLowerBound);
+        Report("NoUpperBound", NoUpperBound);
+        Report("ExclusiveMax", ExclusiveMax);
+        Report("SwappedBounds", SwappedBounds);
+        Report("ReturnsMinInside", ReturnsMinInside);
+        Report("WrongLowerValue", WrongLowerValue);
+    }`),
+        expectedOutput:
+          "ClampCorrect: accepted\nNoLowerBound: rejected\nNoUpperBound: rejected\nExclusiveMax: rejected\nSwappedBounds: rejected\nReturnsMinInside: rejected\nWrongLowerValue: rejected\n",
+        maxScore: 20,
+      },
+      {
+        kind: "practice",
+        slug: "field-parser",
+        title: { en: "Practice: Field parser", uk: "Практика «Парсер полів»" },
+        language: "csharp",
+        starter: PROGRAM(
+          `    // Parses "name,age,score". Checks, in this order:
+    //  1. exactly 3 fields                  -> "error: expected 3 fields"
+    //  2. the name is not empty             -> "error: empty name"
+    //  3. the age is an int from 0 to 150   -> "error: bad age"
+    //  4. the score is a number 0 to 100    -> "error: bad score"
+    // Success: "OK: <name> (<age>) <score with one decimal>"
+    static string ParseRecord(string line)
+    {
+        // Write your code here
+        return "";
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(ParseRecord("Ann,31,87.5"));
+        Console.WriteLine(ParseRecord(" Bo , 25 , 90 "));
+        Console.WriteLine(ParseRecord("Cy,40"));
+        Console.WriteLine(ParseRecord("Dan,1,2,3"));
+        Console.WriteLine(ParseRecord(",20,50"));
+        Console.WriteLine(ParseRecord("Eve,abc,50"));
+        Console.WriteLine(ParseRecord("Fay,-1,50"));
+        Console.WriteLine(ParseRecord("Gus,151,50"));
+        Console.WriteLine(ParseRecord("Hal,30,100.5"));
+        Console.WriteLine(ParseRecord("Ian,30,x"));
+        Console.WriteLine(ParseRecord("Jo,0,0"));
+        Console.WriteLine(ParseRecord("Kim,150,100"));
+        Console.WriteLine(ParseRecord("  ,30,50"));
+    }`,
+          "using System.Globalization;",
+        ),
+        solution: PROGRAM(
+          `    // Parses "name,age,score". Checks, in this order:
+    //  1. exactly 3 fields                  -> "error: expected 3 fields"
+    //  2. the name is not empty             -> "error: empty name"
+    //  3. the age is an int from 0 to 150   -> "error: bad age"
+    //  4. the score is a number 0 to 100    -> "error: bad score"
+    // Success: "OK: <name> (<age>) <score with one decimal>"
+    static string ParseRecord(string line)
+    {
+        string[] fields = line.Split(',');
+        if (fields.Length != 3)
+        {
+            return "error: expected 3 fields";
+        }
+
+        string name = fields[0].Trim();
+        if (name.Length == 0)
+        {
+            return "error: empty name";
+        }
+
+        int age;
+        if (!int.TryParse(fields[1].Trim(), out age) || age < 0 || age > 150)
+        {
+            return "error: bad age";
+        }
+
+        double score;
+        bool parsed = double.TryParse(fields[2].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out score);
+        if (!parsed || !(score >= 0 && score <= 100))
+        {
+            return "error: bad score";
+        }
+
+        return "OK: " + name + " (" + age + ") " + score.ToString("F1", CultureInfo.InvariantCulture);
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(ParseRecord("Ann,31,87.5"));
+        Console.WriteLine(ParseRecord(" Bo , 25 , 90 "));
+        Console.WriteLine(ParseRecord("Cy,40"));
+        Console.WriteLine(ParseRecord("Dan,1,2,3"));
+        Console.WriteLine(ParseRecord(",20,50"));
+        Console.WriteLine(ParseRecord("Eve,abc,50"));
+        Console.WriteLine(ParseRecord("Fay,-1,50"));
+        Console.WriteLine(ParseRecord("Gus,151,50"));
+        Console.WriteLine(ParseRecord("Hal,30,100.5"));
+        Console.WriteLine(ParseRecord("Ian,30,x"));
+        Console.WriteLine(ParseRecord("Jo,0,0"));
+        Console.WriteLine(ParseRecord("Kim,150,100"));
+        Console.WriteLine(ParseRecord("  ,30,50"));
+    }`,
+          "using System.Globalization;",
+        ),
+        expectedOutput:
+          "OK: Ann (31) 87.5\nOK: Bo (25) 90.0\nerror: expected 3 fields\nerror: expected 3 fields\nerror: empty name\nerror: bad age\nerror: bad age\nerror: bad age\nerror: bad score\nerror: bad score\nOK: Jo (0) 0.0\nOK: Kim (150) 100.0\nerror: empty name\n",
+        maxScore: 20,
       },
     ],
   },
