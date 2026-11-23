@@ -97,8 +97,10 @@ export function CourseSidebar({ outline, progress, currentSlug, certificate }: P
                   }`}
                 >
                   <span className="w-6 shrink-0 font-mono text-xs tabular-nums text-gold-700">{pad(i + 1)}</span>
-                  <span className="min-w-0 flex-1 font-semibold leading-snug text-ink">{m.title}</span>
-                  <span className="font-mono text-xs tabular-nums text-ink-soft">
+                  <span className="min-w-0 flex-1 truncate font-semibold leading-snug text-ink" title={m.title}>
+                    {m.title}
+                  </span>
+                  <span className="shrink-0 whitespace-nowrap font-mono text-xs tabular-nums text-ink-soft">
                     {moduleDone}/{m.slides.length}
                   </span>
                   <Ring done={moduleDone} total={m.slides.length} />

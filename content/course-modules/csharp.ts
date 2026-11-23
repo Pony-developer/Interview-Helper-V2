@@ -17992,6 +17992,58 @@ class ClickCounter : IDisposable
     slug: "async-tasks",
     title: { en: "Async and tasks", uk: "Async і задачі" },
     slides: [
+      { kind: "lecture", slug: "async-vs-threads", title: { en: "Asynchronous vs multithreading", uk: "Асинхронність і багатопотоковість" } },
+      {
+        kind: "quiz",
+        slug: "async-vs-threads-quiz",
+        title: { en: "Asynchronous vs multithreading", uk: "Асинхронність і багатопотоковість" },
+        questions: [
+          {
+            id: "main-difference",
+            mode: "single",
+            prompt: { en: "What is the main difference between asynchronous code and multithreaded code?", uk: "У чому головна різниця між асинхронним і багатопотоковим кодом?" },
+            options: [
+              { id: "a", text: { en: "Asynchrony is about not blocking while waiting; multithreading is about doing work on several threads at the same time", uk: "Асинхронність — це неблокування під час очікування; багатопотоковість — це виконання роботи одночасно в кількох потоках" } },
+              { id: "b", text: { en: "Asynchronous code is always faster", uk: "Асинхронний код завжди швидший" } },
+              { id: "c", text: { en: "Multithreading does not use threads", uk: "Багатопотоковість не використовує потоки" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "delay-thread",
+            mode: "single",
+            prompt: { en: "Does `await Task.Delay(1000)` occupy a thread while it waits?", uk: "Чи займає `await Task.Delay(1000)` потік, поки чекає?" },
+            options: [
+              { id: "a", text: { en: "No: the wait does not occupy a thread", uk: "Ні: очікування не займає потік" } },
+              { id: "b", text: { en: "Yes, one thread is blocked for the whole second", uk: "Так, один потік заблокований на всю секунду" } },
+              { id: "c", text: { en: "Yes, a new process is created", uk: "Так, створюється новий процес" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "async-no-await",
+            mode: "single",
+            prompt: { en: "Does an `async` method that has no `await` inside run on another thread?", uk: "Чи виконується в іншому потоці `async`-метод, у якому немає `await`?" },
+            options: [
+              { id: "a", text: { en: "No: it runs on the calling thread, synchronously", uk: "Ні: він виконується в потоці викликаючого, синхронно" } },
+              { id: "b", text: { en: "Yes, always, on a pool thread", uk: "Так, завжди, у потоці пулу" } },
+              { id: "c", text: { en: "Yes, but only on the UI thread", uk: "Так, але лише в потоці UI" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "best-tool",
+            mode: "single",
+            prompt: { en: "Which tool is the best choice for a heavy calculation that keeps the processor busy?", uk: "Який інструмент найкращий для важкого обчислення, що завантажує процесор?" },
+            options: [
+              { id: "a", text: { en: "`Parallel.For` or `Task.Run`, which spread the work over threads", uk: "`Parallel.For` або `Task.Run`, які розподіляють роботу між потоками" } },
+              { id: "b", text: { en: "`await` on a file read, because it is asynchronous", uk: "`await` читання файлу, бо воно асинхронне" } },
+              { id: "c", text: { en: "`Task.Delay`, which waits without a thread", uk: "`Task.Delay`, який чекає без потоку" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
       { kind: "lecture", slug: "task-basics", title: { en: "Tasks", uk: "Задачі" } },
       { kind: "lecture", slug: "task-run", title: { en: "Task.Run and continuations", uk: "Task.Run і продовження" } },
       { kind: "lecture", slug: "async-await-basics", title: { en: "async and await", uk: "async і await" } },
