@@ -2,6 +2,7 @@
 
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import type { CourseOutline, SlideProgress } from "@/lib/data/course-player";
@@ -11,7 +12,6 @@ import { KindIcon } from "./kind-icon";
 type Props = {
   outline: CourseOutline;
   progress: Record<string, SlideProgress>;
-  currentSlug: string;
   /** Null when the site has no accounts (nothing can be earned). */
   certificate: CertificateState | null;
 };
@@ -64,10 +64,20 @@ function Ring({ done, total }: { done: number; total: number }) {
   );
 }
 
-export function CourseSidebar({ outline, progress, currentSlug, certificate }: Props) {
+export function CourseSidebar({ outline, progress, certificate }: Props) {
   const t = useTranslations("course");
+  // The sidebar lives in the player layout, which stays mounted between slides: read the slide from the URL.
+  const params = useParams<{ slide?: string }>();
+  const currentSlug = params.slide ? decodeURIComponent(params.slide) : "";
   const currentModule = outline.modules.find((m) => m.slides.some((s) => s.slug === currentSlug)) ?? outline.modules[0];
-  const [openModule, setOpenModule] = useState<string | null>(currentModule?.slug ?? null);
+  const currentModuleSlug = currentModule?.slug ?? null;
+  const [openModule, setOpenModule] = useState<string | null>(currentModuleSlug);
+  // Follow the reader into another module (e.g. via Next/Back) without overriding a manual choice on every render.
+  const [followed, setFollowed] = useState(currentModuleSlug);
+  if (followed !== currentModuleSlug) {
+    setFollowed(currentModuleSlug);
+    setOpenModule(currentModuleSlug);
+  }
 
   const isDone = (id: string) => progress[id]?.completed ?? false;
   const all = outline.modules.flatMap((m) => m.slides);

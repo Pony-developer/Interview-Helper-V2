@@ -229,6 +229,7 @@
     "solved": "Solved",
     "read": "Read",
     "empty": "This course has no lessons yet. Check back soon.",
+    "slideError": "This slide couldn't load.",
     "quiz": {
       "check": "Check answers",
       "retry": "Try again",

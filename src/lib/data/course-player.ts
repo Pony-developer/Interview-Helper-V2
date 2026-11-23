@@ -177,8 +177,8 @@ export async function getCourseSlide(outline: CourseOutline, slideSlug: string, 
   }
 }
 
-/** The signed-in visitor's progress in a course. Anonymous visitors get `signedIn: false`. */
-export async function getCourseProgress(outline: CourseOutline): Promise<CourseProgress> {
+/** The signed-in visitor's progress in a course (once per request: the player layout and page share it). Anonymous visitors get `signedIn: false`. */
+export const getCourseProgress = cache(async (outline: CourseOutline): Promise<CourseProgress> => {
   if (!isSupabaseConfigured()) return { signedIn: false, bySlide: {}, certificateId: null };
   try {
     const supabase = await createClient();
@@ -204,7 +204,7 @@ export async function getCourseProgress(outline: CourseOutline): Promise<CourseP
     console.error("getCourseProgress failed", e);
     return { signedIn: false, bySlide: {}, certificateId: null };
   }
-}
+});
 
 /** Share (0–100, rounded down) of the course's points earned, best score per graded slide. Null without graded slides. */
 export function coursePercent(outline: CourseOutline, bySlide: Record<string, SlideProgress>): number | null {
