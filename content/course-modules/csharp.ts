@@ -1825,6 +1825,7 @@ export const csharpModules: ModuleDef[] = [
     slug: "branching",
     title: { en: "Branching", uk: "Розгалуження" },
     slides: [
+      { kind: "lecture", slug: "booleans", title: { en: "Comparison and the bool type", uk: "Порівняння та логічний тип" } },
       { kind: "lecture", slug: "if-else", title: { en: "if, else and switch", uk: "if, else та switch" } },
       {
         kind: "practice",
@@ -1857,6 +1858,608 @@ export const csharpModules: ModuleDef[] = [
         Console.WriteLine(IsLeapYear(2023));
     }`),
         expectedOutput: "False\nTrue\nTrue\nFalse\n",
+      },
+      { kind: "lecture", slug: "float-comparison", title: { en: "Comparing floating-point numbers", uk: "Порівняння чисел з плаваючою комою" } },
+      { kind: "lecture", slug: "short-circuit", title: { en: "Full and short-circuit operators", uk: "Повні та скорочені оператори" } },
+      {
+        kind: "practice",
+        slug: "queens-move",
+        title: { en: "The queen's move", uk: "Хід ферзя" },
+        language: "csharp",
+        starter: PROGRAM(`    // A queen moves along a row, a column or a diagonal.
+    // Squares are (column, row), each from 1 to 8.
+    static bool CanQueenMove(int fromX, int fromY, int toX, int toY)
+    {
+        // Write your code here
+        return false;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(CanQueenMove(1, 1, 1, 8));
+        Console.WriteLine(CanQueenMove(1, 1, 8, 1));
+        Console.WriteLine(CanQueenMove(1, 1, 8, 8));
+        Console.WriteLine(CanQueenMove(3, 5, 6, 2));
+        Console.WriteLine(CanQueenMove(1, 1, 2, 3));
+        Console.WriteLine(CanQueenMove(4, 4, 4, 4));
+        Console.WriteLine(CanQueenMove(2, 7, 5, 8));
+        Console.WriteLine(CanQueenMove(8, 1, 1, 8));
+    }`),
+        solution: PROGRAM(`    // A queen moves along a row, a column or a diagonal.
+    // Squares are (column, row), each from 1 to 8.
+    static bool CanQueenMove(int fromX, int fromY, int toX, int toY)
+    {
+        if (fromX == toX && fromY == toY)
+        {
+            return false;
+        }
+        return fromX == toX
+            || fromY == toY
+            || Math.Abs(toX - fromX) == Math.Abs(toY - fromY);
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(CanQueenMove(1, 1, 1, 8));
+        Console.WriteLine(CanQueenMove(1, 1, 8, 1));
+        Console.WriteLine(CanQueenMove(1, 1, 8, 8));
+        Console.WriteLine(CanQueenMove(3, 5, 6, 2));
+        Console.WriteLine(CanQueenMove(1, 1, 2, 3));
+        Console.WriteLine(CanQueenMove(4, 4, 4, 4));
+        Console.WriteLine(CanQueenMove(2, 7, 5, 8));
+        Console.WriteLine(CanQueenMove(8, 1, 1, 8));
+    }`),
+        expectedOutput: "True\nTrue\nTrue\nTrue\nFalse\nFalse\nFalse\nTrue\n",
+      },
+      {
+        kind: "practice",
+        slug: "middle-of-three",
+        title: { en: "Middle of three", uk: "Середнє з трьох" },
+        language: "csharp",
+        starter: PROGRAM(`    // Return the number that would be second if the three were sorted
+    static int Middle(int a, int b, int c)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Middle(1, 2, 3));
+        Console.WriteLine(Middle(3, 1, 2));
+        Console.WriteLine(Middle(5, 5, 1));
+        Console.WriteLine(Middle(-1, -5, -3));
+        Console.WriteLine(Middle(7, 7, 7));
+        Console.WriteLine(Middle(2, 9, 4));
+        Console.WriteLine(Middle(10, 3, 10));
+    }`),
+        solution: PROGRAM(`    // Return the number that would be second if the three were sorted
+    static int Middle(int a, int b, int c)
+    {
+        if ((a >= b && a <= c) || (a <= b && a >= c))
+        {
+            return a;
+        }
+        if ((b >= a && b <= c) || (b <= a && b >= c))
+        {
+            return b;
+        }
+        return c;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Middle(1, 2, 3));
+        Console.WriteLine(Middle(3, 1, 2));
+        Console.WriteLine(Middle(5, 5, 1));
+        Console.WriteLine(Middle(-1, -5, -3));
+        Console.WriteLine(Middle(7, 7, 7));
+        Console.WriteLine(Middle(2, 9, 4));
+        Console.WriteLine(Middle(10, 3, 10));
+    }`),
+        expectedOutput: "2\n2\n5\n-3\n7\n4\n10\n",
+      },
+      { kind: "lecture", slug: "branching-mistakes", title: { en: "Typical branching errors", uk: "Типові помилки розгалужень" } },
+      {
+        kind: "quiz",
+        slug: "conditions-quiz",
+        title: { en: "Logical expressions and conditions", uk: "Логічні вирази та умови" },
+        questions: [
+          {
+            id: "and",
+            mode: "single",
+            prompt: { en: "What does `Console.WriteLine(5 > 3 && 2 > 4);` print?", uk: "Що надрукує `Console.WriteLine(5 > 3 && 2 > 4);`?" },
+            options: [
+              { id: "a", text: { en: "True", uk: "True" } },
+              { id: "b", text: { en: "False", uk: "False" } },
+              { id: "c", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "not",
+            mode: "single",
+            prompt: { en: "What is the value of `!(true && false)`?", uk: "Чому дорівнює `!(true && false)`?" },
+            options: [
+              { id: "a", text: { en: "True", uk: "True" } },
+              { id: "b", text: { en: "False", uk: "False" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "precedence",
+            mode: "single",
+            prompt: { en: "What is the value of `true || false && false`?", uk: "Чому дорівнює `true || false && false`?" },
+            options: [
+              { id: "a", text: { en: "True, because `&&` is evaluated before `||`", uk: "True, бо `&&` виконується раніше за `||`" } },
+              { id: "b", text: { en: "False, because the expression is evaluated strictly left to right", uk: "False, бо вираз обчислюється суворо зліва направо" } },
+              { id: "c", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "de-morgan",
+            mode: "single",
+            prompt: { en: "Which expression is equal to `!(a && b)`?", uk: "Який вираз дорівнює `!(a && b)`?" },
+            options: [
+              { id: "a", text: { en: "`!a && !b`", uk: "`!a && !b`" } },
+              { id: "b", text: { en: "`!a || !b`", uk: "`!a || !b`" } },
+              { id: "c", text: { en: "`a || b`", uk: "`a || b`" } },
+              { id: "d", text: { en: "`!a == b`", uk: "`!a == b`" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "doubles",
+            mode: "single",
+            prompt: { en: "What does `Console.WriteLine(0.1 + 0.2 == 0.3);` print?", uk: "Що надрукує `Console.WriteLine(0.1 + 0.2 == 0.3);`?" },
+            options: [
+              { id: "a", text: { en: "True", uk: "True" } },
+              { id: "b", text: { en: "False", uk: "False" } },
+              { id: "c", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "assign-in-if",
+            mode: "single",
+            prompt: {
+              en: "What happens with this code?\n\n```csharp\nint x = 5;\nif (x = 10)\n{\n    Console.WriteLine(\"ten\");\n}\n```",
+              uk: "Що станеться з цим кодом?\n\n```csharp\nint x = 5;\nif (x = 10)\n{\n    Console.WriteLine(\"ten\");\n}\n```",
+            },
+            options: [
+              { id: "a", text: { en: "It prints `ten`", uk: "Він надрукує `ten`" } },
+              { id: "b", text: { en: "It prints nothing", uk: "Він нічого не надрукує" } },
+              { id: "c", text: { en: "It does not compile: an `int` is not a condition", uk: "Він не компілюється: `int` не є умовою" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "true-for-seven",
+            mode: "multi",
+            prompt: { en: "Which conditions are true when `x` is `7`?", uk: "Які умови істинні, коли `x` дорівнює `7`?" },
+            options: [
+              { id: "a", text: { en: "`x % 2 == 1`", uk: "`x % 2 == 1`" } },
+              { id: "b", text: { en: "`x > 5 && x < 10`", uk: "`x > 5 && x < 10`" } },
+              { id: "c", text: { en: "`x < 3 || x > 10`", uk: "`x < 3 || x > 10`" } },
+              { id: "d", text: { en: "`!(x == 7)`", uk: "`!(x == 7)`" } },
+              { id: "e", text: { en: "`x >= 7`", uk: "`x >= 7`" } },
+            ],
+            correct: ["a", "b", "e"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "robot-control",
+        title: { en: "Robot control", uk: "Керування роботом" },
+        language: "csharp",
+        starter: PROGRAM(`    // Carries out ONE command and returns the new state as "x y direction".
+    // Directions: N (y grows), E (x grows), S, W.
+    // Commands: L - turn left, R - turn right, F - step forward, B - step backward.
+    // Any other command changes nothing.
+    static string Execute(int x, int y, string direction, string command)
+    {
+        // Write your code here
+        return x + " " + y + " " + direction;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Execute(0, 0, "N", "F"));
+        Console.WriteLine(Execute(0, 0, "N", "R"));
+        Console.WriteLine(Execute(2, 3, "E", "F"));
+        Console.WriteLine(Execute(2, 3, "S", "F"));
+        Console.WriteLine(Execute(2, 3, "W", "L"));
+        Console.WriteLine(Execute(0, 0, "N", "L"));
+        Console.WriteLine(Execute(1, 1, "W", "B"));
+        Console.WriteLine(Execute(1, 1, "N", "B"));
+        Console.WriteLine(Execute(1, 1, "N", "X"));
+    }`),
+        solution: PROGRAM(`    static string TurnLeft(string direction)
+    {
+        switch (direction)
+        {
+            case "N": return "W";
+            case "W": return "S";
+            case "S": return "E";
+            default: return "N";
+        }
+    }
+
+    static string TurnRight(string direction)
+    {
+        switch (direction)
+        {
+            case "N": return "E";
+            case "E": return "S";
+            case "S": return "W";
+            default: return "N";
+        }
+    }
+
+    // Carries out ONE command and returns the new state as "x y direction".
+    // Directions: N (y grows), E (x grows), S, W.
+    // Commands: L - turn left, R - turn right, F - step forward, B - step backward.
+    // Any other command changes nothing.
+    static string Execute(int x, int y, string direction, string command)
+    {
+        int dx = 0;
+        int dy = 0;
+        switch (direction)
+        {
+            case "N": dy = 1; break;
+            case "E": dx = 1; break;
+            case "S": dy = -1; break;
+            case "W": dx = -1; break;
+        }
+
+        switch (command)
+        {
+            case "F":
+                x += dx;
+                y += dy;
+                break;
+            case "B":
+                x -= dx;
+                y -= dy;
+                break;
+            case "L":
+                direction = TurnLeft(direction);
+                break;
+            case "R":
+                direction = TurnRight(direction);
+                break;
+        }
+        return x + " " + y + " " + direction;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Execute(0, 0, "N", "F"));
+        Console.WriteLine(Execute(0, 0, "N", "R"));
+        Console.WriteLine(Execute(2, 3, "E", "F"));
+        Console.WriteLine(Execute(2, 3, "S", "F"));
+        Console.WriteLine(Execute(2, 3, "W", "L"));
+        Console.WriteLine(Execute(0, 0, "N", "L"));
+        Console.WriteLine(Execute(1, 1, "W", "B"));
+        Console.WriteLine(Execute(1, 1, "N", "B"));
+        Console.WriteLine(Execute(1, 1, "N", "X"));
+    }`),
+        expectedOutput: "0 1 N\n0 0 E\n3 3 E\n2 2 S\n2 3 S\n0 0 W\n2 1 W\n1 0 N\n1 1 N\n",
+      },
+      {
+        kind: "quiz",
+        slug: "branching-review",
+        title: { en: "Module review", uk: "Підсумковий тест" },
+        questions: [
+          {
+            id: "order",
+            mode: "single",
+            prompt: {
+              en: "What does this program print?\n\n```csharp\nint score = 95;\nif (score >= 50) Console.WriteLine(\"pass\");\nelse if (score >= 90) Console.WriteLine(\"excellent\");\n```",
+              uk: "Що надрукує ця програма?\n\n```csharp\nint score = 95;\nif (score >= 50) Console.WriteLine(\"pass\");\nelse if (score >= 90) Console.WriteLine(\"excellent\");\n```",
+            },
+            options: [
+              { id: "a", text: { en: "`pass`", uk: "`pass`" } },
+              { id: "b", text: { en: "`excellent`", uk: "`excellent`" } },
+              { id: "c", text: { en: "`pass` and `excellent`", uk: "`pass` та `excellent`" } },
+              { id: "d", text: { en: "Nothing", uk: "Нічого" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "semicolon",
+            mode: "single",
+            prompt: {
+              en: "What does this program print?\n\n```csharp\nint x = -1;\nif (x > 0);\n    Console.WriteLine(\"positive\");\n```",
+              uk: "Що надрукує ця програма?\n\n```csharp\nint x = -1;\nif (x > 0);\n    Console.WriteLine(\"positive\");\n```",
+            },
+            options: [
+              { id: "a", text: { en: "Nothing", uk: "Нічого" } },
+              { id: "b", text: { en: "`positive`: the `;` makes the `if` govern an empty statement", uk: "`positive`: через `;` оператор `if` керує порожньою інструкцією" } },
+              { id: "c", text: { en: "It does not compile", uk: "Вона не компілюється" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "ternary",
+            mode: "single",
+            prompt: {
+              en: "What does `int a = 5; Console.WriteLine(a > 3 ? \"big\" : \"small\");` print?",
+              uk: "Що надрукує `int a = 5; Console.WriteLine(a > 3 ? \"big\" : \"small\");`?",
+            },
+            options: [
+              { id: "a", text: { en: "big", uk: "big" } },
+              { id: "b", text: { en: "small", uk: "small" } },
+              { id: "c", text: { en: "True", uk: "True" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "between",
+            mode: "single",
+            prompt: {
+              en: "Which condition checks that `x` is between 1 and 10 inclusive?",
+              uk: "Яка умова перевіряє, що `x` лежить між 1 та 10 включно?",
+            },
+            options: [
+              { id: "a", text: { en: "`1 <= x <= 10`", uk: "`1 <= x <= 10`" } },
+              { id: "b", text: { en: "`x >= 1 || x <= 10`", uk: "`x >= 1 || x <= 10`" } },
+              { id: "c", text: { en: "`x > 1 && x < 10`", uk: "`x > 1 && x < 10`" } },
+              { id: "d", text: { en: "`x >= 1 && x <= 10`", uk: "`x >= 1 && x <= 10`" } },
+            ],
+            correct: ["d"],
+          },
+          {
+            id: "guard",
+            mode: "single",
+            prompt: {
+              en: "What does this program print?\n\n```csharp\nstring s = null;\nConsole.WriteLine(s != null && s.Length > 0);\n```",
+              uk: "Що надрукує ця програма?\n\n```csharp\nstring s = null;\nConsole.WriteLine(s != null && s.Length > 0);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "False", uk: "False" } },
+              { id: "b", text: { en: "True", uk: "True" } },
+              { id: "c", text: { en: "It crashes with `NullReferenceException`", uk: "Вона аварійно завершується з `NullReferenceException`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "no-guard",
+            mode: "single",
+            prompt: {
+              en: "And what does this program print? Note the single `&`.\n\n```csharp\nstring s = null;\nConsole.WriteLine(s != null & s.Length > 0);\n```",
+              uk: "А що надрукує ця програма? Зверніть увагу на одинарний `&`.\n\n```csharp\nstring s = null;\nConsole.WriteLine(s != null & s.Length > 0);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "False", uk: "False" } },
+              { id: "b", text: { en: "True", uk: "True" } },
+              { id: "c", text: { en: "It crashes with `NullReferenceException`, since `&` evaluates both sides", uk: "Вона аварійно завершується з `NullReferenceException`, бо `&` обчислює обидві частини" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "else-pair",
+            mode: "single",
+            prompt: {
+              en: "To which `if` does an `else` belong when there are no braces?",
+              uk: "До якого `if` належить `else`, якщо фігурних дужок немає?",
+            },
+            options: [
+              { id: "a", text: { en: "To the first `if` in the code", uk: "До першого `if` у коді" } },
+              { id: "b", text: { en: "To the nearest preceding `if` that has no `else` yet", uk: "До найближчого попереднього `if`, у якого ще немає `else`" } },
+              { id: "c", text: { en: "To the one that the indentation suggests", uk: "До того, на який вказують відступи" } },
+            ],
+            correct: ["b"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "hryvnia",
+        title: { en: "Practice: Hryvnia", uk: "Практика «Гривня-гривні-гривень»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Returns the number and the correct form of the word:
+    // 1 hryvnia, 2 hryvni, 5 hryven
+    static string Hryvnias(int n)
+    {
+        // Write your code here
+        return n + " hryven";
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Hryvnias(0));
+        Console.WriteLine(Hryvnias(1));
+        Console.WriteLine(Hryvnias(2));
+        Console.WriteLine(Hryvnias(4));
+        Console.WriteLine(Hryvnias(5));
+        Console.WriteLine(Hryvnias(11));
+        Console.WriteLine(Hryvnias(12));
+        Console.WriteLine(Hryvnias(14));
+        Console.WriteLine(Hryvnias(21));
+        Console.WriteLine(Hryvnias(22));
+        Console.WriteLine(Hryvnias(25));
+        Console.WriteLine(Hryvnias(100));
+        Console.WriteLine(Hryvnias(101));
+        Console.WriteLine(Hryvnias(111));
+        Console.WriteLine(Hryvnias(112));
+        Console.WriteLine(Hryvnias(1002));
+    }`),
+        solution: PROGRAM(`    // Returns the number and the correct form of the word:
+    // 1 hryvnia, 2 hryvni, 5 hryven
+    static string Hryvnias(int n)
+    {
+        int lastTwo = n % 100;
+        int last = n % 10;
+
+        if (lastTwo >= 11 && lastTwo <= 14)
+        {
+            return n + " hryven";
+        }
+        if (last == 1)
+        {
+            return n + " hryvnia";
+        }
+        if (last >= 2 && last <= 4)
+        {
+            return n + " hryvni";
+        }
+        return n + " hryven";
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Hryvnias(0));
+        Console.WriteLine(Hryvnias(1));
+        Console.WriteLine(Hryvnias(2));
+        Console.WriteLine(Hryvnias(4));
+        Console.WriteLine(Hryvnias(5));
+        Console.WriteLine(Hryvnias(11));
+        Console.WriteLine(Hryvnias(12));
+        Console.WriteLine(Hryvnias(14));
+        Console.WriteLine(Hryvnias(21));
+        Console.WriteLine(Hryvnias(22));
+        Console.WriteLine(Hryvnias(25));
+        Console.WriteLine(Hryvnias(100));
+        Console.WriteLine(Hryvnias(101));
+        Console.WriteLine(Hryvnias(111));
+        Console.WriteLine(Hryvnias(112));
+        Console.WriteLine(Hryvnias(1002));
+    }`),
+        expectedOutput:
+          "0 hryven\n1 hryvnia\n2 hryvni\n4 hryvni\n5 hryven\n11 hryven\n12 hryven\n14 hryven\n21 hryvnia\n22 hryvni\n25 hryven\n100 hryven\n101 hryvnia\n111 hryven\n112 hryven\n1002 hryvni\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "two-rectangles",
+        title: { en: "Practice: Two rectangles", uk: "Практика «Два прямокутники»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Rectangles A and B have sides parallel to the axes.
+    // (x1, y1) is the lower-left corner, (x2, y2) the upper-right one.
+    // Returns "disjoint", "touch" or "overlap".
+    static string Relation(
+        int ax1, int ay1, int ax2, int ay2,
+        int bx1, int by1, int bx2, int by2)
+    {
+        // Write your code here
+        return "disjoint";
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Relation(0, 0, 4, 4, 5, 5, 8, 8));
+        Console.WriteLine(Relation(0, 0, 4, 4, 4, 0, 8, 4));
+        Console.WriteLine(Relation(0, 0, 4, 4, 4, 4, 8, 8));
+        Console.WriteLine(Relation(0, 0, 4, 4, 2, 2, 6, 6));
+        Console.WriteLine(Relation(0, 0, 10, 10, 2, 2, 3, 3));
+        Console.WriteLine(Relation(0, 0, 4, 4, 5, 0, 8, 4));
+        Console.WriteLine(Relation(0, 0, 4, 4, 4, 5, 8, 8));
+        Console.WriteLine(Relation(0, 0, 4, 4, 0, 0, 4, 4));
+        Console.WriteLine(Relation(0, 0, 4, 4, 1, 4, 3, 9));
+    }`),
+        solution: PROGRAM(`    // Rectangles A and B have sides parallel to the axes.
+    // (x1, y1) is the lower-left corner, (x2, y2) the upper-right one.
+    // Returns "disjoint", "touch" or "overlap".
+    static string Relation(
+        int ax1, int ay1, int ax2, int ay2,
+        int bx1, int by1, int bx2, int by2)
+    {
+        int overlapX = Math.Min(ax2, bx2) - Math.Max(ax1, bx1);
+        int overlapY = Math.Min(ay2, by2) - Math.Max(ay1, by1);
+
+        if (overlapX < 0 || overlapY < 0)
+        {
+            return "disjoint";
+        }
+        if (overlapX == 0 || overlapY == 0)
+        {
+            return "touch";
+        }
+        return "overlap";
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Relation(0, 0, 4, 4, 5, 5, 8, 8));
+        Console.WriteLine(Relation(0, 0, 4, 4, 4, 0, 8, 4));
+        Console.WriteLine(Relation(0, 0, 4, 4, 4, 4, 8, 8));
+        Console.WriteLine(Relation(0, 0, 4, 4, 2, 2, 6, 6));
+        Console.WriteLine(Relation(0, 0, 10, 10, 2, 2, 3, 3));
+        Console.WriteLine(Relation(0, 0, 4, 4, 5, 0, 8, 4));
+        Console.WriteLine(Relation(0, 0, 4, 4, 4, 5, 8, 8));
+        Console.WriteLine(Relation(0, 0, 4, 4, 0, 0, 4, 4));
+        Console.WriteLine(Relation(0, 0, 4, 4, 1, 4, 3, 9));
+    }`),
+        expectedOutput: "disjoint\ntouch\ntouch\noverlap\noverlap\ndisjoint\ndisjoint\noverlap\ntouch\n",
+        maxScore: 20,
+      },
+      {
+        kind: "practice",
+        slug: "segment-distance",
+        title: { en: "Practice: Distance to a segment", uk: "Практика «Відстань до відрізка»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Distance from the point P to the segment AB
+    static double DistanceToSegment(double px, double py, double ax, double ay, double bx, double by)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Math.Round(DistanceToSegment(2, 3, 0, 0, 4, 0), 2));
+        Console.WriteLine(Math.Round(DistanceToSegment(-3, 4, 0, 0, 4, 0), 2));
+        Console.WriteLine(Math.Round(DistanceToSegment(7, 4, 0, 0, 4, 0), 2));
+        Console.WriteLine(Math.Round(DistanceToSegment(2, 0, 0, 0, 4, 0), 2));
+        Console.WriteLine(Math.Round(DistanceToSegment(4, 5, 1, 1, 1, 1), 2));
+        Console.WriteLine(Math.Round(DistanceToSegment(1, 1, 0, 0, 2, 2), 2));
+        Console.WriteLine(Math.Round(DistanceToSegment(0, 2, 0, 0, 2, 2), 2));
+    }`),
+        solution: PROGRAM(`    static double Distance(double x1, double y1, double x2, double y2)
+    {
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        return Math.Sqrt(dx * dx + dy * dy);
+    }
+
+    // Distance from the point P to the segment AB
+    static double DistanceToSegment(double px, double py, double ax, double ay, double bx, double by)
+    {
+        double dx = bx - ax;
+        double dy = by - ay;
+        double lengthSquared = dx * dx + dy * dy;
+        if (lengthSquared == 0)
+        {
+            return Distance(px, py, ax, ay);
+        }
+
+        double t = ((px - ax) * dx + (py - ay) * dy) / lengthSquared;
+        if (t < 0)
+        {
+            t = 0;
+        }
+        if (t > 1)
+        {
+            t = 1;
+        }
+        return Distance(px, py, ax + t * dx, ay + t * dy);
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Math.Round(DistanceToSegment(2, 3, 0, 0, 4, 0), 2));
+        Console.WriteLine(Math.Round(DistanceToSegment(-3, 4, 0, 0, 4, 0), 2));
+        Console.WriteLine(Math.Round(DistanceToSegment(7, 4, 0, 0, 4, 0), 2));
+        Console.WriteLine(Math.Round(DistanceToSegment(2, 0, 0, 0, 4, 0), 2));
+        Console.WriteLine(Math.Round(DistanceToSegment(4, 5, 1, 1, 1, 1), 2));
+        Console.WriteLine(Math.Round(DistanceToSegment(1, 1, 0, 0, 2, 2), 2));
+        Console.WriteLine(Math.Round(DistanceToSegment(0, 2, 0, 0, 2, 2), 2));
+    }`),
+        expectedOutput: "3\n5\n5\n0\n5\n0\n1.41\n",
+        maxScore: 10,
       },
     ],
   },
