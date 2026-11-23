@@ -2468,6 +2468,171 @@ export const csharpModules: ModuleDef[] = [
     title: { en: "Loops", uk: "Цикли" },
     slides: [
       { kind: "lecture", slug: "while-and-for", title: { en: "while and for", uk: "while та for" } },
+      { kind: "lecture", slug: "while-loop", title: { en: "The while loop in depth", uk: "Цикл while докладно" } },
+      {
+        kind: "practice",
+        slug: "powers-of-two",
+        title: { en: "In search of a power of two", uk: "У пошуках степеня двійки" },
+        language: "csharp",
+        starter: PROGRAM(`    // Returns "n: 2^k = p", where p = 2^k is the smallest power of two that is >= n
+    static string PowerOfTwo(int n)
+    {
+        // Write your code here
+        return "";
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(PowerOfTwo(1));
+        Console.WriteLine(PowerOfTwo(5));
+        Console.WriteLine(PowerOfTwo(16));
+        Console.WriteLine(PowerOfTwo(17));
+        Console.WriteLine(PowerOfTwo(1000));
+        Console.WriteLine(PowerOfTwo(1000000));
+    }`),
+        solution: PROGRAM(`    // Returns "n: 2^k = p", where p = 2^k is the smallest power of two that is >= n
+    static string PowerOfTwo(int n)
+    {
+        int power = 1;
+        int k = 0;
+        while (power < n)
+        {
+            power *= 2;
+            k++;
+        }
+        return n + ": 2^" + k + " = " + power;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(PowerOfTwo(1));
+        Console.WriteLine(PowerOfTwo(5));
+        Console.WriteLine(PowerOfTwo(16));
+        Console.WriteLine(PowerOfTwo(17));
+        Console.WriteLine(PowerOfTwo(1000));
+        Console.WriteLine(PowerOfTwo(1000000));
+    }`),
+        expectedOutput: "1: 2^0 = 1\n5: 2^3 = 8\n16: 2^4 = 16\n17: 2^5 = 32\n1000: 2^10 = 1024\n1000000: 2^20 = 1048576\n",
+      },
+      {
+        kind: "practice",
+        slug: "digits",
+        title: { en: "Digits of a number", uk: "Цифри числа" },
+        language: "csharp",
+        starter: PROGRAM(`    // The sum of the digits of n (n >= 0)
+    static int DigitSum(int n)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    // The number with its digits in reverse order (n >= 0)
+    static int Reverse(int n)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(DigitSum(12345));
+        Console.WriteLine(DigitSum(0));
+        Console.WriteLine(DigitSum(999));
+        Console.WriteLine(DigitSum(1000000));
+        Console.WriteLine(Reverse(12345));
+        Console.WriteLine(Reverse(1200));
+        Console.WriteLine(Reverse(907));
+        Console.WriteLine(Reverse(0));
+        Console.WriteLine(Reverse(7));
+    }`),
+        solution: PROGRAM(`    // The sum of the digits of n (n >= 0)
+    static int DigitSum(int n)
+    {
+        int sum = 0;
+        while (n > 0)
+        {
+            sum += n % 10;
+            n /= 10;
+        }
+        return sum;
+    }
+
+    // The number with its digits in reverse order (n >= 0)
+    static int Reverse(int n)
+    {
+        int result = 0;
+        while (n > 0)
+        {
+            result = result * 10 + n % 10;
+            n /= 10;
+        }
+        return result;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(DigitSum(12345));
+        Console.WriteLine(DigitSum(0));
+        Console.WriteLine(DigitSum(999));
+        Console.WriteLine(DigitSum(1000000));
+        Console.WriteLine(Reverse(12345));
+        Console.WriteLine(Reverse(1200));
+        Console.WriteLine(Reverse(907));
+        Console.WriteLine(Reverse(0));
+        Console.WriteLine(Reverse(7));
+    }`),
+        expectedOutput: "15\n0\n27\n1\n54321\n21\n709\n0\n7\n",
+      },
+      { kind: "lecture", slug: "refactoring-while", title: { en: "Refactoring while", uk: "Рефакторинг while" } },
+      {
+        kind: "practice",
+        slug: "remove-spaces",
+        title: { en: "Remove the spaces", uk: "Прибрати пробіли" },
+        language: "csharp",
+        starter: PROGRAM(`    // Returns the text without any space characters.
+    // Build the result yourself; do not use Replace, Split or Join.
+    static string RemoveSpaces(string text)
+    {
+        // Write your code here
+        return text;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine("[" + RemoveSpaces("a b c") + "]");
+        Console.WriteLine("[" + RemoveSpaces("  hello  world ") + "]");
+        Console.WriteLine("[" + RemoveSpaces("") + "]");
+        Console.WriteLine("[" + RemoveSpaces("nospaces") + "]");
+        Console.WriteLine("[" + RemoveSpaces("   ") + "]");
+        Console.WriteLine("[" + RemoveSpaces("x  y") + "]");
+    }`),
+        solution: PROGRAM(`    // Returns the text without any space characters.
+    // Build the result yourself; do not use Replace, Split or Join.
+    static string RemoveSpaces(string text)
+    {
+        string result = "";
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (text[i] != ' ')
+            {
+                result += text[i];
+            }
+        }
+        return result;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine("[" + RemoveSpaces("a b c") + "]");
+        Console.WriteLine("[" + RemoveSpaces("  hello  world ") + "]");
+        Console.WriteLine("[" + RemoveSpaces("") + "]");
+        Console.WriteLine("[" + RemoveSpaces("nospaces") + "]");
+        Console.WriteLine("[" + RemoveSpaces("   ") + "]");
+        Console.WriteLine("[" + RemoveSpaces("x  y") + "]");
+    }`),
+        expectedOutput: "[abc]\n[helloworld]\n[]\n[nospaces]\n[]\n[xy]\n",
+      },
+      { kind: "lecture", slug: "for-loop", title: { en: "for loops in depth", uk: "Цикли for докладно" } },
       {
         kind: "practice",
         slug: "fizzbuzz",
@@ -2485,6 +2650,430 @@ export const csharpModules: ModuleDef[] = [
         }
     }`),
         expectedOutput: "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n",
+      },
+      { kind: "lecture", slug: "nested-loops", title: { en: "Nested loops", uk: "Вкладені цикли" } },
+      {
+        kind: "practice",
+        slug: "frame",
+        title: { en: "Frame", uk: "Рамочка" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints a frame of '*' with the given size; the inside is spaces
+    static void PrintFrame(int width, int height)
+    {
+        // Write your code here
+    }
+
+    static void Main()
+    {
+        PrintFrame(5, 4);
+        Console.WriteLine("---");
+        PrintFrame(3, 3);
+        Console.WriteLine("---");
+        PrintFrame(4, 1);
+        Console.WriteLine("---");
+        PrintFrame(1, 3);
+    }`),
+        solution: PROGRAM(`    // Prints a frame of '*' with the given size; the inside is spaces
+    static void PrintFrame(int width, int height)
+    {
+        for (int row = 0; row < height; row++)
+        {
+            for (int col = 0; col < width; col++)
+            {
+                bool border = row == 0 || row == height - 1 || col == 0 || col == width - 1;
+                Console.Write(border ? "*" : " ");
+            }
+            Console.WriteLine();
+        }
+    }
+
+    static void Main()
+    {
+        PrintFrame(5, 4);
+        Console.WriteLine("---");
+        PrintFrame(3, 3);
+        Console.WriteLine("---");
+        PrintFrame(4, 1);
+        Console.WriteLine("---");
+        PrintFrame(1, 3);
+    }`),
+        expectedOutput: "*****\n*   *\n*   *\n*****\n---\n***\n* *\n***\n---\n****\n---\n*\n*\n*\n",
+      },
+      { kind: "lecture", slug: "while-vs-for", title: { en: "Comparing for and while", uk: "Порівняння for і while" } },
+      {
+        kind: "practice",
+        slug: "chessboard",
+        title: { en: "* Chessboard", uk: "* Шахівниця" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints a size x size board: '#' for dark squares, '.' for light ones.
+    // The top-left square is dark.
+    static void PrintBoard(int size)
+    {
+        // Write your code here
+    }
+
+    static void Main()
+    {
+        PrintBoard(8);
+        Console.WriteLine("---");
+        PrintBoard(3);
+    }`),
+        solution: PROGRAM(`    // Prints a size x size board: '#' for dark squares, '.' for light ones.
+    // The top-left square is dark.
+    static void PrintBoard(int size)
+    {
+        for (int row = 0; row < size; row++)
+        {
+            for (int col = 0; col < size; col++)
+            {
+                Console.Write((row + col) % 2 == 0 ? "#" : ".");
+            }
+            Console.WriteLine();
+        }
+    }
+
+    static void Main()
+    {
+        PrintBoard(8);
+        Console.WriteLine("---");
+        PrintBoard(3);
+    }`),
+        expectedOutput:
+          "#.#.#.#.\n.#.#.#.#\n#.#.#.#.\n.#.#.#.#\n#.#.#.#.\n.#.#.#.#\n#.#.#.#.\n.#.#.#.#\n---\n#.#\n.#.\n#.#\n",
+      },
+      {
+        kind: "quiz",
+        slug: "loops-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "step",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nfor (int i = 1; i <= 10; i += 3)\n{\n    Console.Write(i + \" \");\n}\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nfor (int i = 1; i <= 10; i += 3)\n{\n    Console.Write(i + \" \");\n}\n```",
+            },
+            options: [
+              { id: "a", text: { en: "`1 4 7 10`", uk: "`1 4 7 10`" } },
+              { id: "b", text: { en: "`1 4 7`", uk: "`1 4 7`" } },
+              { id: "c", text: { en: "`4 7 10`", uk: "`4 7 10`" } },
+              { id: "d", text: { en: "`1 3 6 9`", uk: "`1 3 6 9`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "counter-after",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nint i;\nfor (i = 0; i < 5; i++)\n{\n}\nConsole.WriteLine(i);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nint i;\nfor (i = 0; i < 5; i++)\n{\n}\nConsole.WriteLine(i);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "4", uk: "4" } },
+              { id: "b", text: { en: "5", uk: "5" } },
+              { id: "c", text: { en: "6", uk: "6" } },
+              { id: "d", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "nested-count",
+            mode: "single",
+            prompt: {
+              en: "How many times does `count++` run?\n\n```csharp\nint count = 0;\nfor (int i = 0; i < 3; i++)\n{\n    for (int j = 0; j < 4; j++)\n    {\n        count++;\n    }\n}\n```",
+              uk: "Скільки разів виконається `count++`?\n\n```csharp\nint count = 0;\nfor (int i = 0; i < 3; i++)\n{\n    for (int j = 0; j < 4; j++)\n    {\n        count++;\n    }\n}\n```",
+            },
+            options: [
+              { id: "a", text: { en: "7", uk: "7" } },
+              { id: "b", text: { en: "12", uk: "12" } },
+              { id: "c", text: { en: "3", uk: "3" } },
+              { id: "d", text: { en: "4", uk: "4" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "continue",
+            mode: "single",
+            prompt: {
+              en: "What is `sum` after this code?\n\n```csharp\nint sum = 0;\nfor (int i = 1; i <= 5; i++)\n{\n    if (i == 3) continue;\n    sum += i;\n}\n```",
+              uk: "Чому дорівнює `sum` після цього коду?\n\n```csharp\nint sum = 0;\nfor (int i = 1; i <= 5; i++)\n{\n    if (i == 3) continue;\n    sum += i;\n}\n```",
+            },
+            options: [
+              { id: "a", text: { en: "15", uk: "15" } },
+              { id: "b", text: { en: "12", uk: "12" } },
+              { id: "c", text: { en: "3", uk: "3" } },
+              { id: "d", text: { en: "9", uk: "9" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "break",
+            mode: "single",
+            prompt: {
+              en: "And what is `sum` if `continue` is replaced by `break`?\n\n```csharp\nint sum = 0;\nfor (int i = 1; i <= 5; i++)\n{\n    if (i == 3) break;\n    sum += i;\n}\n```",
+              uk: "А чому дорівнює `sum`, якщо `continue` замінити на `break`?\n\n```csharp\nint sum = 0;\nfor (int i = 1; i <= 5; i++)\n{\n    if (i == 3) break;\n    sum += i;\n}\n```",
+            },
+            options: [
+              { id: "a", text: { en: "12", uk: "12" } },
+              { id: "b", text: { en: "6", uk: "6" } },
+              { id: "c", text: { en: "3", uk: "3" } },
+              { id: "d", text: { en: "15", uk: "15" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "do-while",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nint x = 10;\ndo\n{\n    x++;\n}\nwhile (x < 5);\nConsole.WriteLine(x);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nint x = 10;\ndo\n{\n    x++;\n}\nwhile (x < 5);\nConsole.WriteLine(x);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "10", uk: "10" } },
+              { id: "b", text: { en: "11", uk: "11" } },
+              { id: "c", text: { en: "5", uk: "5" } },
+              { id: "d", text: { en: "Nothing: the loop never runs", uk: "Нічого: цикл ніколи не виконується" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "endless",
+            mode: "single",
+            prompt: { en: "Which loop never ends?", uk: "Який цикл ніколи не завершується?" },
+            options: [
+              {
+                id: "a",
+                text: {
+                  en: "`int i = 0; while (i < 5) { Console.WriteLine(i); }`",
+                  uk: "`int i = 0; while (i < 5) { Console.WriteLine(i); }`",
+                },
+              },
+              { id: "b", text: { en: "`for (int i = 0; i < 5; i++) { }`", uk: "`for (int i = 0; i < 5; i++) { }`" } },
+              { id: "c", text: { en: "`int i = 5; while (i > 0) { i--; }`", uk: "`int i = 5; while (i > 0) { i--; }`" } },
+              { id: "d", text: { en: "`do { } while (false);`", uk: "`do { } while (false);`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "choose",
+            mode: "multi",
+            prompt: {
+              en: "Which pairs of situation and loop are a good match?",
+              uk: "Які пари «ситуація й цикл» підібрано добре?",
+            },
+            options: [
+              { id: "a", text: { en: "Print 10 squares: `for`", uk: "Надрукувати 10 квадратів: `for`" } },
+              { id: "b", text: { en: "Repeat until the data runs out, the length being unknown: `while`", uk: "Повторювати, доки закінчаться дані, довжина невідома: `while`" } },
+              { id: "c", text: { en: "The body must run at least once: `do-while`", uk: "Тіло має виконатися принаймні раз: `do-while`" } },
+              { id: "d", text: { en: "Go through every character of a string and only read it: `while (true)` without `break`", uk: "Пройтися по кожному символу рядка й лише прочитати його: `while (true)` без `break`" } },
+            ],
+            correct: ["a", "b", "c"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "empty-maze",
+        title: { en: "Practice: Empty maze", uk: "Практика «Порожній лабіринт»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints an empty maze: walls around the edge, start S and exit E inside
+    static void PrintMaze(int width, int height)
+    {
+        // Write your code here
+    }
+
+    static void Main()
+    {
+        PrintMaze(7, 5);
+        Console.WriteLine("---");
+        PrintMaze(4, 4);
+    }`),
+        solution: PROGRAM(`    // Prints an empty maze: walls around the edge, start S and exit E inside
+    static void PrintMaze(int width, int height)
+    {
+        for (int row = 0; row < height; row++)
+        {
+            for (int col = 0; col < width; col++)
+            {
+                if (row == 0 || row == height - 1 || col == 0 || col == width - 1)
+                {
+                    Console.Write("#");
+                }
+                else if (row == 1 && col == 1)
+                {
+                    Console.Write("S");
+                }
+                else if (row == height - 2 && col == width - 2)
+                {
+                    Console.Write("E");
+                }
+                else
+                {
+                    Console.Write(".");
+                }
+            }
+            Console.WriteLine();
+        }
+    }
+
+    static void Main()
+    {
+        PrintMaze(7, 5);
+        Console.WriteLine("---");
+        PrintMaze(4, 4);
+    }`),
+        expectedOutput: "#######\n#S....#\n#.....#\n#....E#\n#######\n---\n####\n#S.#\n#.E#\n####\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "snake-maze",
+        title: { en: "Practice: Snake maze", uk: "Практика «Лабіринт змійка»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints a snake maze. width and height are odd, both at least 5.
+    static void PrintSnake(int width, int height)
+    {
+        // Write your code here
+    }
+
+    static void Main()
+    {
+        PrintSnake(7, 7);
+        Console.WriteLine("---");
+        PrintSnake(9, 5);
+    }`),
+        solution: PROGRAM(`    // Prints a snake maze. width and height are odd, both at least 5.
+    static void PrintSnake(int width, int height)
+    {
+        for (int row = 0; row < height; row++)
+        {
+            for (int col = 0; col < width; col++)
+            {
+                bool wall;
+                if (row == 0 || row == height - 1 || col == 0 || col == width - 1)
+                {
+                    wall = true;
+                }
+                else if (row % 2 == 1)
+                {
+                    wall = false;
+                }
+                else if (row % 4 == 2)
+                {
+                    wall = col != width - 2;
+                }
+                else
+                {
+                    wall = col != 1;
+                }
+                Console.Write(wall ? "#" : ".");
+            }
+            Console.WriteLine();
+        }
+    }
+
+    static void Main()
+    {
+        PrintSnake(7, 7);
+        Console.WriteLine("---");
+        PrintSnake(9, 5);
+    }`),
+        expectedOutput:
+          "#######\n#.....#\n#####.#\n#.....#\n#.#####\n#.....#\n#######\n---\n#########\n#.......#\n#######.#\n#.......#\n#########\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "diagonals",
+        title: { en: "Practice: Diagonals", uk: "Практика «Діагоналі»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints a size x size square with both diagonals drawn as '*' and '.' elsewhere
+    static void PrintX(int size)
+    {
+        // Write your code here
+    }
+
+    static void Main()
+    {
+        PrintX(7);
+        Console.WriteLine("---");
+        PrintX(4);
+    }`),
+        solution: PROGRAM(`    // Prints a size x size square with both diagonals drawn as '*' and '.' elsewhere
+    static void PrintX(int size)
+    {
+        for (int row = 0; row < size; row++)
+        {
+            for (int col = 0; col < size; col++)
+            {
+                bool onDiagonal = row == col || row + col == size - 1;
+                Console.Write(onDiagonal ? "*" : ".");
+            }
+            Console.WriteLine();
+        }
+    }
+
+    static void Main()
+    {
+        PrintX(7);
+        Console.WriteLine("---");
+        PrintX(4);
+    }`),
+        expectedOutput: "*.....*\n.*...*.\n..*.*..\n...*...\n..*.*..\n.*...*.\n*.....*\n---\n*..*\n.**.\n.**.\n*..*\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "dragon-curve",
+        title: { en: "Practice: Dragon curve", uk: "Практика «Dragon curve»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Dragon(1) = "R"
+    // Dragon(n) = Dragon(n - 1) + "R" + the reversed and flipped copy of Dragon(n - 1)
+    // (flipped: every L becomes R and every R becomes L)
+    static string Dragon(int n)
+    {
+        // Write your code here
+        return "";
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Dragon(1));
+        Console.WriteLine(Dragon(2));
+        Console.WriteLine(Dragon(3));
+        Console.WriteLine(Dragon(4));
+        Console.WriteLine(Dragon(5));
+        Console.WriteLine(Dragon(10).Length);
+    }`),
+        solution: PROGRAM(`    // Dragon(1) = "R"
+    // Dragon(n) = Dragon(n - 1) + "R" + the reversed and flipped copy of Dragon(n - 1)
+    // (flipped: every L becomes R and every R becomes L)
+    static string Dragon(int n)
+    {
+        string s = "R";
+        for (int step = 2; step <= n; step++)
+        {
+            string flipped = "";
+            for (int i = s.Length - 1; i >= 0; i--)
+            {
+                flipped += s[i] == 'R' ? 'L' : 'R';
+            }
+            s = s + "R" + flipped;
+        }
+        return s;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Dragon(1));
+        Console.WriteLine(Dragon(2));
+        Console.WriteLine(Dragon(3));
+        Console.WriteLine(Dragon(4));
+        Console.WriteLine(Dragon(5));
+        Console.WriteLine(Dragon(10).Length);
+    }`),
+        expectedOutput: "R\nRRL\nRRLRRLL\nRRLRRLLRRRLLRLL\nRRLRRLLRRRLLRLLRRRLRRLLLRRLLRLL\n1023\n",
+        maxScore: 10,
       },
     ],
   },
