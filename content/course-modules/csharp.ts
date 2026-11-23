@@ -988,6 +988,273 @@ export const csharpModules: ModuleDef[] = [
     title: { en: "Errors", uk: "Помилки" },
     slides: [
       { kind: "lecture", slug: "kinds-of-errors", title: { en: "Three kinds of errors", uk: "Три види помилок" } },
+      { kind: "lecture", slug: "compile-errors", title: { en: "Compile errors", uk: "Помилки компіляції" } },
+      {
+        kind: "quiz",
+        slug: "compile-errors-quiz",
+        title: { en: "Compile errors quiz", uk: "Тест: помилки компіляції" },
+        questions: [
+          {
+            id: "semicolon",
+            mode: "single",
+            prompt: {
+              en: "The compiler reports `error CS1002: ; expected`. What is the most likely cause?",
+              uk: "Компілятор повідомляє `error CS1002: ; expected`. Яка найімовірніша причина?",
+            },
+            options: [
+              {
+                id: "a",
+                text: {
+                  en: "A semicolon is missing, often at the end of the previous line",
+                  uk: "Пропущено крапку з комою, часто наприкінці попереднього рядка",
+                },
+              },
+              { id: "b", text: { en: "The program divided by zero", uk: "Програма поділила на нуль" } },
+              { id: "c", text: { en: "The computer ran out of memory", uk: "У комп'ютера закінчилася пам'ять" } },
+              { id: "d", text: { en: "The result of the calculation is wrong", uk: "Результат обчислення хибний" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "first-error",
+            mode: "single",
+            prompt: {
+              en: "The compiler lists 12 errors. Where should you start?",
+              uk: "Компілятор перелічив 12 помилок. З чого почати?",
+            },
+            options: [
+              { id: "a", text: { en: "With the last one", uk: "З останньої" } },
+              { id: "b", text: { en: "With the first one, then recompile", uk: "З першої, а потім перекомпілювати" } },
+              { id: "c", text: { en: "With the one that looks the hardest", uk: "З тієї, що здається найскладнішою" } },
+              { id: "d", text: { en: "Ignore them: most are not real", uk: "Ігнорувати їх: більшість несправжні" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "which-compile",
+            mode: "multi",
+            prompt: { en: "Which of these are compile errors?", uk: "Які з наведеного є помилками компіляції?" },
+            options: [
+              { id: "a", text: { en: "`int x = \"5\";`", uk: "`int x = \"5\";`" } },
+              { id: "b", text: { en: "`Console.Writeline(\"hi\");`", uk: "`Console.Writeline(\"hi\");`" } },
+              { id: "c", text: { en: "`int n = int.Parse(\"abc\");`", uk: "`int n = int.Parse(\"abc\");`" } },
+              { id: "d", text: { en: "`double average = a + b / 2;`", uk: "`double average = a + b / 2;`" } },
+              { id: "e", text: { en: "`int y; Console.WriteLine(y);`", uk: "`int y; Console.WriteLine(y);`" } },
+            ],
+            correct: ["a", "b", "e"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "typos",
+        title: { en: "Typos", uk: "Одруківки" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Main()
+    {
+        strng course = "Assay";
+        Console.Writeline("Welcome to " + Course);
+        int year = 2026
+        Console.WriteLine("Year: " + year);
+        Console.WriteLine("Done!";
+    }`),
+        solution: PROGRAM(`    static void Main()
+    {
+        string course = "Assay";
+        Console.WriteLine("Welcome to " + course);
+        int year = 2026;
+        Console.WriteLine("Year: " + year);
+        Console.WriteLine("Done!");
+    }`),
+        expectedOutput: "Welcome to Assay\nYear: 2026\nDone!\n",
+      },
+      { kind: "lecture", slug: "runtime-errors", title: { en: "Runtime errors and exceptions", uk: "Помилки виконання та винятки" } },
+      {
+        kind: "quiz",
+        slug: "runtime-errors-quiz",
+        title: { en: "Exceptions quiz", uk: "Тест: винятки" },
+        questions: [
+          {
+            id: "format",
+            mode: "single",
+            prompt: { en: "Which exception does `int.Parse(\"4.5\")` throw?", uk: "Який виняток кидає `int.Parse(\"4.5\")`?" },
+            options: [
+              { id: "a", text: { en: "`DivideByZeroException`", uk: "`DivideByZeroException`" } },
+              { id: "b", text: { en: "`FormatException`", uk: "`FormatException`" } },
+              { id: "c", text: { en: "`NullReferenceException`", uk: "`NullReferenceException`" } },
+              { id: "d", text: { en: "`IndexOutOfRangeException`", uk: "`IndexOutOfRangeException`" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "null",
+            mode: "single",
+            prompt: {
+              en: "Which exception does this code throw?\n\n```csharp\nstring s = null;\nConsole.WriteLine(s.Length);\n```",
+              uk: "Який виняток кидає цей код?\n\n```csharp\nstring s = null;\nConsole.WriteLine(s.Length);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "`FormatException`", uk: "`FormatException`" } },
+              { id: "b", text: { en: "`OverflowException`", uk: "`OverflowException`" } },
+              { id: "c", text: { en: "`NullReferenceException`", uk: "`NullReferenceException`" } },
+              { id: "d", text: { en: "None: it prints 0", uk: "Жодного: він друкує 0" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "finally",
+            mode: "single",
+            prompt: { en: "When does the `finally` block run?", uk: "Коли виконується блок `finally`?" },
+            options: [
+              { id: "a", text: { en: "Only when an exception was thrown", uk: "Лише коли було кинуто виняток" } },
+              { id: "b", text: { en: "Only when no exception was thrown", uk: "Лише коли виняток не було кинуто" } },
+              { id: "c", text: { en: "Both when an exception was thrown and when it was not", uk: "І коли виняток було кинуто, і коли ні" } },
+              { id: "d", text: { en: "Never, it is only a comment", uk: "Ніколи, це лише коментар" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "expected-bad-input",
+            mode: "single",
+            prompt: {
+              en: "Users often type text that is not a number. What is the best way to deal with that?",
+              uk: "Користувачі часто вводять текст, що не є числом. Як найкраще з цим упоратися?",
+            },
+            options: [
+              { id: "a", text: { en: "Use `int.TryParse` and check the result", uk: "Використати `int.TryParse` і перевірити результат" } },
+              { id: "b", text: { en: "Wrap everything in `catch (Exception) { }` with an empty body", uk: "Обгорнути все в `catch (Exception) { }` з порожнім тілом" } },
+              { id: "c", text: { en: "Hope that nobody does it", uk: "Сподіватися, що ніхто так не зробить" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "stack-trace",
+            mode: "single",
+            prompt: {
+              en: "Where do you usually look first in a stack trace?",
+              uk: "Куди зазвичай дивляться першим у трасуванні стека?",
+            },
+            options: [
+              { id: "a", text: { en: "At the last line", uk: "На останній рядок" } },
+              { id: "b", text: { en: "At the first line that points into your own code", uk: "На перший рядок, що вказує на ваш власний код" } },
+              { id: "c", text: { en: "At the exception's name in the middle", uk: "На назву винятку посередині" } },
+            ],
+            correct: ["b"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "catch-exceptions",
+        title: { en: "Catch the exceptions", uk: "Перехопіть винятки" },
+        language: "csharp",
+        starter: PROGRAM(`    static string Divide(string a, string b)
+    {
+        int result = int.Parse(a) / int.Parse(b);
+        return "Result: " + result;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Divide("20", "4"));
+        Console.WriteLine(Divide("20", "0"));
+        Console.WriteLine(Divide("20", "x"));
+        Console.WriteLine(Divide("99999999999", "1"));
+        Console.WriteLine("Done");
+    }`),
+        solution: PROGRAM(`    static string Divide(string a, string b)
+    {
+        try
+        {
+            int result = int.Parse(a) / int.Parse(b);
+            return "Result: " + result;
+        }
+        catch (DivideByZeroException)
+        {
+            return "Cannot divide by zero";
+        }
+        catch (FormatException)
+        {
+            return "Not a number";
+        }
+        catch (OverflowException)
+        {
+            return "Number is too big";
+        }
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Divide("20", "4"));
+        Console.WriteLine(Divide("20", "0"));
+        Console.WriteLine(Divide("20", "x"));
+        Console.WriteLine(Divide("99999999999", "1"));
+        Console.WriteLine("Done");
+    }`),
+        expectedOutput: "Result: 5\nCannot divide by zero\nNot a number\nNumber is too big\nDone\n",
+      },
+      { kind: "lecture", slug: "logic-errors", title: { en: "Logic errors", uk: "Логічні помилки" } },
+      {
+        kind: "practice",
+        slug: "bug-hunt",
+        title: { en: "Bug hunt", uk: "Полювання на баги" },
+        language: "csharp",
+        starter: PROGRAM(`    static double Average(int a, int b)
+    {
+        return (a + b) / 2;
+    }
+
+    static double ToFahrenheit(double c)
+    {
+        return c * (9 / 5) + 32;
+    }
+
+    static double Percent(int part, int total)
+    {
+        return part / total * 100;
+    }
+
+    static int Perimeter(int w, int h)
+    {
+        return 2 * w + h;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Average(1, 2));
+        Console.WriteLine(ToFahrenheit(100));
+        Console.WriteLine(Percent(1, 4));
+        Console.WriteLine(Perimeter(3, 4));
+    }`),
+        solution: PROGRAM(`    static double Average(int a, int b)
+    {
+        return (a + b) / 2.0;
+    }
+
+    static double ToFahrenheit(double c)
+    {
+        return c * 9 / 5 + 32;
+    }
+
+    static double Percent(int part, int total)
+    {
+        return (double)part / total * 100;
+    }
+
+    static int Perimeter(int w, int h)
+    {
+        return 2 * (w + h);
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Average(1, 2));
+        Console.WriteLine(ToFahrenheit(100));
+        Console.WriteLine(Percent(1, 4));
+        Console.WriteLine(Perimeter(3, 4));
+    }`),
+        expectedOutput: "1.5\n212\n25\n14\n",
+      },
       {
         kind: "practice",
         slug: "fix-the-bugs",
@@ -1014,6 +1281,543 @@ export const csharpModules: ModuleDef[] = [
         Console.WriteLine(perimeter);
     }`),
         expectedOutput: "7\n26\n",
+      },
+      { kind: "lecture", slug: "debugging", title: { en: "Debugging", uk: "Налагодження" } },
+      {
+        kind: "quiz",
+        slug: "debugging-quiz",
+        title: { en: "Debugging quiz", uk: "Тест: налагодження" },
+        questions: [
+          {
+            id: "start-key",
+            mode: "single",
+            prompt: {
+              en: "Which key starts the program with debugging in Visual Studio and VS Code?",
+              uk: "Яка клавіша запускає програму з налагодженням у Visual Studio та VS Code?",
+            },
+            options: [
+              { id: "a", text: { en: "`F5`", uk: "`F5`" } },
+              { id: "b", text: { en: "`F10`", uk: "`F10`" } },
+              { id: "c", text: { en: "`Shift+F11`", uk: "`Shift+F11`" } },
+              { id: "d", text: { en: "`Ctrl+S`", uk: "`Ctrl+S`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "step-into",
+            mode: "single",
+            prompt: {
+              en: "The current line calls a method. Which key goes **inside** that method?",
+              uk: "Поточний рядок викликає метод. Яка клавіша заходить **усередину** цього методу?",
+            },
+            options: [
+              { id: "a", text: { en: "`F10` (step over)", uk: "`F10` (крок з обходом)" } },
+              { id: "b", text: { en: "`F11` (step into)", uk: "`F11` (крок із заходом)" } },
+              { id: "c", text: { en: "`Shift+F11` (step out)", uk: "`Shift+F11` (вийти з методу)" } },
+              { id: "d", text: { en: "`F9` (breakpoint)", uk: "`F9` (точка зупину)" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "breakpoint",
+            mode: "single",
+            prompt: {
+              en: "When the program stops at a breakpoint, has the line with the breakpoint already been executed?",
+              uk: "Коли програма зупиняється на точці зупину, чи вже виконано рядок із цією точкою?",
+            },
+            options: [
+              { id: "a", text: { en: "No, it stops before running that line", uk: "Ні, вона зупиняється до виконання цього рядка" } },
+              { id: "b", text: { en: "Yes, it stops right after running that line", uk: "Так, вона зупиняється одразу після виконання цього рядка" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "inspect",
+            mode: "multi",
+            prompt: {
+              en: "Which of these let you see the current value of a variable while the program is paused?",
+              uk: "Що з наведеного дає змогу побачити поточне значення змінної, поки програму призупинено?",
+            },
+            options: [
+              { id: "a", text: { en: "The Locals window", uk: "Вікно Locals" } },
+              { id: "b", text: { en: "The Watch window", uk: "Вікно Watch" } },
+              { id: "c", text: { en: "Hovering over the variable in the editor", uk: "Наведення курсора на змінну в редакторі" } },
+              { id: "d", text: { en: "The window with the list of project files", uk: "Вікно зі списком файлів проєкту" } },
+            ],
+            correct: ["a", "b", "c"],
+          },
+          {
+            id: "one-change",
+            mode: "single",
+            prompt: {
+              en: "You have a hypothesis about a bug. What is the best way to test it?",
+              uk: "У вас є гіпотеза щодо помилки. Як найкраще її перевірити?",
+            },
+            options: [
+              { id: "a", text: { en: "Change one thing and run the program again", uk: "Змінити щось одне й запустити програму знову" } },
+              { id: "b", text: { en: "Change everything that looks suspicious at once", uk: "Змінити одразу все, що здається підозрілим" } },
+              { id: "c", text: { en: "Rewrite the program from scratch", uk: "Переписати програму з нуля" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "style", title: { en: "Style and readability", uk: "Стиль і читабельність" } },
+      { kind: "lecture", slug: "refactoring", title: { en: "Refactoring", uk: "Рефакторинг" } },
+      { kind: "lecture", slug: "constants-and-enums", title: { en: "Constants and enums", uk: "Константи та enum" } },
+      {
+        kind: "quiz",
+        slug: "design-quiz",
+        title: { en: "Code design quiz", uk: "Тест: дизайн коду" },
+        questions: [
+          {
+            id: "method-name",
+            mode: "single",
+            prompt: {
+              en: "Which is the best name for a method that checks whether a number is even?",
+              uk: "Яка назва найкраща для методу, що перевіряє, чи число парне?",
+            },
+            options: [
+              { id: "a", text: { en: "`Check`", uk: "`Check`" } },
+              { id: "b", text: { en: "`IsEven`", uk: "`IsEven`" } },
+              { id: "c", text: { en: "`DoIt`", uk: "`DoIt`" } },
+              { id: "d", text: { en: "`even1`", uk: "`even1`" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "magic-number",
+            mode: "single",
+            prompt: {
+              en: "What is a \"magic number\"?",
+              uk: "Що таке «магічне число»?",
+            },
+            options: [
+              { id: "a", text: { en: "A literal in the code whose meaning is not obvious, such as the `0.2` in `price * 0.2`", uk: "Літерал у коді, сенс якого неочевидний, як-от `0.2` у `price * 0.2`" } },
+              { id: "b", text: { en: "A number that is always prime", uk: "Число, яке завжди просте" } },
+              { id: "c", text: { en: "The result of `Random.Next()`", uk: "Результат `Random.Next()`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "refactoring-def",
+            mode: "single",
+            prompt: { en: "What does refactoring mean?", uk: "Що означає рефакторинг?" },
+            options: [
+              { id: "a", text: { en: "Changing the structure of code without changing its behavior", uk: "Зміна структури коду без зміни його поведінки" } },
+              { id: "b", text: { en: "Adding a new feature to the program", uk: "Додавання нової функції до програми" } },
+              { id: "c", text: { en: "Fixing a bug", uk: "Виправлення помилки" } },
+              { id: "d", text: { en: "Making the program run faster", uk: "Прискорення роботи програми" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "extract-why",
+            mode: "multi",
+            prompt: { en: "Which are good reasons to extract a method?", uk: "Які причини виділити метод добрі?" },
+            options: [
+              { id: "a", text: { en: "The same code is copied in several places", uk: "Той самий код скопійовано в кількох місцях" } },
+              { id: "b", text: { en: "A block of code deserves a descriptive name", uk: "Блок коду заслуговує на промовисте ім'я" } },
+              { id: "c", text: { en: "To change what the program prints", uk: "Щоб змінити те, що друкує програма" } },
+              { id: "d", text: { en: "To make the code longer", uk: "Щоб зробити код довшим" } },
+            ],
+            correct: ["a", "b"],
+          },
+          {
+            id: "enum-value",
+            mode: "single",
+            prompt: {
+              en: "What does this program print?\n\n```csharp\nenum Level { Low, Medium, High }\n\nConsole.WriteLine((int)Level.High);\n```",
+              uk: "Що надрукує ця програма?\n\n```csharp\nenum Level { Low, Medium, High }\n\nConsole.WriteLine((int)Level.High);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "2", uk: "2" } },
+              { id: "c", text: { en: "3", uk: "3" } },
+              { id: "d", text: { en: "High", uk: "High" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "comments",
+            mode: "single",
+            prompt: { en: "Which comment is the most useful?", uk: "Який коментар найкорисніший?" },
+            options: [
+              { id: "a", text: { en: "`// add one to i` above `i++;`", uk: "`// add one to i` над `i++;`" } },
+              { id: "b", text: { en: "`// the API counts pages from 1, not from 0` above `page = index + 1;`", uk: "`// the API counts pages from 1, not from 0` над `page = index + 1;`" } },
+              { id: "c", text: { en: "`// TODO` with nothing else", uk: "`// TODO` без жодних пояснень" } },
+            ],
+            correct: ["b"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "copy-paste-bug",
+        title: { en: "The copy-paste bug", uk: "Помилка копіювання" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Main()
+    {
+        int priceA = 100;
+        int vatA = priceA * 20 / 100;
+        Console.WriteLine("Laptop: " + priceA + " + VAT " + vatA + " = " + (priceA + vatA));
+
+        int priceB = 40;
+        int vatB = priceB * 20 / 100;
+        Console.WriteLine("Mouse: " + priceB + " + VAT " + vatB + " = " + (priceB + vatB));
+
+        int priceC = 15;
+        int vatC = priceC * 2 / 100;
+        Console.WriteLine("Cable: " + priceC + " + VAT " + vatC + " = " + (priceC + vatC));
+    }`),
+        solution: PROGRAM(`    const int VatPercent = 20;
+
+    static void PrintWithVat(string name, int price)
+    {
+        int vat = price * VatPercent / 100;
+        Console.WriteLine(name + ": " + price + " + VAT " + vat + " = " + (price + vat));
+    }
+
+    static void Main()
+    {
+        PrintWithVat("Laptop", 100);
+        PrintWithVat("Mouse", 40);
+        PrintWithVat("Cable", 15);
+    }`),
+        expectedOutput: "Laptop: 100 + VAT 20 = 120\nMouse: 40 + VAT 8 = 48\nCable: 15 + VAT 3 = 18\n",
+      },
+      {
+        kind: "practice",
+        slug: "weekday-enum",
+        title: { en: "Days of the week", uk: "Дні тижня" },
+        language: "csharp",
+        starter: PROGRAM(`    // Declare the enum Weekday here
+
+    static void Main()
+    {
+        Console.WriteLine(Weekday.Friday);
+        Console.WriteLine((int)Weekday.Friday);
+        Console.WriteLine((Weekday)7);
+        Console.WriteLine((int)Weekday.Sunday - (int)Weekday.Monday);
+    }`),
+        solution: PROGRAM(`    enum Weekday
+    {
+        Monday = 1,
+        Tuesday,
+        Wednesday,
+        Thursday,
+        Friday,
+        Saturday,
+        Sunday
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Weekday.Friday);
+        Console.WriteLine((int)Weekday.Friday);
+        Console.WriteLine((Weekday)7);
+        Console.WriteLine((int)Weekday.Sunday - (int)Weekday.Monday);
+    }`),
+        expectedOutput: "Friday\n5\nSunday\n6\n",
+      },
+      {
+        kind: "practice",
+        slug: "guess-the-formula",
+        title: { en: "Guess the formula", uk: "Вгадай формулу" },
+        language: "csharp",
+        starter: PROGRAM(`    static int F(int n)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    static int G(int n)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(F(0));
+        Console.WriteLine(F(1));
+        Console.WriteLine(F(2));
+        Console.WriteLine(F(10));
+        Console.WriteLine(F(-3));
+        Console.WriteLine(F(50));
+        Console.WriteLine(G(7));
+        Console.WriteLine(G(10));
+        Console.WriteLine(G(25));
+        Console.WriteLine(G(13));
+        Console.WriteLine(G(99));
+        Console.WriteLine(G(1000));
+    }`),
+        solution: PROGRAM(`    static int F(int n)
+    {
+        return 2 * n + 3;
+    }
+
+    static int G(int n)
+    {
+        return n % 5;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(F(0));
+        Console.WriteLine(F(1));
+        Console.WriteLine(F(2));
+        Console.WriteLine(F(10));
+        Console.WriteLine(F(-3));
+        Console.WriteLine(F(50));
+        Console.WriteLine(G(7));
+        Console.WriteLine(G(10));
+        Console.WriteLine(G(25));
+        Console.WriteLine(G(13));
+        Console.WriteLine(G(99));
+        Console.WriteLine(G(1000));
+    }`),
+        expectedOutput: "3\n5\n7\n23\n-3\n103\n2\n0\n0\n3\n4\n0\n",
+      },
+      {
+        kind: "quiz",
+        slug: "errors-review",
+        title: { en: "Module review", uk: "Підсумковий тест" },
+        questions: [
+          {
+            id: "which-kind",
+            mode: "single",
+            prompt: {
+              en: "A program compiles and finishes without any message, but prints 5 where 6 is expected. What kind of error is it?",
+              uk: "Програма компілюється й завершується без жодних повідомлень, але друкує 5 замість очікуваних 6. Який це різновид помилки?",
+            },
+            options: [
+              { id: "a", text: { en: "A compile error", uk: "Помилка компіляції" } },
+              { id: "b", text: { en: "A runtime error (an exception)", uk: "Помилка виконання (виняток)" } },
+              { id: "c", text: { en: "A logic error", uk: "Логічна помилка" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "before-running",
+            mode: "single",
+            prompt: {
+              en: "Which kind of error does the compiler report before the program starts?",
+              uk: "Який різновид помилок компілятор повідомляє до запуску програми?",
+            },
+            options: [
+              { id: "a", text: { en: "Compile errors", uk: "Помилки компіляції" } },
+              { id: "b", text: { en: "Runtime errors", uk: "Помилки виконання" } },
+              { id: "c", text: { en: "Logic errors", uk: "Логічні помилки" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "empty-catch",
+            mode: "single",
+            prompt: {
+              en: "What is the main danger of an empty `catch (Exception) { }` block?",
+              uk: "У чому головна небезпека порожнього блоку `catch (Exception) { }`?",
+            },
+            options: [
+              { id: "a", text: { en: "It makes the program slower", uk: "Він сповільнює програму" } },
+              { id: "b", text: { en: "It hides every error, including bugs, so the program silently goes wrong", uk: "Він приховує всі помилки, зокрема баги, тож програма мовчки працює хибно" } },
+              { id: "c", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "const-assign",
+            mode: "single",
+            prompt: {
+              en: "What happens with this code?\n\n```csharp\nconst int Max = 10;\nMax = 20;\n```",
+              uk: "Що станеться з цим кодом?\n\n```csharp\nconst int Max = 10;\nMax = 20;\n```",
+            },
+            options: [
+              { id: "a", text: { en: "A compile error", uk: "Помилка компіляції" } },
+              { id: "b", text: { en: "An exception while running", uk: "Виняток під час виконання" } },
+              { id: "c", text: { en: "`Max` becomes 20", uk: "`Max` стає 20" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "enum-print",
+            mode: "single",
+            prompt: {
+              en: "What does this program print?\n\n```csharp\nenum Color { Red, Green, Blue }\n\nConsole.WriteLine(Color.Green);\n```",
+              uk: "Що надрукує ця програма?\n\n```csharp\nenum Color { Red, Green, Blue }\n\nConsole.WriteLine(Color.Green);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "Green", uk: "Green" } },
+              { id: "c", text: { en: "Color.Green", uk: "Color.Green" } },
+              { id: "d", text: { en: "It does not compile", uk: "Вона не компілюється" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "first-step",
+            mode: "single",
+            prompt: {
+              en: "A bug was reported. What should you do first?",
+              uk: "Повідомили про помилку. Що слід зробити першим?",
+            },
+            options: [
+              { id: "a", text: { en: "Reproduce it and work out what the correct result should be", uk: "Відтворити її та з'ясувати, яким має бути правильний результат" } },
+              { id: "b", text: { en: "Rewrite the module that seems to be responsible", uk: "Переписати модуль, який, схоже, відповідає" } },
+              { id: "c", text: { en: "Add `try / catch` around everything", uk: "Обгорнути все в `try / catch`" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "cannon",
+        title: { en: "Practice: Cannon", uk: "Практика «Гармата»" },
+        language: "csharp",
+        starter: PROGRAM(`    const double Gravity = 9.8;
+
+    // Degrees -> radians
+    static double ToRadians(double degrees)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // v^2 * sin(2 * angle) / g
+    static double Range(double speed, double angleDegrees)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // 2 * v * sin(angle) / g
+    static double FlightTime(double speed, double angleDegrees)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // (v * sin(angle))^2 / (2 * g)
+    static double MaxHeight(double speed, double angleDegrees)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    static void Main()
+    {
+        double speed = 20;
+        double angle = 45;
+        Console.WriteLine("Range: " + Math.Round(Range(speed, angle), 2));
+        Console.WriteLine("Time: " + Math.Round(FlightTime(speed, angle), 2));
+        Console.WriteLine("Height: " + Math.Round(MaxHeight(speed, angle), 2));
+    }`),
+        solution: PROGRAM(`    const double Gravity = 9.8;
+
+    // Degrees -> radians
+    static double ToRadians(double degrees)
+    {
+        return degrees * Math.PI / 180;
+    }
+
+    // v^2 * sin(2 * angle) / g
+    static double Range(double speed, double angleDegrees)
+    {
+        return speed * speed * Math.Sin(2 * ToRadians(angleDegrees)) / Gravity;
+    }
+
+    // 2 * v * sin(angle) / g
+    static double FlightTime(double speed, double angleDegrees)
+    {
+        return 2 * speed * Math.Sin(ToRadians(angleDegrees)) / Gravity;
+    }
+
+    // (v * sin(angle))^2 / (2 * g)
+    static double MaxHeight(double speed, double angleDegrees)
+    {
+        double vertical = speed * Math.Sin(ToRadians(angleDegrees));
+        return vertical * vertical / (2 * Gravity);
+    }
+
+    static void Main()
+    {
+        double speed = 20;
+        double angle = 45;
+        Console.WriteLine("Range: " + Math.Round(Range(speed, angle), 2));
+        Console.WriteLine("Time: " + Math.Round(FlightTime(speed, angle), 2));
+        Console.WriteLine("Height: " + Math.Round(MaxHeight(speed, angle), 2));
+    }`),
+        expectedOutput: "Range: 40.82\nTime: 2.89\nHeight: 10.2\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "billiards",
+        title: { en: "Practice: Billiards", uk: "Практика «Більярд»" },
+        language: "csharp",
+        starter: PROGRAM(`    const double CueSpeed = 2.5;
+
+    // Straight-line distance between two points
+    static double Distance(double x1, double y1, double x2, double y2)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // Direction from point 1 to point 2 in degrees, measured from the x axis
+    static double AngleDegrees(double x1, double y1, double x2, double y2)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // Time to cover the distance at a constant speed
+    static double TravelTime(double distance, double speed)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    static void Main()
+    {
+        double distance = Distance(1, 2, 4, 6);
+        Console.WriteLine("Distance: " + Math.Round(distance, 2));
+        Console.WriteLine("Angle: " + Math.Round(AngleDegrees(1, 2, 4, 6), 2));
+        Console.WriteLine("Time: " + Math.Round(TravelTime(distance, CueSpeed), 2));
+    }`),
+        solution: PROGRAM(`    const double CueSpeed = 2.5;
+
+    // Straight-line distance between two points
+    static double Distance(double x1, double y1, double x2, double y2)
+    {
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        return Math.Sqrt(dx * dx + dy * dy);
+    }
+
+    // Direction from point 1 to point 2 in degrees, measured from the x axis
+    static double AngleDegrees(double x1, double y1, double x2, double y2)
+    {
+        return Math.Atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+    }
+
+    // Time to cover the distance at a constant speed
+    static double TravelTime(double distance, double speed)
+    {
+        return distance / speed;
+    }
+
+    static void Main()
+    {
+        double distance = Distance(1, 2, 4, 6);
+        Console.WriteLine("Distance: " + Math.Round(distance, 2));
+        Console.WriteLine("Angle: " + Math.Round(AngleDegrees(1, 2, 4, 6), 2));
+        Console.WriteLine("Time: " + Math.Round(TravelTime(distance, CueSpeed), 2));
+    }`),
+        expectedOutput: "Distance: 5\nAngle: 53.13\nTime: 2\n",
+        maxScore: 10,
       },
     ],
   },
