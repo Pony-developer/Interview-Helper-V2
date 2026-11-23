@@ -207,7 +207,7 @@ const EMPTY_MAIN = PROGRAM(`    static void Main()
         // Write your code here
     }`);
 
-/** The C# course: sixteen modules of lectures, quizzes and coding practices. */
+/** The C# course: twenty-one modules of lectures, quizzes and coding practices. */
 export const csharpModules: ModuleDef[] = [
   {
     slug: "first-steps",
@@ -14099,6 +14099,3058 @@ class Negate : Expr
             correct: ["a"],
           },
         ],
+      },
+    ],
+  },
+  {
+    slug: "stacks-queues-generics",
+    title: { en: "Stacks, queues, generics", uk: "Черги, стеки, дженерики" },
+    slides: [
+      { kind: "lecture", slug: "stacks-and-queues", title: { en: "Stacks and queues", uk: "Стеки і черги" } },
+      { kind: "lecture", slug: "queue-linked-list", title: { en: "A queue on linked lists", uk: "Черга на зв'язних списках" } },
+      {
+        kind: "quiz",
+        slug: "stacks-queues-quiz",
+        title: { en: "Stacks and queues", uk: "Стеки і черги" },
+        questions: [
+          {
+            id: "stack-order",
+            mode: "single",
+            prompt: { en: "In which order does a stack return its items?", uk: "У якому порядку стек повертає елементи?" },
+            options: [
+              { id: "a", text: { en: "Last in, first out", uk: "Останнім прийшов — першим вийшов" } },
+              { id: "b", text: { en: "First in, first out", uk: "Першим прийшов — першим вийшов" } },
+              { id: "c", text: { en: "In random order", uk: "У випадковому порядку" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "queue-dequeue",
+            mode: "single",
+            prompt: {
+              en: "What does this print?\n\n```csharp\nvar q = new Queue<int>();\nq.Enqueue(1);\nq.Enqueue(2);\nConsole.WriteLine(q.Dequeue());\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nvar q = new Queue<int>();\nq.Enqueue(1);\nq.Enqueue(2);\nConsole.WriteLine(q.Dequeue());\n```",
+            },
+            options: [
+              { id: "a", text: { en: "2", uk: "2" } },
+              { id: "b", text: { en: "1", uk: "1" } },
+              { id: "c", text: { en: "It does not compile", uk: "Не компілюється" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "pop-empty",
+            mode: "single",
+            prompt: { en: "What happens when you call `Pop()` on an empty stack?", uk: "Що станеться, коли викликати `Pop()` на порожньому стеку?" },
+            options: [
+              { id: "a", text: { en: "It returns 0", uk: "Повертає 0" } },
+              { id: "b", text: { en: "An `InvalidOperationException` is thrown", uk: "Кидається `InvalidOperationException`" } },
+              { id: "c", text: { en: "It returns `null` silently", uk: "Мовчки повертає `null`" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "brackets-structure",
+            mode: "single",
+            prompt: { en: "Which structure is the natural choice for checking that brackets match?", uk: "Яка структура природно підходить для перевірки відповідності дужок?" },
+            options: [
+              { id: "a", text: { en: "A stack", uk: "Стек" } },
+              { id: "b", text: { en: "A queue", uk: "Черга" } },
+              { id: "c", text: { en: "A single integer counter", uk: "Один цілочисельний лічильник" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "universal-queue", title: { en: "A universal queue and downcasts", uk: "Універсальна черга і приведення вниз" } },
+      { kind: "lecture", slug: "generic-classes", title: { en: "Generic classes", uk: "Дженерик-класи" } },
+      { kind: "lecture", slug: "bracket-stacks", title: { en: "Stacks for checking brackets", uk: "Стеки для аналізу дужкових виразів" } },
+      { kind: "lecture", slug: "stack-calculation", title: { en: "Stacks for calculation", uk: "Стеки для обчислень" } },
+      { kind: "lecture", slug: "moving-average", title: { en: "A queue for a moving average", uk: "Черга для ковзного середнього" } },
+      { kind: "lecture", slug: "generic-sorting", title: { en: "Generics and sorting arrays", uk: "Дженерики і сортування масивів" } },
+      {
+        kind: "practice",
+        slug: "max-in-array",
+        title: { en: "Maximum in an array", uk: "Максимум у масиві" },
+        language: "csharp",
+        starter: PROGRAM(`    // The largest element of the array, for any comparable type
+    static T Max<T>(T[] items) where T : IComparable<T>
+    {
+        // Write your code here
+        return default(T);
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Max(new[] { 3, 9, 2 }));
+        Console.WriteLine(Max(new[] { "pear", "apple", "plum" }));
+        Console.WriteLine(Max(new[] { 2.5, -1.0, 2.25 }));
+        Console.WriteLine(Max(new[] { 'a', 'z', 'm' }));
+        Console.WriteLine(Max(new[] { 7 }));
+    }`),
+        solution: PROGRAM(`    // The largest element of the array, for any comparable type
+    static T Max<T>(T[] items) where T : IComparable<T>
+    {
+        T best = items[0];
+        for (int i = 1; i < items.Length; i++)
+        {
+            if (items[i].CompareTo(best) > 0)
+            {
+                best = items[i];
+            }
+        }
+        return best;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Max(new[] { 3, 9, 2 }));
+        Console.WriteLine(Max(new[] { "pear", "apple", "plum" }));
+        Console.WriteLine(Max(new[] { 2.5, -1.0, 2.25 }));
+        Console.WriteLine(Max(new[] { 'a', 'z', 'm' }));
+        Console.WriteLine(Max(new[] { 7 }));
+    }`),
+        expectedOutput: "9\nplum\n2.5\nz\n7\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "return-value-errors", title: { en: "Returning a value and errors", uk: "Повернення значення і помилки" } },
+      { kind: "lecture", slug: "return-multiple", title: { en: "Returning several values", uk: "Повернення кількох значень" } },
+      { kind: "lecture", slug: "tuple-class", title: { en: "The Tuple generic class", uk: "Дженерик-клас Tuple" } },
+      { kind: "lecture", slug: "nullable-class", title: { en: "The Nullable generic class", uk: "Дженерик-клас Nullable" } },
+      {
+        kind: "quiz",
+        slug: "stacks-queues-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "generic-benefit",
+            mode: "single",
+            prompt: { en: "Why is a `Queue<int>` better than a queue of `object`?", uk: "Чому `Queue<int>` кращий за чергу з `object`?" },
+            options: [
+              { id: "a", text: { en: "The compiler checks the types, and there is no boxing or downcast", uk: "Компілятор перевіряє типи, а boxing і приведення вниз не потрібні" } },
+              { id: "b", text: { en: "It is always faster to write", uk: "Його завжди швидше писати" } },
+              { id: "c", text: { en: "It can hold `null` only", uk: "Він може тримати лише `null`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "constraint-meaning",
+            mode: "single",
+            prompt: { en: "What does the constraint `where T : IComparable<T>` allow?", uk: "Що дозволяє обмеження `where T : IComparable<T>`?" },
+            options: [
+              { id: "a", text: { en: "Calling `CompareTo` on values of type `T`", uk: "Виклик `CompareTo` для значень типу `T`" } },
+              { id: "b", text: { en: "Using `T` only with `int`", uk: "Вживання `T` лише з `int`" } },
+              { id: "c", text: { en: "Making `T` a reference type", uk: "Робити `T` посилальним типом" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "nullable-coalesce",
+            mode: "single",
+            prompt: {
+              en: "What is `y` here?\n\n```csharp\nint? x = null;\nint y = x ?? 5;\n```",
+              uk: "Чому дорівнює `y` тут?\n\n```csharp\nint? x = null;\nint y = x ?? 5;\n```",
+            },
+            options: [
+              { id: "a", text: { en: "5", uk: "5" } },
+              { id: "b", text: { en: "0", uk: "0" } },
+              { id: "c", text: { en: "It does not compile", uk: "Не компілюється" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "dequeue-empty",
+            mode: "single",
+            prompt: { en: "What does `Dequeue()` do on an empty queue?", uk: "Що робить `Dequeue()` на порожній черзі?" },
+            options: [
+              { id: "a", text: { en: "It throws an `InvalidOperationException`", uk: "Кидає `InvalidOperationException`" } },
+              { id: "b", text: { en: "It returns the default value silently", uk: "Мовчки повертає типове значення" } },
+              { id: "c", text: { en: "It waits until an item arrives", uk: "Чекає, доки прийде елемент" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "try-pattern",
+            mode: "single",
+            prompt: { en: "What is the Try pattern?", uk: "Що таке шаблон Try?" },
+            options: [
+              { id: "a", text: { en: "A method that returns `bool` for success, and gives the result through an `out` parameter", uk: "Метод, що повертає `bool` для успіху, а результат віддає через параметр `out`" } },
+              { id: "b", text: { en: "A method that always throws an exception", uk: "Метод, що завжди кидає виняток" } },
+              { id: "c", text: { en: "A method with no parameters", uk: "Метод без параметрів" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "limited-size-stack",
+        title: { en: "Practice: Limited Size Stack", uk: "Практика «Стек обмеженого розміру»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class LimitedStack<T>
+{
+    private readonly T[] items;
+    private int count;
+
+    public LimitedStack(int capacity)
+    {
+        items = new T[capacity];
+    }
+
+    public int Count => count;
+
+    // Write IsFull, Push, Pop and Peek here
+    public bool IsFull => false;
+
+    public void Push(T item)
+    {
+    }
+
+    public T Pop()
+    {
+        return default(T);
+    }
+
+    public T Peek()
+    {
+        return default(T);
+    }
+}`,
+          `        var s = new LimitedStack<int>(2);
+        s.Push(1);
+        s.Push(2);
+        Console.WriteLine(s.IsFull);
+        try
+        {
+            s.Push(3);
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("full");
+        }
+        Console.WriteLine(s.Pop());
+        Console.WriteLine(s.Peek());
+        Console.WriteLine(s.Count);
+        s.Pop();
+        try
+        {
+            s.Pop();
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("empty");
+        }
+        var names = new LimitedStack<string>(3);
+        names.Push("a");
+        names.Push("b");
+        Console.WriteLine(names.Pop() + names.Pop());`,
+        ),
+        solution: PROGRAM_WITH(
+          `class LimitedStack<T>
+{
+    private readonly T[] items;
+    private int count;
+
+    public LimitedStack(int capacity)
+    {
+        items = new T[capacity];
+    }
+
+    public int Count => count;
+
+    public bool IsFull => count == items.Length;
+
+    public void Push(T item)
+    {
+        if (IsFull)
+        {
+            throw new InvalidOperationException("The stack is full");
+        }
+        items[count] = item;
+        count++;
+    }
+
+    public T Pop()
+    {
+        if (count == 0)
+        {
+            throw new InvalidOperationException("The stack is empty");
+        }
+        count--;
+        T item = items[count];
+        items[count] = default(T);
+        return item;
+    }
+
+    public T Peek()
+    {
+        if (count == 0)
+        {
+            throw new InvalidOperationException("The stack is empty");
+        }
+        return items[count - 1];
+    }
+}`,
+          `        var s = new LimitedStack<int>(2);
+        s.Push(1);
+        s.Push(2);
+        Console.WriteLine(s.IsFull);
+        try
+        {
+            s.Push(3);
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("full");
+        }
+        Console.WriteLine(s.Pop());
+        Console.WriteLine(s.Peek());
+        Console.WriteLine(s.Count);
+        s.Pop();
+        try
+        {
+            s.Pop();
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("empty");
+        }
+        var names = new LimitedStack<string>(3);
+        names.Push("a");
+        names.Push("b");
+        Console.WriteLine(names.Pop() + names.Pop());`,
+        ),
+        expectedOutput: "True\nfull\n2\n1\n1\nempty\nba\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "undo-practice",
+        title: { en: "Practice: Undo", uk: "Практика «Скасування»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class TextEditor
+{
+    private string text = "";
+    private readonly Stack<string> history = new Stack<string>();
+
+    public string Text => text;
+
+    // Saves the text, then adds s to the end
+    public void Type(string s)
+    {
+        // Write your code here
+    }
+
+    // If the text is not empty: saves the text, then removes the last n characters
+    public void Erase(int n)
+    {
+        // Write your code here
+    }
+
+    // Restores the text from the history, if there is any
+    public void Undo()
+    {
+        // Write your code here
+    }
+}`,
+          `        var ed = new TextEditor();
+        ed.Type("hello");
+        ed.Type(" world");
+        Console.WriteLine(ed.Text);
+        ed.Erase(6);
+        Console.WriteLine(ed.Text);
+        ed.Undo();
+        Console.WriteLine(ed.Text);
+        ed.Undo();
+        Console.WriteLine(ed.Text);
+        ed.Undo();
+        ed.Undo();
+        Console.WriteLine("[" + ed.Text + "]");
+        ed.Erase(100);
+        Console.WriteLine("[" + ed.Text + "]");`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM_WITH(
+          `class TextEditor
+{
+    private string text = "";
+    private readonly Stack<string> history = new Stack<string>();
+
+    public string Text => text;
+
+    // Saves the text, then adds s to the end
+    public void Type(string s)
+    {
+        history.Push(text);
+        text += s;
+    }
+
+    // If the text is not empty: saves the text, then removes the last n characters
+    public void Erase(int n)
+    {
+        if (text.Length == 0)
+        {
+            return;
+        }
+        history.Push(text);
+        int remove = Math.Min(n, text.Length);
+        text = text.Substring(0, text.Length - remove);
+    }
+
+    // Restores the text from the history, if there is any
+    public void Undo()
+    {
+        if (history.Count > 0)
+        {
+            text = history.Pop();
+        }
+    }
+}`,
+          `        var ed = new TextEditor();
+        ed.Type("hello");
+        ed.Type(" world");
+        Console.WriteLine(ed.Text);
+        ed.Erase(6);
+        Console.WriteLine(ed.Text);
+        ed.Undo();
+        Console.WriteLine(ed.Text);
+        ed.Undo();
+        Console.WriteLine(ed.Text);
+        ed.Undo();
+        ed.Undo();
+        Console.WriteLine("[" + ed.Text + "]");
+        ed.Erase(100);
+        Console.WriteLine("[" + ed.Text + "]");`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "hello world\nhello\nhello world\nhello\n[]\n[]\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "csv-practice",
+        title: { en: "Practice: CSV", uk: "Практика «CSV»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          "",
+          `        string[] lines =
+        {
+            "name,age,city",
+            "Ann,30,Kyiv",
+            "\\"Smith, John\\",45,\\"New \\"\\"York\\"\\"\\"",
+            "Bob,,Lviv",
+            "x,\\"\\",y"
+        };
+        foreach (string line in lines)
+        {
+            List<string> fields = ParseLine(line);
+            Console.WriteLine(fields.Count + ": " + string.Join(" | ", fields.ToArray()));
+        }`,
+          "using System.Collections.Generic;\nusing System.Text;",
+          `    // Splits one CSV line into its fields. Quotes protect commas, and "" stands for one quote.
+    static List<string> ParseLine(string line)
+    {
+        // Write your code here
+        return new List<string>();
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          "",
+          `        string[] lines =
+        {
+            "name,age,city",
+            "Ann,30,Kyiv",
+            "\\"Smith, John\\",45,\\"New \\"\\"York\\"\\"\\"",
+            "Bob,,Lviv",
+            "x,\\"\\",y"
+        };
+        foreach (string line in lines)
+        {
+            List<string> fields = ParseLine(line);
+            Console.WriteLine(fields.Count + ": " + string.Join(" | ", fields.ToArray()));
+        }`,
+          "using System.Collections.Generic;\nusing System.Text;",
+          `    // Splits one CSV line into its fields. Quotes protect commas, and "" stands for one quote.
+    static List<string> ParseLine(string line)
+    {
+        var fields = new List<string>();
+        var current = new StringBuilder();
+        bool inQuotes = false;
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (inQuotes)
+            {
+                if (c == '"')
+                {
+                    if (i + 1 < line.Length && line[i + 1] == '"')
+                    {
+                        current.Append('"');
+                        i++;
+                    }
+                    else
+                    {
+                        inQuotes = false;
+                    }
+                }
+                else
+                {
+                    current.Append(c);
+                }
+            }
+            else if (c == '"')
+            {
+                inQuotes = true;
+            }
+            else if (c == ',')
+            {
+                fields.Add(current.ToString());
+                current.Clear();
+            }
+            else
+            {
+                current.Append(c);
+            }
+        }
+        fields.Add(current.ToString());
+        return fields;
+    }`,
+        ),
+        expectedOutput:
+          "3: name | age | city\n3: Ann | 30 | Kyiv\n3: Smith, John | 45 | New \"York\"\n3: Bob |  | Lviv\n3: x |  | y\n",
+        maxScore: 20,
+      },
+    ],
+  },
+  {
+    slug: "yield-return",
+    title: { en: "yield return", uk: "yield return" },
+    slides: [
+      { kind: "lecture", slug: "foreach-enumerable", title: { en: "foreach, IEnumerable and IEnumerator", uk: "foreach, IEnumerable і IEnumerator" } },
+      { kind: "lecture", slug: "enumerator-implementation", title: { en: "Implementing IEnumerator", uk: "Реалізація IEnumerator" } },
+      {
+        kind: "quiz",
+        slug: "enumerable-quiz",
+        title: { en: "foreach, IEnumerable and IEnumerator", uk: "foreach, IEnumerable і IEnumerator" },
+        questions: [
+          {
+            id: "foreach-needs",
+            mode: "single",
+            prompt: { en: "What must a collection provide for `foreach` to work?", uk: "Що має надавати колекція, щоб працював `foreach`?" },
+            options: [
+              { id: "a", text: { en: "A `GetEnumerator` method, usually through `IEnumerable`", uk: "Метод `GetEnumerator`, зазвичай через `IEnumerable`" } },
+              { id: "b", text: { en: "A `Length` property only", uk: "Лише властивість `Length`" } },
+              { id: "c", text: { en: "An array type", uk: "Тип масиву" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "movenext",
+            mode: "single",
+            prompt: { en: "What does `MoveNext()` return?", uk: "Що повертає `MoveNext()`?" },
+            options: [
+              { id: "a", text: { en: "`true` if there is a current item, `false` at the end", uk: "`true`, якщо є поточний елемент, і `false` наприкінці" } },
+              { id: "b", text: { en: "The current item", uk: "Поточний елемент" } },
+              { id: "c", text: { en: "The number of items", uk: "Кількість елементів" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "current-property",
+            mode: "single",
+            prompt: { en: "Which property gives the item where the enumerator stands?", uk: "Яка властивість дає елемент, на якому стоїть перелічувач?" },
+            options: [
+              { id: "a", text: { en: "`Current`", uk: "`Current`" } },
+              { id: "b", text: { en: "`Next`", uk: "`Next`" } },
+              { id: "c", text: { en: "`Length`", uk: "`Length`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "compiler-generates",
+            mode: "single",
+            prompt: { en: "What does the compiler generate for a method that uses `yield return`?", uk: "Що генерує компілятор для методу з `yield return`?" },
+            options: [
+              { id: "a", text: { en: "A hidden class that implements `IEnumerator`", uk: "Прихований клас, що реалізує `IEnumerator`" } },
+              { id: "b", text: { en: "A new array with all the items", uk: "Новий масив з усіма елементами" } },
+              { id: "c", text: { en: "Nothing: `yield` is only a comment", uk: "Нічого: `yield` — лише коментар" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "iqueryable-ienumerable", title: { en: "IEnumerable and IQueryable", uk: "IEnumerable і IQueryable" } },
+      { kind: "lecture", slug: "yield-return", title: { en: "yield return", uk: "yield return" } },
+      { kind: "lecture", slug: "lazy-collections", title: { en: "Lazy collections", uk: "Ледачі колекції" } },
+      {
+        kind: "practice",
+        slug: "sequence-generation",
+        title: { en: "Sequence generation", uk: "Генерація послідовності" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          "",
+          `        Print(Evens(10));
+        Print(Fibonacci(8));
+        Print(Countdown(3));`,
+          "using System.Collections.Generic;",
+          `    // Prints the items of a sequence on one line, separated by spaces
+    static void Print(IEnumerable<int> items)
+    {
+        string text = "";
+        foreach (int item in items)
+        {
+            text += (text == "" ? "" : " ") + item;
+        }
+        Console.WriteLine(text);
+    }
+
+    // The even numbers from 0 up to limit, inclusive
+    static IEnumerable<int> Evens(int limit)
+    {
+        // Write your code here
+        yield break;
+    }
+
+    // The first count Fibonacci numbers: 1, 1, 2, 3, 5, ...
+    static IEnumerable<int> Fibonacci(int count)
+    {
+        // Write your code here
+        yield break;
+    }
+
+    // The numbers from 'from' down to 0, inclusive
+    static IEnumerable<int> Countdown(int from)
+    {
+        // Write your code here
+        yield break;
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          "",
+          `        Print(Evens(10));
+        Print(Fibonacci(8));
+        Print(Countdown(3));`,
+          "using System.Collections.Generic;",
+          `    // Prints the items of a sequence on one line, separated by spaces
+    static void Print(IEnumerable<int> items)
+    {
+        string text = "";
+        foreach (int item in items)
+        {
+            text += (text == "" ? "" : " ") + item;
+        }
+        Console.WriteLine(text);
+    }
+
+    // The even numbers from 0 up to limit, inclusive
+    static IEnumerable<int> Evens(int limit)
+    {
+        for (int i = 0; i <= limit; i += 2)
+        {
+            yield return i;
+        }
+    }
+
+    // The first count Fibonacci numbers: 1, 1, 2, 3, 5, ...
+    static IEnumerable<int> Fibonacci(int count)
+    {
+        int a = 1;
+        int b = 1;
+        for (int i = 0; i < count; i++)
+        {
+            yield return a;
+            int next = a + b;
+            a = b;
+            b = next;
+        }
+    }
+
+    // The numbers from 'from' down to 0, inclusive
+    static IEnumerable<int> Countdown(int from)
+    {
+        for (int i = from; i >= 0; i--)
+        {
+            yield return i;
+        }
+    }`,
+        ),
+        expectedOutput: "0 2 4 6 8 10\n1 1 2 3 5 8 13 21\n3 2 1 0\n",
+        maxScore: 5,
+      },
+      {
+        kind: "practice",
+        slug: "zip-sum",
+        title: { en: "ZipSum", uk: "ZipSum" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          "",
+          `        Print(ZipSum(new[] { 1, 2, 3 }, new[] { 10, 20, 30 }));
+        Print(ZipSum(new[] { 1, 2, 3, 4 }, new[] { 5, 6 }));
+        Print(ZipSum(new int[0], new[] { 1 }));
+        Print(ZipSum(Evens(4), Countdown(2)));`,
+          "using System.Collections.Generic;",
+          `    // Prints the items of a sequence on one line, separated by spaces
+    static void Print(IEnumerable<int> items)
+    {
+        string text = "";
+        foreach (int item in items)
+        {
+            text += (text == "" ? "" : " ") + item;
+        }
+        Console.WriteLine(text);
+    }
+
+    static IEnumerable<int> Evens(int limit)
+    {
+        for (int i = 0; i <= limit; i += 2)
+        {
+            yield return i;
+        }
+    }
+
+    static IEnumerable<int> Countdown(int from)
+    {
+        for (int i = from; i >= 0; i--)
+        {
+            yield return i;
+        }
+    }
+
+    // The sum of each pair of items; stops at the shorter sequence
+    static IEnumerable<int> ZipSum(IEnumerable<int> a, IEnumerable<int> b)
+    {
+        // Write your code here
+        yield break;
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          "",
+          `        Print(ZipSum(new[] { 1, 2, 3 }, new[] { 10, 20, 30 }));
+        Print(ZipSum(new[] { 1, 2, 3, 4 }, new[] { 5, 6 }));
+        Print(ZipSum(new int[0], new[] { 1 }));
+        Print(ZipSum(Evens(4), Countdown(2)));`,
+          "using System.Collections.Generic;",
+          `    // Prints the items of a sequence on one line, separated by spaces
+    static void Print(IEnumerable<int> items)
+    {
+        string text = "";
+        foreach (int item in items)
+        {
+            text += (text == "" ? "" : " ") + item;
+        }
+        Console.WriteLine(text);
+    }
+
+    static IEnumerable<int> Evens(int limit)
+    {
+        for (int i = 0; i <= limit; i += 2)
+        {
+            yield return i;
+        }
+    }
+
+    static IEnumerable<int> Countdown(int from)
+    {
+        for (int i = from; i >= 0; i--)
+        {
+            yield return i;
+        }
+    }
+
+    // The sum of each pair of items; stops at the shorter sequence
+    static IEnumerable<int> ZipSum(IEnumerable<int> a, IEnumerable<int> b)
+    {
+        using (IEnumerator<int> first = a.GetEnumerator())
+        using (IEnumerator<int> second = b.GetEnumerator())
+        {
+            while (first.MoveNext() && second.MoveNext())
+            {
+                yield return first.Current + second.Current;
+            }
+        }
+    }`,
+        ),
+        expectedOutput: "11 22 33\n6 8\n\n2 3 4\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "yield-recursive", title: { en: "yield return in recursive methods", uk: "yield return у рекурсивних методах" } },
+      {
+        kind: "quiz",
+        slug: "yield-special-quiz",
+        title: { en: "Special cases of yield return", uk: "Особливі випадки yield return" },
+        questions: [
+          {
+            id: "try-catch",
+            mode: "single",
+            prompt: { en: "Which of these is a compile error inside an iterator method?", uk: "Що з цього є помилкою компіляції всередині ітераторного методу?" },
+            options: [
+              { id: "a", text: { en: "`yield return` inside a `try` block that has a `catch` clause", uk: "`yield return` у блоці `try`, що має `catch`" } },
+              { id: "b", text: { en: "`yield return` inside a `try` block that has only `finally`", uk: "`yield return` у блоці `try`, що має лише `finally`" } },
+              { id: "c", text: { en: "`yield break`", uk: "`yield break`" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "quiz",
+        slug: "yield-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "iterator-start",
+            mode: "single",
+            prompt: { en: "When does the body of an iterator method start running?", uk: "Коли починає виконуватися тіло ітераторного методу?" },
+            options: [
+              { id: "a", text: { en: "When the first `MoveNext()` is called, for example by `foreach`", uk: "Коли вперше викликають `MoveNext()`, наприклад через `foreach`" } },
+              { id: "b", text: { en: "At the moment the method is called", uk: "У момент виклику методу" } },
+              { id: "c", text: { en: "When the program starts", uk: "Коли програма запускається" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "yield-break",
+            mode: "single",
+            prompt: { en: "What does `yield break` do?", uk: "Що робить `yield break`?" },
+            options: [
+              { id: "a", text: { en: "Ends the sequence", uk: "Завершує послідовність" } },
+              { id: "b", text: { en: "Skips one item", uk: "Пропускає один елемент" } },
+              { id: "c", text: { en: "Throws an exception", uk: "Кидає виняток" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "lazy-benefit",
+            mode: "single",
+            prompt: { en: "Why is lazy evaluation useful?", uk: "Чому корисне ледаче обчислення?" },
+            options: [
+              { id: "a", text: { en: "Items are computed on demand, and infinite sequences are possible", uk: "Елементи обчислюються на вимогу, і можливі нескінченні послідовності" } },
+              { id: "b", text: { en: "The program runs faster on every item", uk: "Програма швидша на кожному елементі" } },
+              { id: "c", text: { en: "Each item is saved to disk", uk: "Кожен елемент зберігається на диску" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "iqueryable-database",
+            mode: "single",
+            prompt: { en: "Which type lets a provider translate the query into a database query?", uk: "Який тип дозволяє провайдеру перекласти запит у запит до бази даних?" },
+            options: [
+              { id: "a", text: { en: "`IQueryable<T>`", uk: "`IQueryable<T>`" } },
+              { id: "b", text: { en: "`IEnumerable<T>`", uk: "`IEnumerable<T>`" } },
+              { id: "c", text: { en: "`List<T>`", uk: "`List<T>`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "argument-checks",
+            mode: "single",
+            prompt: { en: "Why is it a problem to check arguments inside an iterator method?", uk: "Чому перевірка аргументів усередині ітераторного методу — проблема?" },
+            options: [
+              { id: "a", text: { en: "The checks run only when the sequence is enumerated, so errors appear late", uk: "Перевірки виконуються лише під час перелічування, тож помилки з'являються пізно" } },
+              { id: "b", text: { en: "The checks are not allowed at all", uk: "Перевірки взагалі не дозволені" } },
+              { id: "c", text: { en: "The checks make the program slower to compile", uk: "Перевірки сповільнюють компіляцію" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "exponential-smoothing",
+        title: { en: "Practice: Exponential smoothing", uk: "Практика «Експоненціальне згладжування»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          "",
+          `        Print(Smooth(new double[] { 10, 20, 30 }, 0.5));
+        Print(FirstN(Smooth(Constant(8), 0.25), 3));
+        Print(FirstN(Smooth(Ramp(), 0.5), 4));`,
+          "using System.Collections.Generic;",
+          `    // Prints the items of a sequence on one line, separated by spaces
+    static void Print(IEnumerable<double> items)
+    {
+        string text = "";
+        foreach (double item in items)
+        {
+            text += (text == "" ? "" : " ") + item;
+        }
+        Console.WriteLine(text);
+    }
+
+    // An infinite sequence of the same value
+    static IEnumerable<double> Constant(double value)
+    {
+        while (true)
+        {
+            yield return value;
+        }
+    }
+
+    // An infinite sequence 0, 1, 2, ...
+    static IEnumerable<double> Ramp()
+    {
+        double x = 0;
+        while (true)
+        {
+            yield return x;
+            x++;
+        }
+    }
+
+    // Each output is alpha * value + (1 - alpha) * previous output; the first output is the first value
+    static IEnumerable<double> Smooth(IEnumerable<double> values, double alpha)
+    {
+        // Write your code here
+        yield break;
+    }
+
+    // The first n items of a sequence; must stop reading after n items
+    static List<double> FirstN(IEnumerable<double> items, int n)
+    {
+        // Write your code here
+        return new List<double>();
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          "",
+          `        Print(Smooth(new double[] { 10, 20, 30 }, 0.5));
+        Print(FirstN(Smooth(Constant(8), 0.25), 3));
+        Print(FirstN(Smooth(Ramp(), 0.5), 4));`,
+          "using System.Collections.Generic;",
+          `    // Prints the items of a sequence on one line, separated by spaces
+    static void Print(IEnumerable<double> items)
+    {
+        string text = "";
+        foreach (double item in items)
+        {
+            text += (text == "" ? "" : " ") + item;
+        }
+        Console.WriteLine(text);
+    }
+
+    // An infinite sequence of the same value
+    static IEnumerable<double> Constant(double value)
+    {
+        while (true)
+        {
+            yield return value;
+        }
+    }
+
+    // An infinite sequence 0, 1, 2, ...
+    static IEnumerable<double> Ramp()
+    {
+        double x = 0;
+        while (true)
+        {
+            yield return x;
+            x++;
+        }
+    }
+
+    // Each output is alpha * value + (1 - alpha) * previous output; the first output is the first value
+    static IEnumerable<double> Smooth(IEnumerable<double> values, double alpha)
+    {
+        bool first = true;
+        double smoothed = 0;
+        foreach (double value in values)
+        {
+            if (first)
+            {
+                smoothed = value;
+                first = false;
+            }
+            else
+            {
+                smoothed = alpha * value + (1 - alpha) * smoothed;
+            }
+            yield return smoothed;
+        }
+    }
+
+    // The first n items of a sequence; must stop reading after n items
+    static List<double> FirstN(IEnumerable<double> items, int n)
+    {
+        var result = new List<double>();
+        foreach (double item in items)
+        {
+            result.Add(item);
+            if (result.Count == n)
+            {
+                break;
+            }
+        }
+        return result;
+    }`,
+        ),
+        expectedOutput: "10 15 22.5\n8 8 8\n0 0.5 1.25 2.125\n",
+        maxScore: 10,
+      },
+    ],
+  },
+  {
+    slug: "lists-and-dictionaries",
+    title: { en: "Lists and dictionaries", uk: "Списки і словники" },
+    slides: [
+      { kind: "lecture", slug: "lists-indexing", title: { en: "Lists and indexing", uk: "Списки і індексація" } },
+      { kind: "lecture", slug: "contains-method", title: { en: "The Contains method", uk: "Метод Contains" } },
+      { kind: "lecture", slug: "equals-method", title: { en: "The Equals method", uk: "Метод Equals" } },
+      {
+        kind: "quiz",
+        slug: "operation-complexity-quiz",
+        title: { en: "Operation complexity", uk: "Складність операцій" },
+        questions: [
+          {
+            id: "dictionary-lookup",
+            mode: "single",
+            prompt: { en: "What is the average time of looking up a key in a `Dictionary<K, V>`?", uk: "Який середній час пошуку ключа в `Dictionary<K, V>`?" },
+            options: [
+              { id: "a", text: { en: "O(1)", uk: "O(1)" } },
+              { id: "b", text: { en: "O(n)", uk: "O(n)" } },
+              { id: "c", text: { en: "O(log n)", uk: "O(log n)" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "operator-overloading", title: { en: "Operator overloading", uk: "Перевантаження операторів" } },
+      { kind: "lecture", slug: "when-overload-operators", title: { en: "When to overload operators", uk: "Коли варто перевантажувати оператори" } },
+      {
+        kind: "quiz",
+        slug: "operator-subtleties-quiz",
+        title: { en: "Operator subtleties", uk: "Тонкощі операторів" },
+        questions: [
+          {
+            id: "pair-with",
+            mode: "single",
+            prompt: { en: "If you define `operator ==`, what else must you define?", uk: "Якщо ви визначили `operator ==`, що ще потрібно визначити?" },
+            options: [
+              { id: "a", text: { en: "`operator !=`", uk: "`operator !=`" } },
+              { id: "b", text: { en: "`operator +`", uk: "`operator +`" } },
+              { id: "c", text: { en: "Nothing, it is automatic", uk: "Нічого, це автоматично" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "compound",
+            mode: "single",
+            prompt: { en: "A class defines `operator +` but not `operator +=`. What does `a += b` do?", uk: "Клас визначає `operator +`, але не `operator +=`. Що робить `a += b`?" },
+            options: [
+              { id: "a", text: { en: "It computes `a = a + b` with `operator +`", uk: "Обчислює `a = a + b` через `operator +`" } },
+              { id: "b", text: { en: "It does not compile", uk: "Не компілюється" } },
+              { id: "c", text: { en: "It changes `b`", uk: "Змінює `b`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "static-operator",
+            mode: "single",
+            prompt: { en: "What must every operator declaration have?", uk: "Що мусить мати кожне оголошення оператора?" },
+            options: [
+              { id: "a", text: { en: "The `static` modifier", uk: "Модифікатор `static`" } },
+              { id: "b", text: { en: "The `virtual` modifier", uk: "Модифікатор `virtual`" } },
+              { id: "c", text: { en: "A return type of `void`", uk: "Тип значення, що повертається, `void`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "null-in-operator",
+            mode: "single",
+            prompt: { en: "Inside `operator ==`, why is writing `if (a == null)` dangerous?", uk: "Чому всередині `operator ==` написати `if (a == null)` небезпечно?" },
+            options: [
+              { id: "a", text: { en: "It calls `operator ==` again, which leads to endless recursion", uk: "Воно знову викликає `operator ==`, що веде до нескінченної рекурсії" } },
+              { id: "b", text: { en: "It always returns `true`", uk: "Завжди повертає `true`" } },
+              { id: "c", text: { en: "`null` cannot be compared at all", uk: "`null` взагалі не можна порівняти" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "equals-missing",
+            mode: "single",
+            prompt: { en: "A class defines `operator ==` but not `Equals` and `GetHashCode`. What is the problem?", uk: "Клас визначає `operator ==`, але не `Equals` і `GetHashCode`. У чому проблема?" },
+            options: [
+              { id: "a", text: { en: "The compiler warns, and dictionaries and lists may behave inconsistently", uk: "Компілятор попереджає, а словники й списки можуть поводитися неузгоджено" } },
+              { id: "b", text: { en: "The class cannot be compiled", uk: "Клас не можна скомпілювати" } },
+              { id: "c", text: { en: "Nothing: the operator covers everything", uk: "Нічого: оператор покриває все" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "comparison-pairs",
+            mode: "single",
+            prompt: { en: "Can `operator <` be defined without `operator >`?", uk: "Чи можна визначити `operator <` без `operator >`?" },
+            options: [
+              { id: "a", text: { en: "No: comparison operators come in pairs", uk: "Ні: оператори порівняння визначають парами" } },
+              { id: "b", text: { en: "Yes, always", uk: "Так, завжди" } },
+              { id: "c", text: { en: "Only for structs", uk: "Лише для структур" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "string-equality",
+            mode: "single",
+            prompt: { en: "In C#, what is `\"ab\" == \"a\" + \"b\"` for strings?", uk: "Чому дорівнює `\"ab\" == \"a\" + \"b\"` для рядків у C#?" },
+            options: [
+              { id: "a", text: { en: "True: `string` overloads `==` to compare the contents", uk: "True: `string` перевизначає `==`, щоб порівнювати вміст" } },
+              { id: "b", text: { en: "False: strings are compared by reference", uk: "False: рядки порівнюються за посиланням" } },
+              { id: "c", text: { en: "It does not compile", uk: "Не компілюється" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "hashing-functions", title: { en: "Hash functions", uk: "Хешуючі функції" } },
+      { kind: "lecture", slug: "hashes-security", title: { en: "Hashes in computer security", uk: "Хеші в комп'ютерній безпеці" } },
+      { kind: "lecture", slug: "substring-search-1", title: { en: "Substring search in a string - 1", uk: "Пошук підрядка в рядку - 1" } },
+      { kind: "lecture", slug: "substring-search-2", title: { en: "Substring search in a string - 2", uk: "Пошук підрядка в рядку - 2" } },
+      { kind: "lecture", slug: "dictionary-class", title: { en: "The Dictionary class", uk: "Клас Dictionary" } },
+      { kind: "lecture", slug: "gethashcode-method", title: { en: "GetHashCode", uk: "GetHashCode" } },
+      {
+        kind: "quiz",
+        slug: "dictionary-equals-quiz",
+        title: { en: "Dictionary, Equals and GetHashCode", uk: "Dictionary, Equals і GetHashCode" },
+        questions: [
+          {
+            id: "bucket",
+            mode: "single",
+            prompt: { en: "Why must equal keys have equal hash codes?", uk: "Чому рівні ключі мусять мати рівні хеш-коди?" },
+            options: [
+              { id: "a", text: { en: "A dictionary chooses the bucket by the hash code, so an equal key must go to the same bucket", uk: "Словник вибирає кошик за хеш-кодом, тож рівний ключ мусить потрапити в той самий кошик" } },
+              { id: "b", text: { en: "To make the dictionary smaller", uk: "Щоб словник був меншим" } },
+              { id: "c", text: { en: "Because `Equals` is never called", uk: "Бо `Equals` ніколи не викликається" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "mutable-key",
+            mode: "single",
+            prompt: { en: "What happens if a key's field changes after the key was stored in a `Dictionary`?", uk: "Що станеться, якщо поле ключа змінюється після того, як ключ збережено в `Dictionary`?" },
+            options: [
+              { id: "a", text: { en: "The item may become impossible to find, because its hash changed", uk: "Елемент може стати неможливо знайти, бо його хеш змінився" } },
+              { id: "b", text: { en: "Nothing: the dictionary updates itself", uk: "Нічого: словник оновлюється сам" } },
+              { id: "c", text: { en: "An exception is thrown at once", uk: "Одразу кидається виняток" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "quiz",
+        slug: "lists-dictionaries-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "contains-uses",
+            mode: "single",
+            prompt: { en: "What does `List.Contains` use to compare items of your own class?", uk: "Що `List.Contains` використовує для порівняння елементів вашого класу?" },
+            options: [
+              { id: "a", text: { en: "The `Equals` method", uk: "Метод `Equals`" } },
+              { id: "b", text: { en: "The `==` operator only", uk: "Лише оператор `==`" } },
+              { id: "c", text: { en: "The memory address only", uk: "Лише адресу в пам'яті" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "hash-function",
+            mode: "single",
+            prompt: { en: "What is a hash function?", uk: "Що таке хеш-функція?" },
+            options: [
+              { id: "a", text: { en: "A function that maps data of any size to a number of fixed size", uk: "Функція, що відображає дані будь-якого розміру на число фіксованого розміру" } },
+              { id: "b", text: { en: "A function that sorts data", uk: "Функція, що сортує дані" } },
+              { id: "c", text: { en: "A function that encrypts data with a secret key", uk: "Функція, що шифрує дані секретним ключем" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "password-hash",
+            mode: "single",
+            prompt: { en: "Which property does a cryptographic hash need for storing passwords?", uk: "Яку властивість має мати криптографічний хеш для зберігання паролів?" },
+            options: [
+              { id: "a", text: { en: "It is practically impossible to find an input for a given hash", uk: "Практично неможливо знайти вхід за заданим хешем" } },
+              { id: "b", text: { en: "It is always short", uk: "Він завжди короткий" } },
+              { id: "c", text: { en: "It is the same for all inputs", uk: "Він однаковий для всіх входів" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "naive-cost",
+            mode: "single",
+            prompt: { en: "What is the worst-case cost of the naive substring search, for a text of length n and a pattern of length m?", uk: "Яка найгірша вартість наївного пошуку підрядка для тексту довжини n і шаблону довжини m?" },
+            options: [
+              { id: "a", text: { en: "O(n · m)", uk: "O(n · m)" } },
+              { id: "b", text: { en: "O(1)", uk: "O(1)" } },
+              { id: "c", text: { en: "O(log n)", uk: "O(log n)" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "rolling-hash",
+            mode: "single",
+            prompt: { en: "Why does Rabin–Karp use a rolling hash?", uk: "Навіщо Рабін–Карп використовує ковзний хеш?" },
+            options: [
+              { id: "a", text: { en: "To update the hash of the window in constant time as it slides", uk: "Щоб оновлювати хеш вікна за сталий час, коли воно зсувається" } },
+              { id: "b", text: { en: "To sort the text first", uk: "Щоб спершу відсортувати текст" } },
+              { id: "c", text: { en: "To avoid comparing the text at all", uk: "Щоб взагалі не порівнювати текст" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "readonly-bytes",
+        title: { en: "Practice: Readonly bytes", uk: "Практика «Readonly bytes»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class ReadonlyBytes
+{
+    private readonly byte[] data;
+
+    public ReadonlyBytes(byte[] data)
+    {
+        this.data = (byte[])data.Clone();
+    }
+
+    public int Length => data.Length;
+
+    // Write the indexer, Append, Equals, GetHashCode, the operators == and != and ToString here
+    public byte this[int index] => 0;
+
+    public ReadonlyBytes Append(ReadonlyBytes other)
+    {
+        return this;
+    }
+
+    public override string ToString()
+    {
+        return "";
+    }
+}`,
+          `        var a = new ReadonlyBytes(new byte[] { 1, 255, 16 });
+        var b = new ReadonlyBytes(new byte[] { 1, 255, 16 });
+        var c = a.Append(new ReadonlyBytes(new byte[] { 0 }));
+        Console.WriteLine(a);
+        Console.WriteLine(a == b);
+        Console.WriteLine(a.Equals(b));
+        Console.WriteLine(a == c);
+        Console.WriteLine(c);
+        Console.WriteLine(c.Length);
+        Console.WriteLine(a[1]);
+
+        var source = new byte[] { 7 };
+        var d = new ReadonlyBytes(source);
+        source[0] = 9;
+        Console.WriteLine(d);
+
+        var counts = new Dictionary<ReadonlyBytes, int>();
+        counts[a] = 1;
+        counts[b] = counts[b] + 1;
+        Console.WriteLine(counts.Count);
+        Console.WriteLine(counts[a]);
+        Console.WriteLine(new ReadonlyBytes(new byte[0]).Length);
+        Console.WriteLine(a != c);`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM_WITH(
+          `class ReadonlyBytes
+{
+    private readonly byte[] data;
+
+    public ReadonlyBytes(byte[] data)
+    {
+        this.data = (byte[])data.Clone();
+    }
+
+    public int Length => data.Length;
+
+    public byte this[int index] => data[index];
+
+    public ReadonlyBytes Append(ReadonlyBytes other)
+    {
+        var result = new byte[data.Length + other.data.Length];
+        Array.Copy(data, 0, result, 0, data.Length);
+        Array.Copy(other.data, 0, result, data.Length, other.data.Length);
+        return new ReadonlyBytes(result);
+    }
+
+    public override bool Equals(object obj)
+    {
+        ReadonlyBytes other = obj as ReadonlyBytes;
+        if (ReferenceEquals(other, null))
+        {
+            return false;
+        }
+        if (other.data.Length != data.Length)
+        {
+            return false;
+        }
+        for (int i = 0; i < data.Length; i++)
+        {
+            if (data[i] != other.data[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            int hash = 17;
+            foreach (byte b in data)
+            {
+                hash = hash * 31 + b;
+            }
+            return hash;
+        }
+    }
+
+    public static bool operator ==(ReadonlyBytes a, ReadonlyBytes b)
+    {
+        if (ReferenceEquals(a, b))
+        {
+            return true;
+        }
+        if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
+        {
+            return false;
+        }
+        return a.Equals(b);
+    }
+
+    public static bool operator !=(ReadonlyBytes a, ReadonlyBytes b)
+    {
+        return !(a == b);
+    }
+
+    public override string ToString()
+    {
+        var parts = new string[data.Length];
+        for (int i = 0; i < data.Length; i++)
+        {
+            parts[i] = data[i].ToString("X2");
+        }
+        return string.Join(" ", parts);
+    }
+}`,
+          `        var a = new ReadonlyBytes(new byte[] { 1, 255, 16 });
+        var b = new ReadonlyBytes(new byte[] { 1, 255, 16 });
+        var c = a.Append(new ReadonlyBytes(new byte[] { 0 }));
+        Console.WriteLine(a);
+        Console.WriteLine(a == b);
+        Console.WriteLine(a.Equals(b));
+        Console.WriteLine(a == c);
+        Console.WriteLine(c);
+        Console.WriteLine(c.Length);
+        Console.WriteLine(a[1]);
+
+        var source = new byte[] { 7 };
+        var d = new ReadonlyBytes(source);
+        source[0] = 9;
+        Console.WriteLine(d);
+
+        var counts = new Dictionary<ReadonlyBytes, int>();
+        counts[a] = 1;
+        counts[b] = counts[b] + 1;
+        Console.WriteLine(counts.Count);
+        Console.WriteLine(counts[a]);
+        Console.WriteLine(new ReadonlyBytes(new byte[0]).Length);
+        Console.WriteLine(a != c);`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "01 FF 10\nTrue\nTrue\nFalse\n01 FF 10 00\n4\n255\n07\n1\n2\n0\nTrue\n",
+        maxScore: 20,
+      },
+    ],
+  },
+  {
+    slug: "delegates",
+    title: { en: "Delegates", uk: "Делегати" },
+    slides: [
+      { kind: "lecture", slug: "delegates-problem", title: { en: "Problem statement", uk: "Постановка проблеми" } },
+      { kind: "lecture", slug: "delegates-intro", title: { en: "Delegates", uk: "Делегати" } },
+      {
+        kind: "practice",
+        slug: "delegate-syntax",
+        title: { en: "Delegate syntax", uk: "Синтаксис делегатів" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Declare the delegate type Operation here: two int parameters, returns an int
+// Write Add, Multiply and Apply here`,
+          `        Operation op = Add;
+        Console.WriteLine(op(2, 3));
+        op = Multiply;
+        Console.WriteLine(op(2, 3));
+        Console.WriteLine(Apply(Add, 10, 4));
+        Console.WriteLine(Apply(Multiply, 10, 4));
+        Operation[] all = { Add, Multiply };
+        foreach (Operation f in all)
+        {
+            Console.WriteLine(f(3, 3));
+        }`,
+          "",
+          `    static int Add(int a, int b)
+    {
+        return 0;
+    }
+
+    static int Multiply(int a, int b)
+    {
+        return 0;
+    }
+
+    static int Apply(Operation op, int x, int y)
+    {
+        return 0;
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          `delegate int Operation(int a, int b);`,
+          `        Operation op = Add;
+        Console.WriteLine(op(2, 3));
+        op = Multiply;
+        Console.WriteLine(op(2, 3));
+        Console.WriteLine(Apply(Add, 10, 4));
+        Console.WriteLine(Apply(Multiply, 10, 4));
+        Operation[] all = { Add, Multiply };
+        foreach (Operation f in all)
+        {
+            Console.WriteLine(f(3, 3));
+        }`,
+          "",
+          `    static int Add(int a, int b)
+    {
+        return a + b;
+    }
+
+    static int Multiply(int a, int b)
+    {
+        return a * b;
+    }
+
+    static int Apply(Operation op, int x, int y)
+    {
+        return op(x, y);
+    }`,
+        ),
+        expectedOutput: "5\n6\n14\n40\n6\n9\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "delegates-dynamic", title: { en: "Delegates for dynamic methods", uk: "Делегати для динамічних методів" } },
+      { kind: "lecture", slug: "delegates-memory-map", title: { en: "Memory map", uk: "Карта пам'яті" } },
+      { kind: "lecture", slug: "generic-delegates", title: { en: "Generic delegates", uk: "Дженерик-делегати" } },
+      { kind: "lecture", slug: "func-action", title: { en: "Func and Action", uk: "Func і Action" } },
+      {
+        kind: "practice",
+        slug: "delegate-syntax-2",
+        title: { en: "Delegate syntax 2", uk: "Синтаксис делегатів 2" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Declare the delegate type Notify here: one string parameter, returns nothing
+// Write ConsoleNotify and LogNotify here`,
+          `        Notify n = ConsoleNotify;
+        n += LogNotify;
+        n("saved");
+        n -= ConsoleNotify;
+        n("loaded");
+        Notify empty = null;
+        if (empty == null)
+        {
+            Console.WriteLine("no handlers");
+        }`,
+          "",
+          `    static void ConsoleNotify(string message)
+    {
+    }
+
+    static void LogNotify(string message)
+    {
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          `delegate void Notify(string message);`,
+          `        Notify n = ConsoleNotify;
+        n += LogNotify;
+        n("saved");
+        n -= ConsoleNotify;
+        n("loaded");
+        Notify empty = null;
+        if (empty == null)
+        {
+            Console.WriteLine("no handlers");
+        }`,
+          "",
+          `    static void ConsoleNotify(string message)
+    {
+        Console.WriteLine("console: " + message);
+    }
+
+    static void LogNotify(string message)
+    {
+        Console.WriteLine("log: " + message);
+    }`,
+        ),
+        expectedOutput: "console: saved\nlog: saved\nlog: loaded\nno handlers\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "anonymous-delegates", title: { en: "Anonymous delegates", uk: "Анонімні делегати" } },
+      { kind: "lecture", slug: "lambda-expressions", title: { en: "Lambda expressions", uk: "Лямбда-вирази" } },
+      { kind: "lecture", slug: "more-lambdas", title: { en: "More lambdas", uk: "Більше лямбд" } },
+      {
+        kind: "practice",
+        slug: "lambda-syntax",
+        title: { en: "Lambda syntax", uk: "Синтаксис лямбд" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Main()
+    {
+        Func<int, int> square = null;      // x => x * x
+        Func<int, int, int> add = null;    // (a, b) => a + b
+        Func<int, bool> isEven = null;     // a block lambda: true for even numbers
+        Func<int> answer = null;           // () => 42
+        Action<string> shout = null;       // writes the text in upper case
+
+        Console.WriteLine(square(7));
+        Console.WriteLine(add(2, 5));
+        Console.WriteLine(isEven(10));
+        Console.WriteLine(isEven(7));
+        Console.WriteLine(answer());
+        shout("hi");
+    }`),
+        solution: PROGRAM(`    static void Main()
+    {
+        Func<int, int> square = x => x * x;
+        Func<int, int, int> add = (a, b) => a + b;
+        Func<int, bool> isEven = n =>
+        {
+            return n % 2 == 0;
+        };
+        Func<int> answer = () => 42;
+        Action<string> shout = s => Console.WriteLine(s.ToUpper());
+
+        Console.WriteLine(square(7));
+        Console.WriteLine(add(2, 5));
+        Console.WriteLine(isEven(10));
+        Console.WriteLine(isEven(7));
+        Console.WriteLine(answer());
+        shout("hi");
+    }`),
+        expectedOutput: "49\n7\nTrue\nFalse\n42\nHI\n",
+        maxScore: 5,
+      },
+      {
+        kind: "practice",
+        slug: "lambda-syntax-2",
+        title: { en: "Lambda syntax 2", uk: "Синтаксис лямбд 2" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          "",
+          `        var numbers = new List<int> { 5, 12, 7, 30, 2 };
+        Show(Filter(numbers, null));
+        var words = new List<string> { "pear", "fig", "apple", "kiwi" };
+        Sort(words, null);
+        Show(words);
+        Show(Transform<int, int>(numbers, null));
+        Show(Transform<string, string>(words, null));`,
+          "using System.Collections.Generic;",
+          `    static void Show<T>(List<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // Keeps the items for which keep returns true
+    static List<T> Filter<T>(List<T> items, Func<T, bool> keep)
+    {
+        var result = new List<T>();
+        foreach (T item in items)
+        {
+            if (keep(item))
+            {
+                result.Add(item);
+            }
+        }
+        return result;
+    }
+
+    // Sorts the list with the given order
+    static void Sort<T>(List<T> items, Comparison<T> order)
+    {
+        items.Sort(order);
+    }
+
+    // Converts every item
+    static List<R> Transform<T, R>(List<T> items, Func<T, R> convert)
+    {
+        var result = new List<R>();
+        foreach (T item in items)
+        {
+            result.Add(convert(item));
+        }
+        return result;
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          "",
+          `        var numbers = new List<int> { 5, 12, 7, 30, 2 };
+        Show(Filter(numbers, n => n > 10));
+        var words = new List<string> { "pear", "fig", "apple", "kiwi" };
+        Sort(words, (a, b) => a.Length != b.Length ? a.Length.CompareTo(b.Length) : string.CompareOrdinal(a, b));
+        Show(words);
+        Show(Transform<int, int>(numbers, n => n * 2));
+        Show(Transform<string, string>(words, w => w.Substring(0, 1)));`,
+          "using System.Collections.Generic;",
+          `    static void Show<T>(List<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // Keeps the items for which keep returns true
+    static List<T> Filter<T>(List<T> items, Func<T, bool> keep)
+    {
+        var result = new List<T>();
+        foreach (T item in items)
+        {
+            if (keep(item))
+            {
+                result.Add(item);
+            }
+        }
+        return result;
+    }
+
+    // Sorts the list with the given order
+    static void Sort<T>(List<T> items, Comparison<T> order)
+    {
+        items.Sort(order);
+    }
+
+    // Converts every item
+    static List<R> Transform<T, R>(List<T> items, Func<T, R> convert)
+    {
+        var result = new List<R>();
+        foreach (T item in items)
+        {
+            result.Add(convert(item));
+        }
+        return result;
+    }`,
+        ),
+        expectedOutput: "12 30\nfig kiwi pear apple\n10 24 14 60 4\nf k p a\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "closures", title: { en: "Closures", uk: "Замикання" } },
+      { kind: "lecture", slug: "closures-memory-map", title: { en: "Memory map", uk: "Карта пам'яті" } },
+      { kind: "lecture", slug: "closure-trap", title: { en: "The closure trap", uk: "Пастка замикання" } },
+      {
+        kind: "quiz",
+        slug: "delegates-quiz",
+        title: { en: "Delegates", uk: "Делегати" },
+        questions: [
+          {
+            id: "what-is-delegate",
+            mode: "single",
+            prompt: { en: "What is a delegate?", uk: "Що таке делегат?" },
+            options: [
+              { id: "a", text: { en: "A type that holds a reference to a method with a given signature", uk: "Тип, що тримає посилання на метод із заданою сигнатурою" } },
+              { id: "b", text: { en: "A class with many fields", uk: "Клас з багатьма полями" } },
+              { id: "c", text: { en: "A way to write a loop", uk: "Спосіб написати цикл" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "assign-method",
+            mode: "single",
+            prompt: { en: "Which line assigns the method `Add` to the delegate variable `op`?", uk: "Який рядок присвоює метод `Add` змінній-делегату `op`?" },
+            options: [
+              { id: "a", text: { en: "`Operation op = Add;`", uk: "`Operation op = Add;`" } },
+              { id: "b", text: { en: "`Operation op = Add();`", uk: "`Operation op = Add();`" } },
+              { id: "c", text: { en: "`Operation op = new Add;`", uk: "`Operation op = new Add;`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "combine",
+            mode: "single",
+            prompt: { en: "What does `n += LogNotify;` do when `n` already holds a method?", uk: "Що робить `n += LogNotify;`, коли `n` уже тримає метод?" },
+            options: [
+              { id: "a", text: { en: "Adds `LogNotify` to the invocation list, so both methods are called", uk: "Додає `LogNotify` до списку викликів, тож викликаються обидва методи" } },
+              { id: "b", text: { en: "Replaces the old method", uk: "Замінює старий метод" } },
+              { id: "c", text: { en: "Calls `LogNotify` at once", uk: "Одразу викликає `LogNotify`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "remove",
+            mode: "single",
+            prompt: { en: "What does `n -= LogNotify;` do?", uk: "Що робить `n -= LogNotify;`?" },
+            options: [
+              { id: "a", text: { en: "Removes `LogNotify` from the invocation list", uk: "Видаляє `LogNotify` зі списку викликів" } },
+              { id: "b", text: { en: "Deletes the method from the program", uk: "Видаляє метод з програми" } },
+              { id: "c", text: { en: "Calls it once", uk: "Викликає його один раз" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "unassigned",
+            mode: "single",
+            prompt: { en: "What is the value of a delegate variable that was never assigned?", uk: "Яке значення має змінна-делегат, якій ніколи не присвоювали значення?" },
+            options: [
+              { id: "a", text: { en: "`null`", uk: "`null`" } },
+              { id: "b", text: { en: "An empty method", uk: "Порожній метод" } },
+              { id: "c", text: { en: "`0`", uk: "`0`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "func-signature",
+            mode: "single",
+            prompt: { en: "Which signature does `Func<int, int, bool>` describe?", uk: "Яку сигнатуру описує `Func<int, int, bool>`?" },
+            options: [
+              { id: "a", text: { en: "A method that takes two `int` values and returns a `bool`", uk: "Метод, що приймає два значення `int` і повертає `bool`" } },
+              { id: "b", text: { en: "A method that takes a `bool` and returns two `int` values", uk: "Метод, що приймає `bool` і повертає два значення `int`" } },
+              { id: "c", text: { en: "A method that takes three `int` values", uk: "Метод, що приймає три значення `int`" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "delegates-summary", title: { en: "Summary", uk: "Саммарі" } },
+      {
+        kind: "quiz",
+        slug: "delegates-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "func-vs-action",
+            mode: "single",
+            prompt: { en: "What is the difference between `Func` and `Action`?", uk: "У чому різниця між `Func` і `Action`?" },
+            options: [
+              { id: "a", text: { en: "`Func` returns a value, and `Action` returns nothing", uk: "`Func` повертає значення, а `Action` нічого не повертає" } },
+              { id: "b", text: { en: "`Action` is always faster", uk: "`Action` завжди швидший" } },
+              { id: "c", text: { en: "`Func` cannot have parameters", uk: "`Func` не може мати параметрів" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "lambda-double",
+            mode: "single",
+            prompt: { en: "Which lambda multiplies its parameter by two?", uk: "Яка лямбда множить свій параметр на два?" },
+            options: [
+              { id: "a", text: { en: "`x => x * 2`", uk: "`x => x * 2`" } },
+              { id: "b", text: { en: "`x => x = 2`", uk: "`x => x = 2`" } },
+              { id: "c", text: { en: "`x * 2 => x`", uk: "`x * 2 => x`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "closure-meaning",
+            mode: "single",
+            prompt: { en: "What is a closure?", uk: "Що таке замикання?" },
+            options: [
+              { id: "a", text: { en: "A lambda that uses a local variable from its surroundings and keeps it alive", uk: "Лямбда, що використовує локальну змінну з оточення і утримує її живою" } },
+              { id: "b", text: { en: "A method that closes a file", uk: "Метод, що закриває файл" } },
+              { id: "c", text: { en: "A delegate with no methods", uk: "Делегат без методів" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "loop-trap",
+            mode: "single",
+            prompt: {
+              en: "After this loop, what does each action print when it runs?\n\n```csharp\nvar actions = new List<Action>();\nfor (int i = 0; i < 3; i++)\n{\n    actions.Add(() => Console.Write(i));\n}\n```",
+              uk: "Що друкує кожна дія, коли її виконують після цього циклу?\n\n```csharp\nvar actions = new List<Action>();\nfor (int i = 0; i < 3; i++)\n{\n    actions.Add(() => Console.Write(i));\n}\n```",
+            },
+            options: [
+              { id: "a", text: { en: "The final value of `i`, which is the same for all of them", uk: "Кінцеве значення `i`, однакове для всіх" } },
+              { id: "b", text: { en: "`0`, `1`, `2` in order", uk: "`0`, `1`, `2` по порядку" } },
+              { id: "c", text: { en: "Nothing", uk: "Нічого" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "anonymous-today",
+            mode: "single",
+            prompt: { en: "Why are anonymous methods (`delegate { }`) less common today?", uk: "Чому анонімні методи (`delegate { }`) сьогодні зустрічаються рідше?" },
+            options: [
+              { id: "a", text: { en: "Lambda expressions are shorter and do the same job", uk: "Лямбда-вирази коротші й роблять те саме" } },
+              { id: "b", text: { en: "They are not allowed in C#", uk: "Вони не дозволені в C#" } },
+              { id: "c", text: { en: "They cannot use local variables", uk: "Вони не можуть використовувати локальні змінні" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "brainfuck-vm",
+        title: { en: "Practice: Brainfuck virtual machine", uk: "Практика «Віртуальна машина Brainfuck»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          "",
+          `        Console.Write(Run("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.", ""));
+        Console.WriteLine(Run("++++++++[>++++++++<-]>+.", ""));
+        Console.WriteLine(Run(",+.", "A"));`,
+          "using System.Collections.Generic;\nusing System.Text;",
+          `    // Runs a Brainfuck program and returns the text it writes
+    static string Run(string program, string input)
+    {
+        // Write your code here
+        return "";
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          "",
+          `        Console.Write(Run("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.", ""));
+        Console.WriteLine(Run("++++++++[>++++++++<-]>+.", ""));
+        Console.WriteLine(Run(",+.", "A"));`,
+          "using System.Collections.Generic;\nusing System.Text;",
+          `    // Runs a Brainfuck program and returns the text it writes
+    static string Run(string program, string input)
+    {
+        byte[] tape = new byte[30000];
+        int pointer = 0;
+        int inputPos = 0;
+        var output = new StringBuilder();
+
+        // Pair up the brackets once: jump[i] is the position of the matching bracket
+        var jump = new int[program.Length];
+        var open = new Stack<int>();
+        for (int i = 0; i < program.Length; i++)
+        {
+            if (program[i] == '[')
+            {
+                open.Push(i);
+            }
+            else if (program[i] == ']')
+            {
+                int start = open.Pop();
+                jump[start] = i;
+                jump[i] = start;
+            }
+        }
+
+        for (int pc = 0; pc < program.Length; pc++)
+        {
+            switch (program[pc])
+            {
+                case '>':
+                    pointer++;
+                    break;
+                case '<':
+                    pointer--;
+                    break;
+                case '+':
+                    tape[pointer]++;
+                    break;
+                case '-':
+                    tape[pointer]--;
+                    break;
+                case '.':
+                    output.Append((char)tape[pointer]);
+                    break;
+                case ',':
+                    tape[pointer] = inputPos < input.Length ? (byte)input[inputPos++] : (byte)0;
+                    break;
+                case '[':
+                    if (tape[pointer] == 0)
+                    {
+                        pc = jump[pc];
+                    }
+                    break;
+                case ']':
+                    if (tape[pointer] != 0)
+                    {
+                        pc = jump[pc];
+                    }
+                    break;
+            }
+        }
+        return output.ToString();
+    }`,
+        ),
+        expectedOutput: "Hello World!\nA\nB\n",
+        maxScore: 10,
+      },
+    ],
+  },
+  {
+    slug: "linq",
+    title: { en: "LINQ", uk: "LINQ" },
+    slides: [
+      { kind: "lecture", slug: "linq-introduction", title: { en: "Introduction", uk: "Вступ" } },
+      { kind: "lecture", slug: "linq-filter-transform", title: { en: "Filtering and transforming", uk: "Фільтрація та перетворення" } },
+      { kind: "lecture", slug: "linq-take-skip", title: { en: "Take, Skip, ToArray, ToList", uk: "Take, Skip, ToArray, ToList" } },
+      { kind: "lecture", slug: "linq-method-chaining", title: { en: "Method chaining", uk: "Ланцюжки методів" } },
+      {
+        kind: "practice",
+        slug: "linq-read-numbers",
+        title: { en: "Reading an array of numbers", uk: "Читання масиву чисел" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints a sequence of numbers on one line, separated by spaces
+    static void Show(IEnumerable<int> values)
+    {
+        var parts = new List<string>();
+        foreach (int v in values)
+        {
+            parts.Add(v.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // How many numbers are even
+    static int CountEven(int[] numbers)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // The sum of the odd numbers
+    static int SumOdd(int[] numbers)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // The squares of the numbers greater than 5, in the original order
+    static int[] SquaresAboveFive(int[] numbers)
+    {
+        // Write your code here
+        return new int[0];
+    }
+
+    static void Main()
+    {
+        int[] numbers = { 3, 8, 5, 10, 1, 6 };
+        Console.WriteLine(CountEven(numbers));
+        Console.WriteLine(SumOdd(numbers));
+        Show(SquaresAboveFive(numbers));
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        solution: PROGRAM(`    // Prints a sequence of numbers on one line, separated by spaces
+    static void Show(IEnumerable<int> values)
+    {
+        var parts = new List<string>();
+        foreach (int v in values)
+        {
+            parts.Add(v.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // How many numbers are even
+    static int CountEven(int[] numbers)
+    {
+        return numbers.Count(n => n % 2 == 0);
+    }
+
+    // The sum of the odd numbers
+    static int SumOdd(int[] numbers)
+    {
+        return numbers.Where(n => n % 2 != 0).Sum();
+    }
+
+    // The squares of the numbers greater than 5, in the original order
+    static int[] SquaresAboveFive(int[] numbers)
+    {
+        return numbers.Where(n => n > 5).Select(n => n * n).ToArray();
+    }
+
+    static void Main()
+    {
+        int[] numbers = { 3, 8, 5, 10, 1, 6 };
+        Console.WriteLine(CountEven(numbers));
+        Console.WriteLine(SumOdd(numbers));
+        Show(SquaresAboveFive(numbers));
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        expectedOutput: "3\n9\n64 100 36\n",
+        maxScore: 5,
+      },
+      {
+        kind: "practice",
+        slug: "linq-read-points",
+        title: { en: "Reading a list of points", uk: "Читання списку точок" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class Point
+{
+    public int X { get; }
+    public int Y { get; }
+
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public override string ToString() => "(" + X + ", " + Y + ")";
+}`,
+          `        var points = new List<Point> { new Point(1, 2), new Point(3, 4), new Point(-5, 0), new Point(2, 2) };
+        ShowAll(Outside(points, 3));
+        Console.WriteLine(AverageX(points));
+        ShowAll(YsDescending(points));`,
+          "using System.Collections.Generic;\nusing System.Linq;",
+          `    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // The points whose squared distance from the origin is greater than radius * radius
+    static List<Point> Outside(List<Point> points, int radius)
+    {
+        // Write your code here
+        return new List<Point>();
+    }
+
+    // The average of the X coordinates
+    static double AverageX(List<Point> points)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // The Y coordinates, from the largest to the smallest
+    static List<int> YsDescending(List<Point> points)
+    {
+        // Write your code here
+        return new List<int>();
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Point
+{
+    public int X { get; }
+    public int Y { get; }
+
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public override string ToString() => "(" + X + ", " + Y + ")";
+}`,
+          `        var points = new List<Point> { new Point(1, 2), new Point(3, 4), new Point(-5, 0), new Point(2, 2) };
+        ShowAll(Outside(points, 3));
+        Console.WriteLine(AverageX(points));
+        ShowAll(YsDescending(points));`,
+          "using System.Collections.Generic;\nusing System.Linq;",
+          `    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // The points whose squared distance from the origin is greater than radius * radius
+    static List<Point> Outside(List<Point> points, int radius)
+    {
+        return points.Where(p => p.X * p.X + p.Y * p.Y > radius * radius).ToList();
+    }
+
+    // The average of the X coordinates
+    static double AverageX(List<Point> points)
+    {
+        return points.Average(p => p.X);
+    }
+
+    // The Y coordinates, from the largest to the smallest
+    static List<int> YsDescending(List<Point> points)
+    {
+        return points.Select(p => p.Y).OrderByDescending(y => y).ToList();
+    }`,
+        ),
+        expectedOutput: "(3, 4) (-5, 0)\n0.25\n4 2 2 0\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "linq-selectmany", title: { en: "SelectMany", uk: "SelectMany" } },
+      {
+        kind: "practice",
+        slug: "linq-union",
+        title: { en: "Joining collections", uk: "Об'єднання колекцій" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // All numbers of a, then all numbers of b (duplicates kept)
+    static IEnumerable<int> AllValues(int[] a, int[] b)
+    {
+        // Write your code here
+        return new int[0];
+    }
+
+    // The distinct numbers of both arrays, in the order of first appearance
+    static IEnumerable<int> UniqueValues(int[] a, int[] b)
+    {
+        // Write your code here
+        return new int[0];
+    }
+
+    // The distinct numbers that are in both arrays, in the order of a
+    static IEnumerable<int> Common(int[] a, int[] b)
+    {
+        // Write your code here
+        return new int[0];
+    }
+
+    // The distinct numbers of a that are not in b
+    static IEnumerable<int> OnlyInFirst(int[] a, int[] b)
+    {
+        // Write your code here
+        return new int[0];
+    }
+
+    static void Main()
+    {
+        int[] a = { 1, 2, 3, 2 };
+        int[] b = { 2, 4, 3 };
+        ShowAll(AllValues(a, b));
+        ShowAll(UniqueValues(a, b));
+        ShowAll(Common(a, b));
+        ShowAll(OnlyInFirst(a, b));
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        solution: PROGRAM(`    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // All numbers of a, then all numbers of b (duplicates kept)
+    static IEnumerable<int> AllValues(int[] a, int[] b)
+    {
+        return a.Concat(b);
+    }
+
+    // The distinct numbers of both arrays, in the order of first appearance
+    static IEnumerable<int> UniqueValues(int[] a, int[] b)
+    {
+        return a.Union(b);
+    }
+
+    // The distinct numbers that are in both arrays, in the order of a
+    static IEnumerable<int> Common(int[] a, int[] b)
+    {
+        return a.Intersect(b);
+    }
+
+    // The distinct numbers of a that are not in b
+    static IEnumerable<int> OnlyInFirst(int[] a, int[] b)
+    {
+        return a.Except(b);
+    }
+
+    static void Main()
+    {
+        int[] a = { 1, 2, 3, 2 };
+        int[] b = { 2, 4, 3 };
+        ShowAll(AllValues(a, b));
+        ShowAll(UniqueValues(a, b));
+        ShowAll(Common(a, b));
+        ShowAll(OnlyInFirst(a, b));
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        expectedOutput: "1 2 3 2 2 4 3\n1 2 3 4\n2 3\n1\n",
+        maxScore: 5,
+      },
+      {
+        kind: "practice",
+        slug: "linq-cartesian",
+        title: { en: "Cartesian product", uk: "Декартів добуток" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // The names of all squares: each letter with each number, the letters outer
+    static IEnumerable<string> Board(char[] letters, int[] numbers)
+    {
+        // Write your code here
+        return new string[0];
+    }
+
+    // The sum of every pair, with the items of a in the outer loop
+    static IEnumerable<int> Sums(int[] a, int[] b)
+    {
+        // Write your code here
+        return new int[0];
+    }
+
+    static void Main()
+    {
+        ShowAll(Board(new[] { 'A', 'B' }, new[] { 1, 2 }));
+        ShowAll(Sums(new[] { 1, 2 }, new[] { 10, 20 }));
+        Console.WriteLine(Sums(new[] { 1, 2 }, new[] { 10, 20 }).Count());
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        solution: PROGRAM(`    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // The names of all squares: each letter with each number, the letters outer
+    static IEnumerable<string> Board(char[] letters, int[] numbers)
+    {
+        return letters.SelectMany(l => numbers.Select(n => l.ToString() + n));
+    }
+
+    // The sum of every pair, with the items of a in the outer loop
+    static IEnumerable<int> Sums(int[] a, int[] b)
+    {
+        return a.SelectMany(x => b.Select(y => x + y));
+    }
+
+    static void Main()
+    {
+        ShowAll(Board(new[] { 'A', 'B' }, new[] { 1, 2 }));
+        ShowAll(Sums(new[] { 1, 2 }, new[] { 10, 20 }));
+        Console.WriteLine(Sums(new[] { 1, 2 }, new[] { 10, 20 }).Count());
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        expectedOutput: "A1 A2 B1 B2\n11 21 12 22\n4\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "linq-orderby-distinct", title: { en: "OrderBy and Distinct", uk: "OrderBy і Distinct" } },
+      {
+        kind: "practice",
+        slug: "linq-build-dictionary",
+        title: { en: "Building a dictionary", uk: "Складання словника" },
+        language: "csharp",
+        starter: PROGRAM(`    // Maps each distinct word to its length
+    static Dictionary<string, int> LengthIndex(string[] words)
+    {
+        // Write your code here
+        return new Dictionary<string, int>();
+    }
+
+    // True if the word is a key of the index
+    static bool HasWord(Dictionary<string, int> index, string word)
+    {
+        // Write your code here
+        return false;
+    }
+
+    static void Main()
+    {
+        var index = LengthIndex(new[] { "pear", "fig", "apple", "pear" });
+        Console.WriteLine(index.Count);
+        Console.WriteLine(index["apple"]);
+        Console.WriteLine(index["fig"]);
+        Console.WriteLine(HasWord(index, "pear"));
+        Console.WriteLine(HasWord(index, "kiwi"));
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        solution: PROGRAM(`    // Maps each distinct word to its length
+    static Dictionary<string, int> LengthIndex(string[] words)
+    {
+        return words.Distinct().ToDictionary(w => w, w => w.Length);
+    }
+
+    // True if the word is a key of the index
+    static bool HasWord(Dictionary<string, int> index, string word)
+    {
+        return index.ContainsKey(word);
+    }
+
+    static void Main()
+    {
+        var index = LengthIndex(new[] { "pear", "fig", "apple", "pear" });
+        Console.WriteLine(index.Count);
+        Console.WriteLine(index["apple"]);
+        Console.WriteLine(index["fig"]);
+        Console.WriteLine(HasWord(index, "pear"));
+        Console.WriteLine(HasWord(index, "kiwi"));
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        expectedOutput: "3\n5\n3\nTrue\nFalse\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "linq-tuples", title: { en: "Working with tuples", uk: "Робота з кортежами" } },
+      {
+        kind: "practice",
+        slug: "linq-tuple-sort",
+        title: { en: "Sorting tuples", uk: "Сортування кортежів" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // The players by score, highest first; equal scores by name
+    static List<Tuple<string, int>> ByScoreDescending(List<Tuple<string, int>> items)
+    {
+        // Write your code here
+        return items;
+    }
+
+    // The players sorted by name
+    static IEnumerable<Tuple<string, int>> ByName(List<Tuple<string, int>> items)
+    {
+        // Write your code here
+        return items;
+    }
+
+    // The player with the highest score; equal scores: the alphabetically first name
+    static Tuple<string, int> Best(List<Tuple<string, int>> items)
+    {
+        // Write your code here
+        return items[0];
+    }
+
+    static void Main()
+    {
+        var items = new List<Tuple<string, int>>
+        {
+            Tuple.Create("Ann", 70),
+            Tuple.Create("Bob", 90),
+            Tuple.Create("Cy", 70),
+            Tuple.Create("Dan", 85)
+        };
+        foreach (var t in ByScoreDescending(items))
+        {
+            Console.WriteLine(t.Item1 + " " + t.Item2);
+        }
+        Console.WriteLine(Best(items).Item1 + " " + Best(items).Item2);
+        ShowAll(ByName(items).Select(t => t.Item1));
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        solution: PROGRAM(`    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // The players by score, highest first; equal scores by name
+    static List<Tuple<string, int>> ByScoreDescending(List<Tuple<string, int>> items)
+    {
+        return items.OrderByDescending(t => t.Item2).ThenBy(t => t.Item1).ToList();
+    }
+
+    // The players sorted by name
+    static IEnumerable<Tuple<string, int>> ByName(List<Tuple<string, int>> items)
+    {
+        return items.OrderBy(t => t.Item1);
+    }
+
+    // The player with the highest score; equal scores: the alphabetically first name
+    static Tuple<string, int> Best(List<Tuple<string, int>> items)
+    {
+        return ByScoreDescending(items).First();
+    }
+
+    static void Main()
+    {
+        var items = new List<Tuple<string, int>>
+        {
+            Tuple.Create("Ann", 70),
+            Tuple.Create("Bob", 90),
+            Tuple.Create("Cy", 70),
+            Tuple.Create("Dan", 85)
+        };
+        foreach (var t in ByScoreDescending(items))
+        {
+            Console.WriteLine(t.Item1 + " " + t.Item2);
+        }
+        Console.WriteLine(Best(items).Item1 + " " + Best(items).Item2);
+        ShowAll(ByName(items).Select(t => t.Item1));
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        expectedOutput: "Bob 90\nDan 85\nAnn 70\nCy 70\nBob 90\nAnn Bob Cy Dan\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "linq-aggregates", title: { en: "Aggregate functions", uk: "Функції агрегування" } },
+      {
+        kind: "practice",
+        slug: "linq-longest-word",
+        title: { en: "Finding the longest word", uk: "Пошук найдовшого слова" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // The longest word; for a tie, the first one in the text
+    static string Longest(string text)
+    {
+        // Write your code here
+        return "";
+    }
+
+    // The length of the longest word
+    static int LongestLength(string text)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // The words of at least min letters, in the original order
+    static IEnumerable<string> LongWords(string text, int min)
+    {
+        // Write your code here
+        return new string[0];
+    }
+
+    static void Main()
+    {
+        string text = "the quick brown fox jumped over lazy dogs";
+        Console.WriteLine(Longest(text));
+        Console.WriteLine(LongestLength(text));
+        ShowAll(LongWords(text, 5));
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        solution: PROGRAM(`    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // The longest word; for a tie, the first one in the text
+    static string Longest(string text)
+    {
+        return text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                   .OrderByDescending(w => w.Length)
+                   .First();
+    }
+
+    // The length of the longest word
+    static int LongestLength(string text)
+    {
+        return text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Max(w => w.Length);
+    }
+
+    // The words of at least min letters, in the original order
+    static IEnumerable<string> LongWords(string text, int min)
+    {
+        return text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Where(w => w.Length >= min);
+    }
+
+    static void Main()
+    {
+        string text = "the quick brown fox jumped over lazy dogs";
+        Console.WriteLine(Longest(text));
+        Console.WriteLine(LongestLength(text));
+        ShowAll(LongWords(text, 5));
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        expectedOutput: "jumped\n6\nquick brown jumped\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "linq-grouping", title: { en: "Grouping", uk: "Групування" } },
+      {
+        kind: "practice",
+        slug: "linq-frequency",
+        title: { en: "Building a frequency dictionary", uk: "Створення частотного словника" },
+        language: "csharp",
+        starter: PROGRAM(`    // Maps each word to the number of times it appears
+    static Dictionary<string, int> Frequency(string[] words)
+    {
+        // Write your code here
+        return new Dictionary<string, int>();
+    }
+
+    // The word that appears most often; for a tie, the alphabetically first word
+    static string MostCommon(string[] words)
+    {
+        // Write your code here
+        return "";
+    }
+
+    static void Main()
+    {
+        string[] words = { "a", "b", "a", "c", "a", "b" };
+        var freq = Frequency(words);
+        Console.WriteLine(freq["a"]);
+        Console.WriteLine(freq["b"]);
+        Console.WriteLine(freq.Count);
+        Console.WriteLine(MostCommon(words));
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        solution: PROGRAM(`    // Maps each word to the number of times it appears
+    static Dictionary<string, int> Frequency(string[] words)
+    {
+        return words.GroupBy(w => w).ToDictionary(g => g.Key, g => g.Count());
+    }
+
+    // The word that appears most often; for a tie, the alphabetically first word
+    static string MostCommon(string[] words)
+    {
+        return Frequency(words).OrderByDescending(kv => kv.Value).ThenBy(kv => kv.Key).First().Key;
+    }
+
+    static void Main()
+    {
+        string[] words = { "a", "b", "a", "c", "a", "b" };
+        var freq = Frequency(words);
+        Console.WriteLine(freq["a"]);
+        Console.WriteLine(freq["b"]);
+        Console.WriteLine(freq.Count);
+        Console.WriteLine(MostCommon(words));
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        expectedOutput: "3\n2\n3\na\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "linq-todictionary-tolookup", title: { en: "ToDictionary and ToLookup", uk: "ToDictionary і ToLookup" } },
+      {
+        kind: "practice",
+        slug: "linq-reverse-index",
+        title: { en: "Building a reverse index", uk: "Створення оберненого індексу" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // Maps each word to the numbers of the documents (from 1) that contain it
+    static ILookup<string, int> BuildIndex(string[] docs)
+    {
+        // Write your code here
+        return new int[0].ToLookup(x => "", x => x);
+    }
+
+    static void Main()
+    {
+        string[] docs = { "cat dog", "dog bird", "cat fish cat" };
+        var index = BuildIndex(docs);
+        ShowAll(index["cat"]);
+        ShowAll(index["dog"]);
+        ShowAll(index["fish"]);
+        Console.WriteLine(index["zebra"].Count());
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        solution: PROGRAM(`    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // Maps each word to the numbers of the documents (from 1) that contain it
+    static ILookup<string, int> BuildIndex(string[] docs)
+    {
+        return docs.SelectMany((text, i) => text.Split(' ').Distinct()
+                                              .Select(w => new KeyValuePair<string, int>(w, i + 1)))
+                   .ToLookup(p => p.Key, p => p.Value);
+    }
+
+    static void Main()
+    {
+        string[] docs = { "cat dog", "dog bird", "cat fish cat" };
+        var index = BuildIndex(docs);
+        ShowAll(index["cat"]);
+        ShowAll(index["dog"]);
+        ShowAll(index["fish"]);
+        Console.WriteLine(index["zebra"].Count());
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        expectedOutput: "1 3\n1 2\n3\n0\n",
+        maxScore: 5,
+      },
+      { kind: "lecture", slug: "linq-behind-scenes", title: { en: "What is left behind the scenes", uk: "Що залишилось за кадром" } },
+      {
+        kind: "quiz",
+        slug: "linq-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "select-or-where",
+            mode: "single",
+            prompt: { en: "Which method turns each item into a new value?", uk: "Який метод перетворює кожен елемент на нове значення?" },
+            options: [
+              { id: "a", text: { en: "`Select`", uk: "`Select`" } },
+              { id: "b", text: { en: "`Where`", uk: "`Where`" } },
+              { id: "c", text: { en: "`Take`", uk: "`Take`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "selectmany-meaning",
+            mode: "single",
+            prompt: { en: "Which method gives all the results of several sequences as one flat sequence?", uk: "Який метод дає всі результати кількох послідовностей однією плоскою послідовністю?" },
+            options: [
+              { id: "a", text: { en: "`SelectMany`", uk: "`SelectMany`" } },
+              { id: "b", text: { en: "`Select`", uk: "`Select`" } },
+              { id: "c", text: { en: "`Aggregate`", uk: "`Aggregate`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "orderby-stable",
+            mode: "single",
+            prompt: { en: "What does `OrderBy` do with items that have equal keys?", uk: "Що робить `OrderBy` з елементами з однаковими ключами?" },
+            options: [
+              { id: "a", text: { en: "Keeps their original order: the sort is stable", uk: "Зберігає їхній початковий порядок: сортування стабільне" } },
+              { id: "b", text: { en: "Removes them", uk: "Видаляє їх" } },
+              { id: "c", text: { en: "Puts them in random order", uk: "Ставить їх у випадковому порядку" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "todictionary-duplicates",
+            mode: "single",
+            prompt: { en: "What happens with `ToDictionary` when the same key appears twice?", uk: "Що станеться з `ToDictionary`, коли той самий ключ трапляється двічі?" },
+            options: [
+              { id: "a", text: { en: "An `ArgumentException` is thrown", uk: "Кидається `ArgumentException`" } },
+              { id: "b", text: { en: "The second value is silently ignored", uk: "Друге значення мовчки ігнорується" } },
+              { id: "c", text: { en: "Both values are stored under one key", uk: "Обидва значення зберігаються під одним ключем" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "when-executed",
+            mode: "single",
+            prompt: { en: "When is a LINQ query actually executed?", uk: "Коли насправді виконується запит LINQ?" },
+            options: [
+              { id: "a", text: { en: "When its result is read, for example by `ToList`, `foreach` or `Count`", uk: "Коли читають його результат, наприклад через `ToList`, `foreach` або `Count`" } },
+              { id: "b", text: { en: "At the moment the query is written", uk: "У момент, коли запит написано" } },
+              { id: "c", text: { en: "When the program starts", uk: "Коли програма запускається" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "linq-median-bigrams",
+        title: { en: "Practice: Median & Bigrams", uk: "Практика «Median & Bigrams»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // The median of the values; 0 for no values
+    static double Median(IEnumerable<double> values)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // The bigrams of the text: every two adjacent characters
+    static IEnumerable<string> Bigrams(string text)
+    {
+        // Write your code here
+        return new string[0];
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Median(new double[] { 5, 1, 9, 3 }));
+        Console.WriteLine(Median(new double[] { 2, 7, 4, 10 }));
+        ShowAll(Bigrams("hello"));
+        ShowAll(Bigrams("a"));
+        Console.WriteLine(Bigrams("abcabc").Distinct().Count());
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        solution: PROGRAM(`    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // The median of the values; 0 for no values
+    static double Median(IEnumerable<double> values)
+    {
+        List<double> sorted = values.OrderBy(v => v).ToList();
+        int n = sorted.Count;
+        if (n == 0)
+        {
+            return 0;
+        }
+        if (n % 2 == 1)
+        {
+            return sorted[n / 2];
+        }
+        return (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+    }
+
+    // The bigrams of the text: every two adjacent characters
+    static IEnumerable<string> Bigrams(string text)
+    {
+        return Enumerable.Range(0, Math.Max(0, text.Length - 1)).Select(i => text.Substring(i, 2));
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Median(new double[] { 5, 1, 9, 3 }));
+        Console.WriteLine(Median(new double[] { 2, 7, 4, 10 }));
+        ShowAll(Bigrams("hello"));
+        ShowAll(Bigrams("a"));
+        Console.WriteLine(Bigrams("abcabc").Distinct().Count());
+    }`, "using System.Collections.Generic;\nusing System.Linq;"),
+        expectedOutput: "4\n5.5\nhe el ll lo\n\n3\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "linq-read-file",
+        title: { en: "Practice: Reading a file", uk: "Практика «Читання файлу»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class Record
+{
+    public string Name;
+    public int Value;
+}`,
+          `        string[] file =
+        {
+            "# sales",
+            "apple;10",
+            "",
+            "pear;x",
+            "plum;25",
+            "fig;7",
+            "  kiwi ; 40  "
+        };
+        var records = ParseRecords(file).ToList();
+        Console.WriteLine(records.Count);
+        Console.WriteLine(Total(records));
+        ShowAll(NamesOver(records, 20));
+        Console.WriteLine(records[0].Name);`,
+          "using System.Collections.Generic;\nusing System.Linq;",
+          `    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // One Record per valid line, in the file order (use yield return)
+    static IEnumerable<Record> ParseRecords(IEnumerable<string> lines)
+    {
+        // Write your code here
+        return new Record[0];
+    }
+
+    // The sum of the values
+    static int Total(IEnumerable<Record> records)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // The names of the records whose value is greater than limit, in the file order
+    static IEnumerable<string> NamesOver(IEnumerable<Record> records, int limit)
+    {
+        // Write your code here
+        return new string[0];
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Record
+{
+    public string Name;
+    public int Value;
+}`,
+          `        string[] file =
+        {
+            "# sales",
+            "apple;10",
+            "",
+            "pear;x",
+            "plum;25",
+            "fig;7",
+            "  kiwi ; 40  "
+        };
+        var records = ParseRecords(file).ToList();
+        Console.WriteLine(records.Count);
+        Console.WriteLine(Total(records));
+        ShowAll(NamesOver(records, 20));
+        Console.WriteLine(records[0].Name);`,
+          "using System.Collections.Generic;\nusing System.Linq;",
+          `    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // One Record per valid line, in the file order (use yield return)
+    static IEnumerable<Record> ParseRecords(IEnumerable<string> lines)
+    {
+        foreach (string raw in lines)
+        {
+            string line = raw.Trim();
+            if (line == "" || line.StartsWith("#"))
+            {
+                continue;
+            }
+            string[] parts = line.Split(';');
+            if (parts.Length != 2)
+            {
+                continue;
+            }
+            int value;
+            if (int.TryParse(parts[1].Trim(), out value))
+            {
+                yield return new Record { Name = parts[0].Trim(), Value = value };
+            }
+        }
+    }
+
+    // The sum of the values
+    static int Total(IEnumerable<Record> records)
+    {
+        return records.Sum(r => r.Value);
+    }
+
+    // The names of the records whose value is greater than limit, in the file order
+    static IEnumerable<string> NamesOver(IEnumerable<Record> records, int limit)
+    {
+        return records.Where(r => r.Value > limit).Select(r => r.Name);
+    }`,
+          ),
+        expectedOutput: "4\n82\nplum kiwi\napple\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "linq-statistics",
+        title: { en: "Practice: Statistics", uk: "Практика «Статистика»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class Sale
+{
+    public string Product;
+    public int Quantity;
+    public decimal Price;
+
+    public Sale(string product, int quantity, decimal price)
+    {
+        Product = product;
+        Quantity = quantity;
+        Price = price;
+    }
+}`,
+          `        string[] lines =
+        {
+            "product,quantity,price",
+            "apple,3,1.5",
+            "pear,2,2.25",
+            "apple,1,1.5",
+            "fig,x,4",
+            "kiwi,4,0.75",
+            "pear,1,2.25",
+            "bad line"
+        };
+        var sales = ReadSales(lines);
+        Console.WriteLine(sales.Count);
+        Console.WriteLine(Revenue(sales));
+        Console.WriteLine(TopProduct(sales));
+        ShowAll(ProductsBySales(sales));`,
+          "using System.Collections.Generic;\nusing System.Globalization;\nusing System.Linq;",
+          `    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // The valid rows: exactly three fields, a whole quantity and a decimal price
+    static List<Sale> ReadSales(string[] lines)
+    {
+        // Write your code here
+        return new List<Sale>();
+    }
+
+    // The sum of Quantity * Price over all sales
+    static decimal Revenue(List<Sale> sales)
+    {
+        // Write your code here
+        return 0m;
+    }
+
+    // The product with the highest revenue; for a tie, the alphabetically first
+    static string TopProduct(List<Sale> sales)
+    {
+        // Write your code here
+        return "";
+    }
+
+    // The distinct products by total quantity, highest first; for a tie, alphabetically
+    static IEnumerable<string> ProductsBySales(List<Sale> sales)
+    {
+        // Write your code here
+        return new string[0];
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Sale
+{
+    public string Product;
+    public int Quantity;
+    public decimal Price;
+
+    public Sale(string product, int quantity, decimal price)
+    {
+        Product = product;
+        Quantity = quantity;
+        Price = price;
+    }
+}`,
+          `        string[] lines =
+        {
+            "product,quantity,price",
+            "apple,3,1.5",
+            "pear,2,2.25",
+            "apple,1,1.5",
+            "fig,x,4",
+            "kiwi,4,0.75",
+            "pear,1,2.25",
+            "bad line"
+        };
+        var sales = ReadSales(lines);
+        Console.WriteLine(sales.Count);
+        Console.WriteLine(Revenue(sales));
+        Console.WriteLine(TopProduct(sales));
+        ShowAll(ProductsBySales(sales));`,
+          "using System.Collections.Generic;\nusing System.Globalization;\nusing System.Linq;",
+          `    // Prints any sequence on one line, separated by spaces
+    static void ShowAll<T>(IEnumerable<T> items)
+    {
+        var parts = new List<string>();
+        foreach (T item in items)
+        {
+            parts.Add(item.ToString());
+        }
+        Console.WriteLine(string.Join(" ", parts.ToArray()));
+    }
+
+    // The valid rows: exactly three fields, a whole quantity and a decimal price
+    static List<Sale> ReadSales(string[] lines)
+    {
+        var sales = new List<Sale>();
+        foreach (string line in lines)
+        {
+            string[] parts = line.Split(',');
+            if (parts.Length != 3)
+            {
+                continue;
+            }
+            int quantity;
+            decimal price;
+            if (int.TryParse(parts[1], out quantity)
+                && decimal.TryParse(parts[2], NumberStyles.Number, CultureInfo.InvariantCulture, out price))
+            {
+                sales.Add(new Sale(parts[0], quantity, price));
+            }
+        }
+        return sales;
+    }
+
+    // The sum of Quantity * Price over all sales
+    static decimal Revenue(List<Sale> sales)
+    {
+        return sales.Sum(s => s.Quantity * s.Price);
+    }
+
+    // The product with the highest revenue; for a tie, the alphabetically first
+    static string TopProduct(List<Sale> sales)
+    {
+        return sales.GroupBy(s => s.Product)
+                    .Select(g => new { Product = g.Key, Revenue = g.Sum(s => s.Quantity * s.Price) })
+                    .OrderByDescending(x => x.Revenue)
+                    .ThenBy(x => x.Product)
+                    .First().Product;
+    }
+
+    // The distinct products by total quantity, highest first; for a tie, alphabetically
+    static IEnumerable<string> ProductsBySales(List<Sale> sales)
+    {
+        return sales.GroupBy(s => s.Product)
+                    .OrderByDescending(g => g.Sum(s => s.Quantity))
+                    .ThenBy(g => g.Key)
+                    .Select(g => g.Key);
+    }`,
+        ),
+        expectedOutput: "5\n15.75\npear\napple kiwi pear\n",
+        maxScore: 20,
       },
     ],
   },
