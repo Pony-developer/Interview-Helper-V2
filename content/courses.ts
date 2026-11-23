@@ -65,4 +65,22 @@ export const courses: CourseContent[] = [
       { en: "NoSQL with MongoDB, SQL vs NoSQL", uk: "NoSQL на прикладі MongoDB, SQL проти NoSQL" },
     ],
   },
+  {
+    slug: "dynamics-crm",
+    title: { en: "Dynamics CRM Development", uk: "Розробка для Dynamics CRM" },
+    summary: {
+      en: "Server- and client-side development on Dynamics 365 and Dataverse: the data model, solutions and ALM, the SDK and FetchXML, plug-ins and the event pipeline, Custom APIs and integrations, form scripts and PCF, and the security model, with C# and SQL practice that models the platform.",
+      uk: "Серверна та клієнтська розробка на Dynamics 365 і Dataverse: модель даних, рішення та ALM, SDK і FetchXML, плагіни та конвеєр подій, Custom API та інтеграції, скрипти форм і PCF, модель безпеки, з практикою на C# і SQL, що моделює платформу.",
+    },
+    topics: [
+      { en: "Dynamics 365, Power Platform and Dataverse tables", uk: "Dynamics 365, Power Platform і таблиці Dataverse" },
+      { en: "Solutions, layers and ALM pipelines", uk: "Рішення, шари та конвеєри ALM" },
+      { en: "IOrganizationService, QueryExpression and FetchXML", uk: "IOrganizationService, QueryExpression і FetchXML" },
+      { en: "Plug-ins, the event pipeline and images", uk: "Плагіни, конвеєр подій та образи" },
+      { en: "Testable plug-ins and common pitfalls", uk: "Тестовані плагіни та типові пастки" },
+      { en: "Custom APIs, integrations and service protection limits", uk: "Custom API, інтеграції та ліміти захисту сервісу" },
+      { en: "Form scripts, the Client API and PCF controls", uk: "Скрипти форм, Client API і PCF-контроли" },
+      { en: "Security: business units, roles, teams and column security", uk: "Безпека: бізнес-підрозділи, ролі, команди та безпека стовпців" },
+    ],
+  },
 ];

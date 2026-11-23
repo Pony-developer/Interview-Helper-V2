@@ -79,14 +79,14 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
     });
   });
 
-  it("publishes the C#, JavaScript and Databases courses and hides drafts from anonymous users", async () => {
+  it("publishes the C#, JavaScript, Databases and Dynamics CRM courses and hides drafts from anonymous users", async () => {
     await db.exec(`insert into public.courses (slug, title, summary, published) values ('draft-course', '{"en":"Draft"}', '{"en":"Draft"}', false)`);
     try {
       await asUser(null, async () => {
         const { rows } = await db.query<{ slug: string; topics: unknown[] }>(
           "select slug, topics from public.courses order by sort_order",
         );
-        expect(rows.map((r) => r.slug)).toEqual(["csharp", "javascript", "databases"]);
+        expect(rows.map((r) => r.slug)).toEqual(["csharp", "javascript", "databases", "dynamics-crm"]);
         expect(rows.every((r) => Array.isArray(r.topics) && r.topics.length > 0)).toBe(true);
         await expect(db.query("insert into public.courses (slug, title, summary) values ('x', '{}', '{}')")).rejects.toThrow();
       });

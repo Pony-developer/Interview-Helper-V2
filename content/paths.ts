@@ -27,8 +27,8 @@ export const paths: PathContent[] = [
     slug: "dynamics-crm-developer",
     title: { en: "Dynamics CRM Developer", uk: "Dynamics CRM розробник" },
     summary: {
-      en: "The route to a Dynamics 365 and Power Platform developer role: first the C# that plugins and custom APIs are written in, then the relational thinking behind Dataverse tables, relationships and queries.",
-      uk: "Шлях до ролі розробника Dynamics 365 і Power Platform: спершу C#, яким пишуть плагіни та custom API, далі реляційне мислення, на якому тримаються таблиці, зв'язки та запити Dataverse.",
+      en: "The route to a Dynamics 365 and Power Platform developer role: first the C# that plugins and custom APIs are written in, then the relational thinking behind Dataverse tables, relationships and queries, and finally the platform itself: plug-ins, solutions, integrations and security.",
+      uk: "Шлях до ролі розробника Dynamics 365 і Power Platform: спершу C#, яким пишуть плагіни та custom API, далі реляційне мислення, на якому тримаються таблиці, зв'язки та запити Dataverse, і насамкінець сама платформа: плагіни, рішення, інтеграції та безпека.",
     },
     outcomes: [
       {
@@ -51,6 +51,10 @@ export const paths: PathContent[] = [
         en: "Explain transactions and locking, since synchronous plugins run inside the platform's database transaction",
         uk: "Пояснювати транзакції та блокування, адже синхронні плагіни виконуються всередині транзакції платформи",
       },
+      {
+        en: "Build plug-ins and Custom APIs, ship them in managed solutions, and design security roles, teams and integrations",
+        uk: "Створювати плагіни та Custom API, постачати їх у керованих рішеннях, проєктувати ролі безпеки, команди та інтеграції",
+      },
     ],
     steps: [
       {
@@ -65,6 +69,13 @@ export const paths: PathContent[] = [
         why: {
           en: "Dataverse is a relational store underneath. Joins, indexes, transactions and schema design explain how tables, lookups and FetchXML behave, and how to keep them fast.",
           uk: "Під Dataverse лежить реляційне сховище. З'єднання, індекси, транзакції та проєктування схеми пояснюють, як поводяться таблиці, lookup-поля і FetchXML і як зберегти їхню швидкодію.",
+        },
+      },
+      {
+        course: "dynamics-crm",
+        why: {
+          en: "Now the platform itself: Dataverse tables, solutions and ALM, the SDK, plug-ins in the event pipeline, Custom APIs, integrations, form scripts and the security model. This is where the C# and SQL from the first two stages turn into Dynamics 365 work.",
+          uk: "Тепер сама платформа: таблиці Dataverse, рішення та ALM, SDK, плагіни в конвеєрі подій, Custom API, інтеграції, скрипти форм і модель безпеки. Саме тут C# і SQL із перших двох етапів перетворюються на роботу з Dynamics 365.",
         },
       },
     ],
