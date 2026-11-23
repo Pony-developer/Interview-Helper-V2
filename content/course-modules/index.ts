@@ -1,6 +1,7 @@
 import { csharpModules } from "./csharp";
 import { databasesModules } from "./databases";
 import { dynamicsCrmModules } from "./dynamics-crm";
+import { frontendInterviewModules } from "./frontend-interview";
 import type { ModuleDef } from "./types";
 
 export type { Localized, ModuleDef, QuizQuestionDef, SlideDef } from "./types";
@@ -10,4 +11,5 @@ export const courseModules: Record<string, ModuleDef[]> = {
   csharp: csharpModules,
   databases: databasesModules,
   "dynamics-crm": dynamicsCrmModules,
+  "frontend-interview": frontendInterviewModules,
 };

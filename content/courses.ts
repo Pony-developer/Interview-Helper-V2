@@ -92,9 +92,20 @@ export const courses: CourseContent[] = [
     slug: "frontend-interview",
     title: { en: "Frontend Interview Preparation", uk: "Підготовка до frontend-співбесіди" },
     summary: {
-      en: "Preparation for the frontend part of a Dynamics CRM developer interview. Modules are coming soon.",
-      uk: "Підготовка до frontend-частини співбесіди на розробника Dynamics CRM. Модулі з'являться незабаром.",
+      en: "Preparation for the frontend part of a Dynamics CRM developer interview: 165 typical questions on HTML, CSS, JavaScript and TypeScript, browser APIs, frameworks, networking, the backend and algorithms, with a quiz for each section.",
+      uk: "Підготовка до frontend-частини співбесіди на розробника Dynamics CRM: 165 типових питань з HTML, CSS, JavaScript і TypeScript, API браузера, фреймворків, мережі, бекенда та алгоритмів із квізом до кожного розділу.",
     },
-    topics: [],
+    topics: [
+      { en: "General questions: code quality, HTTP, security, OOP", uk: "Загальні питання: якість коду, HTTP, безпека, ООП" },
+      { en: "HTML: structure, semantics, forms, links and SVG", uk: "HTML: структура, семантика, форми, посилання та SVG" },
+      { en: "CSS: selectors, box model, Flexbox and Grid, positioning, responsive design", uk: "CSS: селектори, модель коробки, Flexbox і Grid, позиціонування, адаптивність" },
+      { en: "Web performance: Core Web Vitals, images, optimization", uk: "Web performance: Core Web Vitals, зображення, оптимізація" },
+      { en: "JavaScript basics: types, scope, closures, events, async code", uk: "Основи JavaScript: типи, область видимості, замикання, події, асинхронний код" },
+      { en: "TypeScript: types, interfaces, generics, migration from JS", uk: "TypeScript: типи, інтерфейси, generics, міграція з JS" },
+      { en: "Browser APIs: the DOM, requests, storage, events", uk: "API браузера: DOM, запити, сховища, події" },
+      { en: "Frameworks: components, state, SSR, React, Angular, Vue", uk: "Фреймворки: компоненти, стан, SSR, React, Angular, Vue" },
+      { en: "Networking and the backend: HTTP, REST, CORS, WebSocket, auth, GraphQL", uk: "Мережа та бекенд: HTTP, REST, CORS, WebSocket, автентифікація, GraphQL" },
+      { en: "Algorithms and data structures: complexity, sorting, search, trees, graphs", uk: "Алгоритми та структури даних: складність, сортування, пошук, дерева, графи" },
+    ],
   },
 ];
