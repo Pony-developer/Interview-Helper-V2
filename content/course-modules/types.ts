@@ -22,7 +22,10 @@ export type SlideDef =
       kind: "practice";
       slug: string;
       title: Localized;
-      language: "csharp";
+      /** "csharp" runs on Wandbox; "sql" runs on PostgreSQL (PGlite) in the learner's browser. */
+      language: "csharp" | "sql";
+      /** SQL only: creates the tables and data the task works on. Shown to the learner, run before their code. */
+      setup?: string;
       /** Code the editor starts with. */
       starter: string;
       /** Reference solution, used to verify `expectedOutput`. Never sent to the browser. */

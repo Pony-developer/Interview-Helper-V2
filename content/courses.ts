@@ -43,4 +43,20 @@ export const courses: CourseContent[] = [
       { en: "Testing and tooling", uk: "Тестування та інструменти" },
     ],
   },
+  {
+    slug: "databases",
+    title: { en: "Databases", uk: "Бази даних" },
+    summary: {
+      en: "SQL on PostgreSQL from the first SELECT to joins, window functions, indexes and transactions, then NoSQL with MongoDB and when to choose which. Practice runs on a real PostgreSQL in your browser.",
+      uk: "SQL у PostgreSQL від першого SELECT до з'єднань, віконних функцій, індексів і транзакцій, а далі NoSQL на прикладі MongoDB і коли що обирати. Практика виконується на справжньому PostgreSQL просто у браузері.",
+    },
+    topics: [
+      { en: "Relational model and PostgreSQL", uk: "Реляційна модель і PostgreSQL" },
+      { en: "SELECT, joins and aggregation", uk: "SELECT, з'єднання та агрегація" },
+      { en: "Subqueries, CTEs and window functions", uk: "Підзапити, CTE та віконні функції" },
+      { en: "Schema design and normalization", uk: "Проєктування схеми та нормалізація" },
+      { en: "Indexes, EXPLAIN and transactions", uk: "Індекси, EXPLAIN і транзакції" },
+      { en: "NoSQL with MongoDB, SQL vs NoSQL", uk: "NoSQL на прикладі MongoDB, SQL проти NoSQL" },
+    ],
+  },
 ];

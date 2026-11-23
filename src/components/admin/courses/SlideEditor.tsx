@@ -4,7 +4,8 @@ import { ArrowDown, ArrowUp, ExternalLink, Play, Plus, Trash2, X } from "lucide-
 import { useState } from "react";
 import { adminRunCSharpAction, deleteSlideAction, saveSlideAction } from "@/app/actions/admin-courses";
 import { Link, useRouter } from "@/i18n/navigation";
-import { emptyLoc, newQuestion, type QuestionForm, type SlideFormState, type Source } from "@/lib/admin/course-forms";
+import { CSHARP_STARTER, emptyLoc, newQuestion, SQL_STARTER, type QuestionForm, type SlideFormState, type Source } from "@/lib/admin/course-forms";
+import { runSqlInBrowser } from "@/lib/runner/sql-client";
 import { btn, callAction, CodeArea, Field, inputCls, LocalizedField, monoCls, SaveBar, Section, SourceBadge, type SaveStatus } from "../fields";
 
 const LETTERS = "abcdefghij";
@@ -162,6 +163,15 @@ export function SlideEditor({
   async function runSolution() {
     setRunning(true);
     setRunNote(null);
+    if (s.language === "sql") {
+      const result = await runSqlInBrowser(s.setup, s.solution);
+      setRunning(false);
+      if (result.status === "unavailable") return setRunNote({ tone: "error", text: `PostgreSQL couldn't run the solution (${result.reason}).` });
+      if (result.status === "error") return setRunNote({ tone: "error", text: `The solution failed:
+${result.error}` });
+      set("expectedOutput", result.output);
+      return setRunNote({ tone: "ok", text: "Expected output filled in from the solution." });
+    }
     const res = await callAction(() => adminRunCSharpAction(s.solution));
     setRunning(false);
     if (!res.ok) return setRunNote({ tone: "error", text: res.errors.join(" ") });
@@ -214,7 +224,7 @@ export function SlideEditor({
 
       <Section
         title={s.kind === "lecture" ? "Lecture text" : s.kind === "quiz" ? "Introduction (optional)" : "Task statement"}
-        description="GitHub-flavoured Markdown. Use ```csharp fences for highlighted code."
+        description="GitHub-flavoured Markdown. Use ```csharp or ```sql fences for highlighted code."
       >
         <LocalizedField id="slide-body" label="Markdown" value={s.body} onChange={(v) => set("body", v)} rows={s.kind === "lecture" ? 22 : 10} markdown />
       </Section>
@@ -245,18 +255,48 @@ export function SlideEditor({
 
       {s.kind === "practice" ? (
         <Section
-          title="C# practice"
-          description="Learners start from the starter code. A run passes when the program prints exactly the expected output (trailing spaces and blank lines are ignored)."
+          title={s.language === "sql" ? "PostgreSQL practice" : "C# practice"}
+          description={
+            s.language === "sql"
+              ? "Runs in the learner's browser on PostgreSQL (PGlite): the setup script first, then their code. Every statement that returns rows prints a psql-style table; a run passes when the tables match the expected output."
+              : "Learners start from the starter code. A run passes when the program prints exactly the expected output (trailing spaces and blank lines are ignored)."
+          }
         >
+          <Field label="Language" htmlFor="slide-language">
+            <select
+              id="slide-language"
+              value={s.language}
+              onChange={(e) => {
+                const language = e.target.value === "sql" ? "sql" : "csharp";
+                const blank = (code: string) => !code.trim() || code === CSHARP_STARTER || code === SQL_STARTER;
+                const fresh = language === "sql" ? SQL_STARTER : CSHARP_STARTER;
+                setS((prev) => ({
+                  ...prev,
+                  language,
+                  starter: blank(prev.starter) ? fresh : prev.starter,
+                  solution: blank(prev.solution) ? fresh : prev.solution,
+                }));
+              }}
+              className={inputCls}
+            >
+              <option value="csharp">C# (Wandbox)</option>
+              <option value="sql">PostgreSQL (in the browser)</option>
+            </select>
+          </Field>
+          {s.language === "sql" ? (
+            <Field label="Setup script" htmlFor="slide-setup" hint="CREATE TABLE and INSERT statements for the practice database. Learners can read it above the editor.">
+              <CodeArea id="slide-setup" ariaLabel="Setup script" language="sql" value={s.setup} onChange={(v) => set("setup", v)} rows={12} />
+            </Field>
+          ) : null}
           <Field label="Starter code" htmlFor="slide-starter">
-            <CodeArea id="slide-starter" ariaLabel="Starter code" language="csharp" value={s.starter} onChange={(v) => set("starter", v)} rows={14} />
+            <CodeArea id="slide-starter" ariaLabel="Starter code" language={s.language} value={s.starter} onChange={(v) => set("starter", v)} rows={14} />
           </Field>
           <Field label="Reference solution" htmlFor="slide-solution" hint="Never shown to learners.">
-            <CodeArea id="slide-solution" ariaLabel="Reference solution" language="csharp" value={s.solution} onChange={(v) => set("solution", v)} rows={14} />
+            <CodeArea id="slide-solution" ariaLabel="Reference solution" language={s.language} value={s.solution} onChange={(v) => set("solution", v)} rows={14} />
           </Field>
           <div className="flex flex-wrap items-center gap-3">
             <button type="button" onClick={runSolution} disabled={running || !s.solution.trim()} className={btn.secondary}>
-              <Play aria-hidden className="h-4 w-4" /> {running ? "Running on Wandbox…" : "Run solution and fill expected output"}
+              <Play aria-hidden className="h-4 w-4" /> {running ? (s.language === "sql" ? "Running on PostgreSQL…" : "Running on Wandbox…") : "Run solution and fill expected output"}
             </button>
             {runNote ? (
               <pre className={`whitespace-pre-wrap font-sans text-sm ${runNote.tone === "ok" ? "text-success" : "text-danger"}`}>{runNote.text}</pre>

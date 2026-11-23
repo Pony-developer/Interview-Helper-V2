@@ -17,8 +17,9 @@ export type CourseSlide = OutlineSlide & {
   moduleSlug: string;
   body: string;
   questions: QuizQuestion[] | null;
-  practice: { language: "csharp"; starter: string } | null;
+  practice: PracticeInfo | null;
 };
+export type PracticeInfo = { language: "csharp" | "sql"; starter: string; setup: string };
 export type SlideProgress = { score: number; completed: boolean; attempts: number; lastCode: string | null };
 export type CourseProgress = { signedIn: boolean; bySlide: Record<string, SlideProgress>; certificateId: string | null };
 
@@ -65,7 +66,7 @@ function localSlide(courseSlug: string, s: LoadedSlide, moduleSlug: string, loca
             options: q.options.map((o) => ({ id: o.id, text: loc(o.text, locale) })),
           }))
         : null,
-    practice: s.kind === "practice" ? { language: s.language, starter: s.starter } : null,
+    practice: s.kind === "practice" ? { language: s.language, starter: s.starter, setup: s.setup ?? "" } : null,
   };
 }
 
@@ -159,7 +160,7 @@ export async function getCourseSlide(outline: CourseOutline, slideSlug: string, 
       .maybeSingle();
     if (error) throw error;
     if (!data) return null;
-    const practice = data.practice as { language?: string; starter?: string } | null;
+    const practice = data.practice as { language?: string; starter?: string; setup?: string } | null;
     return {
       id: data.id,
       slug: data.slug,
@@ -169,7 +170,9 @@ export async function getCourseSlide(outline: CourseOutline, slideSlug: string, 
       moduleSlug: mod.slug,
       body: loc(data.body as never, locale),
       questions: localizeQuestions(data.quiz as RawQuiz | null, locale),
-      practice: practice ? { language: "csharp", starter: practice.starter ?? "" } : null,
+      practice: practice
+        ? { language: practice.language === "sql" ? "sql" : "csharp", starter: practice.starter ?? "", setup: practice.setup ?? "" }
+        : null,
     };
   } catch (e) {
     console.error("getCourseSlide failed", e);

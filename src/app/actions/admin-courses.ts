@@ -148,6 +148,8 @@ const slideInput = z.object({
   title: loc,
   body: loc,
   questions: z.array(questionInput).max(50),
+  language: z.enum(["csharp", "sql"]),
+  setup: z.string().max(100_000),
   starter: z.string().max(50_000),
   solution: z.string().max(50_000),
   expectedOutput: z.string().max(100_000),
@@ -202,7 +204,14 @@ export async function saveSlideAction(input: SlideFormState): Promise<AdminResul
     quiz: s.kind === "quiz" ? { questions: s.questions } : null,
     practice:
       s.kind === "practice"
-        ? { language: "csharp", starter: s.starter, solution: s.solution, expected_output: s.expectedOutput, max_score: s.maxScore }
+        ? {
+            language: s.language,
+            ...(s.language === "sql" && s.setup.trim() ? { setup: s.setup } : {}),
+            starter: s.starter,
+            solution: s.solution,
+            expected_output: s.expectedOutput,
+            max_score: s.maxScore,
+          }
         : null,
   };
   const supabase = await createClient();

@@ -261,7 +261,17 @@
       "signInToRun": "Sign in to run code.",
       "server": "Something went wrong. Try again.",
       "poweredBy": "Runs on Wandbox with Mono (C# 7). Your code is sent to wandbox.org to compile.",
-      "shortcut": "Ctrl + Enter"
+      "shortcut": "Ctrl + Enter",
+      "sqlEditor": "SQL editor",
+      "sqlRunning": "Running on PostgreSQL…",
+      "sqlNoOutput": "The query returned no rows to show.",
+      "sqlError": "The query failed with an error.",
+      "sqlErrorLabel": "PostgreSQL error",
+      "sqlTimeout": "The query ran longer than 10 seconds and was stopped. Check for an endless recursion or a huge cross join.",
+      "sqlLoad": "Couldn't start PostgreSQL in your browser. Reload the page and try again.",
+      "sqlPoweredBy": "Runs on PostgreSQL 18 (PGlite) right in your browser, on a fresh database every run.",
+      "schema": "Practice database",
+      "schemaShow": "Show tables and data"
     }
   },
   "courses": {

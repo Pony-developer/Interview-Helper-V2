@@ -16,6 +16,7 @@ import {
   syntaxHighlighting,
 } from "@codemirror/language";
 import { csharp } from "@codemirror/legacy-modes/mode/clike";
+import { pgSQL } from "@codemirror/legacy-modes/mode/sql";
 import { Annotation, Compartment, EditorState, type Extension } from "@codemirror/state";
 import {
   drawSelection,
@@ -61,6 +62,10 @@ export function languageFor(hint: string | undefined): LanguageSupport | null {
     case "cs":
     case "csharp":
       return new LanguageSupport(StreamLanguage.define(csharp));
+    case "sql":
+    case "pgsql":
+    case "postgres":
+      return new LanguageSupport(StreamLanguage.define(pgSQL));
     default:
       return null;
   }

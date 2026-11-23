@@ -28,6 +28,7 @@
     "@codemirror/state": "^6.7.6",
     "@codemirror/view": "^6.43.15",
     "@codesandbox/sandpack-react": "^2.20.0",
+    "@electric-sql/pglite": "^0.5.17",
     "@lezer/highlight": "^1.2.5",
     "@mlc-ai/web-llm": "^0.2.89",
     "@mozilla/readability": "^0.6.0",
@@ -52,7 +53,6 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
-    "@electric-sql/pglite": "^0.5.17",
     "@playwright/test": "^1.65.1",
     "@tailwindcss/turbopack": "4.3.3",
     "@testing-library/dom": "^10.4.2",

@@ -95,7 +95,7 @@ type RawSlide = {
   title: Json;
   body: Json;
   quiz: { questions?: { id: string; mode: "single" | "multi"; prompt: Json; options: { id: string; text: Json }[] }[] } | null;
-  practice: { language?: string; starter?: string } | null;
+  practice: { language?: string; starter?: string; setup?: string } | null;
   max_score: number;
   source: Source;
   updated_at: string;
@@ -130,6 +130,8 @@ export async function getAdminSlide(id: string): Promise<{ state: SlideFormState
       title: toLoc(s.title),
       body: toLoc(s.body),
       questions,
+      language: s.practice?.language === "sql" ? "sql" : "csharp",
+      setup: s.practice?.setup ?? "",
       starter: s.practice?.starter ?? "",
       solution: s.solution ?? "",
       expectedOutput: s.expected_output ?? "",

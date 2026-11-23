@@ -143,6 +143,8 @@ export default async function CourseSlidePage({ params }: Params) {
             <PracticeSlide
               key={slide.id}
               slideId={slide.id}
+              language={slide.practice.language}
+              setup={slide.practice.setup}
               starter={slide.practice.starter}
               savedCode={mine?.lastCode ?? null}
               maxScore={slide.maxScore}

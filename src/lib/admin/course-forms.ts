@@ -29,6 +29,10 @@ export type SlideFormState = {
   title: Loc;
   body: Loc;
   questions: QuestionForm[];
+  /** Practice: "csharp" runs on Wandbox, "sql" on PostgreSQL (PGlite) in the browser. */
+  language: "csharp" | "sql";
+  /** SQL practice: the script that creates the practice database. */
+  setup: string;
   starter: string;
   solution: string;
   expectedOutput: string;
@@ -70,6 +74,9 @@ class Program
 }
 `;
 
+export const SQL_STARTER = `-- Write your query here
+`;
+
 export function newSlideState(kind: SlideKind, course: string, moduleId: string): SlideFormState {
   return {
     id: null,
@@ -80,6 +87,8 @@ export function newSlideState(kind: SlideKind, course: string, moduleId: string)
     title: emptyLoc(),
     body: emptyLoc(),
     questions: kind === "quiz" ? [newQuestion(1)] : [],
+    language: "csharp",
+    setup: "",
     starter: kind === "practice" ? CSHARP_STARTER : "",
     solution: kind === "practice" ? CSHARP_STARTER : "",
     expectedOutput: "",

@@ -201,7 +201,8 @@ async function main() {
             s.kind === "quiz"
               ? { questions: s.questions.map(({ correct: _correct, ...publicPart }) => publicPart) }
               : null;
-          const practice = s.kind === "practice" ? { language: s.language, starter: s.starter } : null;
+          const practice =
+            s.kind === "practice" ? { language: s.language, starter: s.starter, ...(s.setup ? { setup: s.setup } : {}) } : null;
           return `  (${q(course)}, ${q(s.moduleSlug)}, ${q(s.slug)}, ${q(s.kind)}, ${j(s.title)}, ${j(s.body)}, ${j(quiz)}, ${j(practice)}, ${s.maxScore}, ${i + 1})`;
         })
         .join(",\n"),

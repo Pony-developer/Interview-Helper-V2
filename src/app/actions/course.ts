@@ -107,3 +107,32 @@ export async function runPracticeAction(id: string, code: string): Promise<RunRe
   if (error) return { ok: false, error: "server" };
   return { ok: true, run, outcome: data as PracticeOutcome };
 }
+
+export type SqlSubmitResponse = { ok: true; outcome: PracticeOutcome | null } | { ok: false; error: "invalid" | "server" };
+
+/**
+ * Grades a PostgreSQL practice. SQL runs in the learner's browser (PGlite), so the output arrives with
+ * the code; this is the same trust model as course_submit_practice, which anyone may call directly.
+ * `output` is null when the code failed with an error: the code is then only saved (signed-in users).
+ */
+export async function submitSqlPracticeAction(id: string, code: string, output: string | null): Promise<SqlSubmitResponse> {
+  const outputOk = output === null || z.string().max(100_000).safeParse(output).success;
+  if (!slideId.safeParse(id).success || !codeSchema.safeParse(code).success || !outputOk) return { ok: false, error: "invalid" };
+
+  if (!isSupabaseConfigured()) {
+    const slide = localSlide(id);
+    if (slide?.kind !== "practice" || slide.language !== "sql") return { ok: false, error: "invalid" };
+    if (output === null) return { ok: true, outcome: null };
+    const passed = normalize(output) === normalize(slide.expectedOutput);
+    return { ok: true, outcome: { passed, score: passed ? slide.maxScore : 0, max: slide.maxScore, saved: false } };
+  }
+
+  const supabase = await createClient();
+  if (output === null) {
+    await supabase.rpc("course_save_code", { p_slide: id, p_code: code });
+    return { ok: true, outcome: null };
+  }
+  const { data, error } = await supabase.rpc("course_submit_practice", { p_slide: id, p_code: code, p_output: output });
+  if (error) return { ok: false, error: "server" };
+  return { ok: true, outcome: data as PracticeOutcome };
+}

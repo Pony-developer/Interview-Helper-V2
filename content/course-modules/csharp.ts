@@ -1,14 +1,11 @@
+import { PROGRAM, PROGRAM_WITH } from "./csharp-code";
+import { concurrencyModule } from "./csharp-modules/concurrency";
+import { diAspnetModule } from "./csharp-modules/di-aspnet";
+import { exceptionsAdvancedModule } from "./csharp-modules/exceptions-advanced";
+import { genericsAdvancedModule } from "./csharp-modules/generics-advanced";
+import { memoryGcModule } from "./csharp-modules/memory-gc";
+import { modernCsharpModule } from "./csharp-modules/modern-csharp";
 import type { ModuleDef } from "./types";
-
-const PROGRAM = (body: string, extraUsings = "") =>
-  `using System;\n${extraUsings ? `${extraUsings}\n` : ""}\nclass Program\n{\n${body}\n}\n`;
-
-/**
- * A program whose classes sit at the top level (as in a real project), followed by `Program`.
- * `members` go inside Program before Main (static helper methods); `main` is the body of Main.
- */
-const PROGRAM_WITH = (types: string, main: string, extraUsings = "", members = "") =>
-  `using System;\n${extraUsings ? `${extraUsings}\n` : ""}\n${types}\n\nclass Program\n{\n${members ? `${members}\n\n` : ""}    static void Main()\n    {\n${main}\n    }\n}\n`;
 
 /**
  * The engine of the "Digger" game that the last practices of the Inheritance module build on.
@@ -207,7 +204,7 @@ const EMPTY_MAIN = PROGRAM(`    static void Main()
         // Write your code here
     }`);
 
-/** The C# course: twenty-four modules of lectures, quizzes and coding practices. */
+/** The C# course: modules of lectures, quizzes and coding practices. The advanced modules live in csharp-modules/. */
 export const csharpModules: ModuleDef[] = [
   {
     slug: "first-steps",
@@ -17154,6 +17151,7 @@ class Negate : Expr
       },
     ],
   },
+  genericsAdvancedModule,
   {
     slug: "events",
     title: { en: "Events", uk: "Події" },
@@ -17488,6 +17486,8 @@ class ClickCounter : IDisposable
       },
     ],
   },
+  exceptionsAdvancedModule,
+  memoryGcModule,
   {
     slug: "multithreading",
     title: { en: "Multithreading", uk: "Багатопотоковість" },
@@ -18307,4 +18307,7 @@ class ClickCounter : IDisposable
       },
     ],
   },
+  concurrencyModule,
+  modernCsharpModule,
+  diAspnetModule,
 ];
