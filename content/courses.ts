@@ -92,8 +92,8 @@ export const courses: CourseContent[] = [
     slug: "frontend-interview",
     title: { en: "Frontend Interview Preparation", uk: "Підготовка до frontend-співбесіди" },
     summary: {
-      en: "Preparation for the frontend part of a Dynamics CRM developer interview: 165 typical questions on HTML, CSS, JavaScript and TypeScript, browser APIs, frameworks, networking, the backend and algorithms, with a quiz for each section.",
-      uk: "Підготовка до frontend-частини співбесіди на розробника Dynamics CRM: 165 типових питань з HTML, CSS, JavaScript і TypeScript, API браузера, фреймворків, мережі, бекенда та алгоритмів із квізом до кожного розділу.",
+      en: "Preparation for the frontend part of a Dynamics CRM developer interview at Junior, Middle and Senior level: typical questions on HTML, CSS, JavaScript and TypeScript, browser APIs, frameworks, networking, the backend, algorithms, Git, testing, accessibility and performance, with a quiz for each section.",
+      uk: "Підготовка до frontend-частини співбесіди на розробника Dynamics CRM рівня Junior, Middle і Senior: типові питання з HTML, CSS, JavaScript і TypeScript, API браузера, фреймворків, мережі, бекенда, алгоритмів, Git, тестування, доступності та продуктивності із квізом до кожного розділу.",
     },
     topics: [
       { en: "General questions: code quality, HTTP, security, OOP", uk: "Загальні питання: якість коду, HTTP, безпека, ООП" },
@@ -106,6 +106,9 @@ export const courses: CourseContent[] = [
       { en: "Frameworks: components, state, SSR, React, Angular, Vue", uk: "Фреймворки: компоненти, стан, SSR, React, Angular, Vue" },
       { en: "Networking and the backend: HTTP, REST, CORS, WebSocket, auth, GraphQL", uk: "Мережа та бекенд: HTTP, REST, CORS, WebSocket, автентифікація, GraphQL" },
       { en: "Algorithms and data structures: complexity, sorting, search, trees, graphs", uk: "Алгоритми та структури даних: складність, сортування, пошук, дерева, графи" },
+      { en: "Git, testing and accessibility", uk: "Git, тестування та доступність" },
+      { en: "Middle level: SOLID, project structure, modern CSS, performance in practice, JavaScript and React in depth, tests and accessibility", uk: "Рівень Middle: SOLID, структура проєкту, сучасний CSS, продуктивність на практиці, JavaScript і React глибше, тести та доступність" },
+      { en: "Senior level: teamwork, estimation, mentoring, CSS architecture at scale, React internals, testing strategy, system architecture, security", uk: "Рівень Senior: робота в команді, оцінювання, менторство, CSS-архітектура великих проєктів, React зсередини, стратегія тестування, архітектура систем, безпека" },
     ],
   },
 ];

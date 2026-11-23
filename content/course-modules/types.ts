@@ -11,7 +11,7 @@ export type QuizQuestionDef = {
   mode: "single" | "multi";
   prompt: Localized;
   options: { id: string; text: Localized }[];
-  /** Option ids that make the answer fully correct. Never sent to the browser. */
+  /** Option ids that make the answer fully correct. Sent to the browser only after the learner submits the quiz. */
   correct: string[];
 };
 

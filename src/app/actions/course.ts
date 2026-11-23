@@ -12,7 +12,15 @@ const codeSchema = z.string().max(50_000);
 
 /** Set once the learner holds the course certificate; `new` on the submission that earned it. */
 export type CertificateRef = { id: string; new: boolean } | null;
-export type QuizOutcome = { score: number; max: number; results: Record<string, boolean>; saved: boolean; certificate?: CertificateRef };
+export type QuizOutcome = {
+  score: number;
+  max: number;
+  results: Record<string, boolean>;
+  /** Answer key per question, revealed only in the response to a submission. Absent before the 20261123180000 migration. */
+  correct?: Record<string, string[]>;
+  saved: boolean;
+  certificate?: CertificateRef;
+};
 export type PracticeOutcome = { passed: boolean; score: number; max: number; saved: boolean; certificate?: CertificateRef };
 
 /** Same normalisation as private.normalize_output in the database. */
@@ -56,12 +64,14 @@ export async function submitQuizAction(id: string, answers: Record<string, strin
     const slide = localSlide(id);
     if (slide?.kind !== "quiz") return { ok: false as const, error: "invalid" as const };
     const results: Record<string, boolean> = {};
+    const correct: Record<string, string[]> = {};
     for (const q of slide.questions) {
       const selected = [...new Set(parsed.data[q.id] ?? [])].sort();
       results[q.id] = selected.join(",") === [...q.correct].sort().join(",");
+      correct[q.id] = q.correct;
     }
     const score = Object.values(results).filter(Boolean).length;
-    return { ok: true as const, outcome: { score, max: slide.maxScore, results, saved: false } satisfies QuizOutcome };
+    return { ok: true as const, outcome: { score, max: slide.maxScore, results, correct, saved: false } satisfies QuizOutcome };
   }
 
   const supabase = await createClient();

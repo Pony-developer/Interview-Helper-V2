@@ -57,6 +57,7 @@ export function QuizSlide({
     <div className="space-y-6">
       {questions.map((q, i) => {
         const verdict = outcome ? outcome.results[q.id] : undefined;
+        const correct = outcome?.correct?.[q.id];
         return (
           <section
             key={q.id}
@@ -92,6 +93,7 @@ export function QuizSlide({
                 }}
                 disabled={pending || outcome !== null}
                 labelId={`q-${q.id}`}
+                review={correct ? { correct } : undefined}
               />
             </div>
           </section>

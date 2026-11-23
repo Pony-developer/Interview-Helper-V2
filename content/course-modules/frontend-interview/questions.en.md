@@ -202,3 +202,32 @@ Below are the questions that come up most often in frontend interviews. First tr
 163. How does a hash table work, and what are its pros and cons?
 164. Tell us about algorithms for working with trees, such as a binary search tree.
 165. Which algorithms can be used to find the shortest path in a graph?
+
+## Git and version control
+
+166. What is a version control system and why is it used?
+167. Which basic Git commands do you know, and what are they for?
+168. What is the difference between `git merge` and `git rebase`?
+169. What is a commit in Git, and how do you shape one well?
+170. How do you fix mistakes in previous commits?
+171. What are branches in Git, and how do you use them effectively?
+172. How do you create a new branch in Git?
+173. Which branching strategies are used in different development processes (for example, Git Flow)?
+174. How do you use tags in Git?
+175. What is a merge conflict and how do you resolve it?
+176. What are the best practices for working with remote repositories?
+177. How do you use a `.gitignore` file?
+
+## Testing
+
+178. Whose responsibility is a bug in production: the developer's or the tester's?
+179. How do you test your code? Have you written code that could not be checked before deployment?
+180. What is AAA in testing?
+
+## Accessibility
+
+181. What is web accessibility?
+182. How do you test web accessibility?
+183. Name the basic techniques for building accessible web interfaces.
+184. When should you use links, and when buttons?
+185. What text should the `alt` attribute contain?
