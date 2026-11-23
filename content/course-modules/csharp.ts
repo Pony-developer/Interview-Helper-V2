@@ -3,12 +3,211 @@ import type { ModuleDef } from "./types";
 const PROGRAM = (body: string, extraUsings = "") =>
   `using System;\n${extraUsings ? `${extraUsings}\n` : ""}\nclass Program\n{\n${body}\n}\n`;
 
+/**
+ * A program whose classes sit at the top level (as in a real project), followed by `Program`.
+ * `members` go inside Program before Main (static helper methods); `main` is the body of Main.
+ */
+const PROGRAM_WITH = (types: string, main: string, extraUsings = "", members = "") =>
+  `using System;\n${extraUsings ? `${extraUsings}\n` : ""}\n${types}\n\nclass Program\n{\n${members ? `${members}\n\n` : ""}    static void Main()\n    {\n${main}\n    }\n}\n`;
+
+/**
+ * The engine of the "Digger" game that the last practices of the Inheritance module build on.
+ * `cells` is the code that the student writes (or its solution); `createExtra` is the extra
+ * lines of Field.Create that make the cells of the student's classes.
+ */
+const DIGGER_ENGINE = (cells: string, createExtra: string) => `abstract class Cell
+{
+    public abstract char Symbol { get; }
+    public virtual bool CanEnter { get { return false; } }
+    public virtual int Score { get { return 0; } }
+    public virtual bool Kills { get { return false; } }
+
+    // Called once per tick for every cell; a cell may change the field
+    public virtual void Update(Field field, int row, int col) { }
+}
+
+class Wall : Cell
+{
+    public override char Symbol { get { return '#'; } }
+}
+
+class Empty : Cell
+{
+    public override char Symbol { get { return '_'; } }
+    public override bool CanEnter { get { return true; } }
+}
+
+class Gold : Cell
+{
+    public override char Symbol { get { return '$'; } }
+    public override bool CanEnter { get { return true; } }
+    public override int Score { get { return 10; } }
+}
+
+class Terrain : Cell
+{
+    public override char Symbol { get { return '.'; } }
+    public override bool CanEnter { get { return true; } }
+    public override int Score { get { return 1; } }
+}
+
+class Digger : Cell
+{
+    public override char Symbol { get { return 'D'; } }
+}
+
+${cells}
+
+class Field
+{
+    private readonly Cell[,] cells;
+    private int diggerRow;
+    private int diggerCol;
+
+    public int Score { get; private set; }
+    public bool Alive { get; private set; }
+    public int Rows { get { return cells.GetLength(0); } }
+    public int Cols { get { return cells.GetLength(1); } }
+
+    public Field(string[] rows)
+    {
+        Alive = true;
+        cells = new Cell[rows.Length, rows[0].Length];
+        for (int r = 0; r < rows.Length; r++)
+        {
+            for (int c = 0; c < rows[r].Length; c++)
+            {
+                cells[r, c] = Create(rows[r][c]);
+                if (rows[r][c] == 'D')
+                {
+                    diggerRow = r;
+                    diggerCol = c;
+                }
+            }
+        }
+    }
+
+    private static Cell Create(char symbol)
+    {
+        if (symbol == '#') return new Wall();
+        if (symbol == '$') return new Gold();
+        if (symbol == '.') return new Terrain();
+        if (symbol == 'D') return new Digger();
+${createExtra}        return new Empty();
+    }
+
+    public Cell Get(int row, int col)
+    {
+        return cells[row, col];
+    }
+
+    public void Set(int row, int col, Cell cell)
+    {
+        cells[row, col] = cell;
+    }
+
+    public void Kill()
+    {
+        Alive = false;
+    }
+
+    // Moves the digger by dRow rows and dCol columns. Returns whether the move happened.
+    public bool Move(int dRow, int dCol)
+    {
+        if (!Alive)
+        {
+            return false;
+        }
+        int row = diggerRow + dRow;
+        int col = diggerCol + dCol;
+        if (row < 0 || row >= Rows || col < 0 || col >= Cols)
+        {
+            return false;
+        }
+        Cell target = cells[row, col];
+        if (!target.CanEnter)
+        {
+            return false;
+        }
+        Score += target.Score;
+        if (target.Kills)
+        {
+            Alive = false;
+        }
+        cells[row, col] = cells[diggerRow, diggerCol];
+        cells[diggerRow, diggerCol] = new Empty();
+        diggerRow = row;
+        diggerCol = col;
+        return true;
+    }
+
+    // One tick of the game: every cell gets its Update, from the bottom row up.
+    // A cell that was moved by another cell during this tick is not updated twice.
+    public void Tick()
+    {
+        Cell[,] snapshot = (Cell[,])cells.Clone();
+        for (int r = Rows - 1; r >= 0; r--)
+        {
+            for (int c = 0; c < Cols; c++)
+            {
+                if (!Alive)
+                {
+                    return;
+                }
+                if (ReferenceEquals(cells[r, c], snapshot[r, c]))
+                {
+                    snapshot[r, c].Update(this, r, c);
+                }
+            }
+        }
+    }
+
+    public override string ToString()
+    {
+        string text = "";
+        for (int r = 0; r < Rows; r++)
+        {
+            if (r > 0) text += "\\n";
+            for (int c = 0; c < Cols; c++)
+            {
+                text += cells[r, c].Symbol;
+            }
+        }
+        return text;
+    }
+}`;
+
+const BAG_CLASS = `class Bag : Cell
+{
+    private int fallen;
+
+    public override char Symbol { get { return 'S'; } }
+
+    public override void Update(Field field, int row, int col)
+    {
+        if (row + 1 < field.Rows && field.Get(row + 1, col) is Empty)
+        {
+            fallen++;
+            field.Set(row + 1, col, this);
+            field.Set(row, col, new Empty());
+        }
+        else
+        {
+            if (fallen >= 2)
+            {
+                field.Set(row, col, new Gold());
+            }
+            fallen = 0;
+        }
+    }
+}`;
+
 const EMPTY_MAIN = PROGRAM(`    static void Main()
     {
         // Write your code here
     }`);
 
-/** The C# course. Modules 2–8 start with a lecture and a practice each; module 1 is complete. */
+/** The C# course: fifteen modules of lectures, quizzes and coding practices. */
 export const csharpModules: ModuleDef[] = [
   {
     slug: "first-steps",
@@ -5946,7 +6145,348 @@ export const csharpModules: ModuleDef[] = [
     slug: "complexity",
     title: { en: "Algorithm complexity", uk: "Складність алгоритмів" },
     slides: [
+      { kind: "lecture", slug: "why-algorithms", title: { en: "Why algorithms matter", uk: "Про важливість алгоритмів" } },
       { kind: "lecture", slug: "big-o", title: { en: "Counting the work: Big O", uk: "Рахуємо роботу: O-нотація" } },
+      { kind: "lecture", slug: "basic-concepts", title: { en: "Basic concepts", uk: "Базові поняття" } },
+      {
+        kind: "quiz",
+        slug: "basic-concepts-quiz",
+        title: { en: "Basic concepts quiz", uk: "Тест: базові поняття" },
+        questions: [
+          {
+            id: "input-size",
+            mode: "single",
+            prompt: {
+              en: "For an algorithm that finds the maximum of an array, what is the size of the input `n`?",
+              uk: "Для алгоритму, що знаходить максимум масиву, чим є розмір вхідних даних `n`?",
+            },
+            options: [
+              { id: "a", text: { en: "The number of elements in the array", uk: "Кількістю елементів у масиві" } },
+              { id: "b", text: { en: "The value of the largest element", uk: "Значенням найбільшого елемента" } },
+              { id: "c", text: { en: "The number of seconds the program takes", uk: "Кількістю секунд роботи програми" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "worst-case",
+            mode: "single",
+            prompt: {
+              en: "How many comparisons does a linear search make in the worst case, in an unsorted array of `n` elements?",
+              uk: "Скільки порівнянь робить лінійний пошук у найгіршому випадку в невідсортованому масиві з `n` елементів?",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "About `n / 2`", uk: "Близько `n / 2`" } },
+              { id: "c", text: { en: "`n`", uk: "`n`" } },
+              { id: "d", text: { en: "`n²`", uk: "`n²`" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "space",
+            mode: "single",
+            prompt: {
+              en: "Which term describes how the extra memory used by an algorithm grows with the input?",
+              uk: "Який термін описує, як додаткова пам'ять, що її використовує алгоритм, зростає разом із вхідними даними?",
+            },
+            options: [
+              { id: "a", text: { en: "Time complexity", uk: "Часова складність" } },
+              { id: "b", text: { en: "Space complexity", uk: "Просторова складність" } },
+              { id: "c", text: { en: "Cyclomatic complexity", uk: "Цикломатична складність" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "why-count",
+            mode: "single",
+            prompt: {
+              en: "Why do we usually count operations instead of measuring seconds?",
+              uk: "Чому ми зазвичай рахуємо операції, а не міряємо секунди?",
+            },
+            options: [
+              { id: "a", text: { en: "Seconds depend on the computer, the language and the load, while the count shows how the work grows", uk: "Секунди залежать від комп'ютера, мови та навантаження, а підрахунок показує, як зростає робота" } },
+              { id: "b", text: { en: "Computers cannot measure time", uk: "Комп'ютери не вміють міряти час" } },
+              { id: "c", text: { en: "Counting is always more precise than a stopwatch for any purpose", uk: "Підрахунок завжди точніший за секундомір для будь-якої мети" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "calculating-complexity", title: { en: "Calculating complexity", uk: "Розрахунок складності" } },
+      { kind: "lecture", slug: "growth-scale", title: { en: "The growth scale of functions", uk: "Масштаб зростання функцій" } },
+      {
+        kind: "quiz",
+        slug: "complexity-speed-quiz",
+        title: { en: "Complexity and speed", uk: "Складність і швидкість" },
+        questions: [
+          {
+            id: "faster-computer",
+            mode: "single",
+            prompt: {
+              en: "Your computer becomes 100 times faster. About how much larger an input can an O(n²) algorithm handle in the same time?",
+              uk: "Ваш комп'ютер став у 100 разів швидшим. Приблизно у скільки разів більші вхідні дані зможе обробити алгоритм O(n²) за той самий час?",
+            },
+            options: [
+              { id: "a", text: { en: "100 times larger", uk: "У 100 разів більші" } },
+              { id: "b", text: { en: "10 times larger", uk: "У 10 разів більші" } },
+              { id: "c", text: { en: "2 times larger", uk: "У 2 рази більші" } },
+              { id: "d", text: { en: "10 000 times larger", uk: "У 10 000 разів більші" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "linear-vs-quadratic",
+            mode: "single",
+            prompt: {
+              en: "For n = 1 000 000, roughly how many times more steps does an O(n²) algorithm need than an O(n) algorithm with the same constants?",
+              uk: "Для n = 1 000 000 приблизно у скільки разів більше кроків потрібно алгоритму O(n²), ніж алгоритму O(n) з тими самими сталими?",
+            },
+            options: [
+              { id: "a", text: { en: "2 times", uk: "У 2 рази" } },
+              { id: "b", text: { en: "1 000 times", uk: "У 1 000 разів" } },
+              { id: "c", text: { en: "1 000 000 times", uk: "У 1 000 000 разів" } },
+            ],
+            correct: ["c"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "count-steps",
+        title: { en: "Counting the steps", uk: "Рахуємо кроки" },
+        language: "csharp",
+        starter: PROGRAM(`    // How many elements the linear search looks at (it stops at the first match)
+    static int LinearSteps(int[] sorted, int value)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    // How many times the body of the binary search loop runs
+    static int BinarySteps(int[] sorted, int value)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    // The number of pairs (i, j) with i < j among n elements. Use a formula!
+    static long PairCount(int n)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Main()
+    {
+        int[] a = new int[1000];
+        for (int i = 0; i < a.Length; i++)
+        {
+            a[i] = i + 1;
+        }
+
+        Console.WriteLine(LinearSteps(a, 1));
+        Console.WriteLine(LinearSteps(a, 500));
+        Console.WriteLine(LinearSteps(a, 1000));
+        Console.WriteLine(LinearSteps(a, 5000));
+        Console.WriteLine(BinarySteps(a, 500));
+        Console.WriteLine(BinarySteps(a, 1));
+        Console.WriteLine(BinarySteps(a, 1000));
+        Console.WriteLine(BinarySteps(a, 5000));
+        Console.WriteLine(PairCount(10));
+        Console.WriteLine(PairCount(1000));
+        Console.WriteLine(PairCount(100000));
+    }`),
+        solution: PROGRAM(`    // How many elements the linear search looks at (it stops at the first match)
+    static int LinearSteps(int[] sorted, int value)
+    {
+        int steps = 0;
+        for (int i = 0; i < sorted.Length; i++)
+        {
+            steps++;
+            if (sorted[i] == value)
+            {
+                return steps;
+            }
+        }
+        return steps;
+    }
+
+    // How many times the body of the binary search loop runs
+    static int BinarySteps(int[] sorted, int value)
+    {
+        int steps = 0;
+        int left = 0, right = sorted.Length - 1;
+        while (left <= right)
+        {
+            steps++;
+            int middle = left + (right - left) / 2;
+            if (sorted[middle] == value) return steps;
+            if (sorted[middle] < value) left = middle + 1;
+            else right = middle - 1;
+        }
+        return steps;
+    }
+
+    // The number of pairs (i, j) with i < j among n elements. Use a formula!
+    static long PairCount(int n)
+    {
+        return (long)n * (n - 1) / 2;
+    }
+
+    static void Main()
+    {
+        int[] a = new int[1000];
+        for (int i = 0; i < a.Length; i++)
+        {
+            a[i] = i + 1;
+        }
+
+        Console.WriteLine(LinearSteps(a, 1));
+        Console.WriteLine(LinearSteps(a, 500));
+        Console.WriteLine(LinearSteps(a, 1000));
+        Console.WriteLine(LinearSteps(a, 5000));
+        Console.WriteLine(BinarySteps(a, 500));
+        Console.WriteLine(BinarySteps(a, 1));
+        Console.WriteLine(BinarySteps(a, 1000));
+        Console.WriteLine(BinarySteps(a, 5000));
+        Console.WriteLine(PairCount(10));
+        Console.WriteLine(PairCount(1000));
+        Console.WriteLine(PairCount(100000));
+    }`),
+        expectedOutput: "1\n500\n1000\n1000\n1\n9\n10\n10\n45\n499500\n4999950000\n",
+      },
+      { kind: "lecture", slug: "big-o-notation", title: { en: "Big-O notation", uk: "O-символіка" } },
+      {
+        kind: "quiz",
+        slug: "big-o-quiz",
+        title: { en: "Big-O notation quiz", uk: "Тест: O-символіка" },
+        questions: [
+          {
+            id: "polynomial",
+            mode: "single",
+            prompt: { en: "What is the Big-O class of `3n² + 5n + 2`?", uk: "Який клас O-символіки в `3n² + 5n + 2`?" },
+            options: [
+              { id: "a", text: { en: "O(n)", uk: "O(n)" } },
+              { id: "b", text: { en: "O(n²)", uk: "O(n²)" } },
+              { id: "c", text: { en: "O(3n²)", uk: "O(3n²)" } },
+              { id: "d", text: { en: "O(n³)", uk: "O(n³)" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "n-log-n",
+            mode: "single",
+            prompt: { en: "What is the Big-O class of `5n · log n + 100n`?", uk: "Який клас O-символіки в `5n · log n + 100n`?" },
+            options: [
+              { id: "a", text: { en: "O(n)", uk: "O(n)" } },
+              { id: "b", text: { en: "O(n log n)", uk: "O(n log n)" } },
+              { id: "c", text: { en: "O(n² log n)", uk: "O(n² log n)" } },
+              { id: "d", text: { en: "O(log n)", uk: "O(log n)" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "upper-bound",
+            mode: "single",
+            prompt: {
+              en: "An algorithm takes exactly `n` steps. Is the statement \"the algorithm is O(n²)\" true?",
+              uk: "Алгоритм виконує рівно `n` кроків. Чи правдиве твердження «алгоритм є O(n²)»?",
+            },
+            options: [
+              { id: "a", text: { en: "Yes: O is an upper bound, so it is true, although not the tightest one", uk: "Так: O — верхня межа, тож це правда, хоча й не найточніша" } },
+              { id: "b", text: { en: "No: the algorithm is only O(n)", uk: "Ні: алгоритм є лише O(n)" } },
+              { id: "c", text: { en: "Only for n > 100", uk: "Лише для n > 100" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "log-base",
+            mode: "single",
+            prompt: {
+              en: "How do O(log₂ n) and O(log₁₀ n) compare?",
+              uk: "Як співвідносяться O(log₂ n) та O(log₁₀ n)?",
+            },
+            options: [
+              { id: "a", text: { en: "They are the same class: the bases differ only by a constant factor", uk: "Це той самий клас: основи відрізняються лише сталим множником" } },
+              { id: "b", text: { en: "O(log₂ n) is much faster", uk: "O(log₂ n) значно швидший" } },
+              { id: "c", text: { en: "O(log₁₀ n) is much faster", uk: "O(log₁₀ n) значно швидший" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "sequential",
+            mode: "single",
+            prompt: {
+              en: "A method has an O(n) loop followed by an O(n²) loop, one after the other. What is its complexity?",
+              uk: "Метод має цикл O(n), за яким іде цикл O(n²), один за одним. Яка його складність?",
+            },
+            options: [
+              { id: "a", text: { en: "O(n)", uk: "O(n)" } },
+              { id: "b", text: { en: "O(n²)", uk: "O(n²)" } },
+              { id: "c", text: { en: "O(n³)", uk: "O(n³)" } },
+              { id: "d", text: { en: "O(n + n²) is the final answer and cannot be simplified", uk: "O(n + n²) — остаточна відповідь, її не можна спростити" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "two-variables",
+            mode: "single",
+            prompt: {
+              en: "What is the complexity of this code?\n\n```csharp\nfor (int i = 0; i < n; i++)\n    for (int j = 0; j < m; j++)\n        Work();\n```",
+              uk: "Яка складність цього коду?\n\n```csharp\nfor (int i = 0; i < n; i++)\n    for (int j = 0; j < m; j++)\n        Work();\n```",
+            },
+            options: [
+              { id: "a", text: { en: "O(n + m)", uk: "O(n + m)" } },
+              { id: "b", text: { en: "O(n · m)", uk: "O(n · m)" } },
+              { id: "c", text: { en: "O(n²)", uk: "O(n²)" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "theta",
+            mode: "single",
+            prompt: {
+              en: "Which notation expresses a tight bound: both an upper and a lower one?",
+              uk: "Яке позначення виражає точну межу: і верхню, і нижню водночас?",
+            },
+            options: [
+              { id: "a", text: { en: "O", uk: "O" } },
+              { id: "b", text: { en: "Ω", uk: "Ω" } },
+              { id: "c", text: { en: "Θ", uk: "Θ" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "order",
+            mode: "single",
+            prompt: {
+              en: "Which list is in increasing order of growth?",
+              uk: "Який список розташовано за зростанням швидкості зростання?",
+            },
+            options: [
+              { id: "a", text: { en: "`1, n, log n, n², n log n`", uk: "`1, n, log n, n², n log n`" } },
+              { id: "b", text: { en: "`1, log n, n, n log n, n²`", uk: "`1, log n, n, n log n, n²`" } },
+              { id: "c", text: { en: "`log n, 1, n, n², n log n`", uk: "`log n, 1, n, n², n log n`" } },
+              { id: "d", text: { en: "`n, n², n log n, 1, log n`", uk: "`n, n², n log n, 1, log n`" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "exponential",
+            mode: "single",
+            prompt: {
+              en: "For large n, which function grows faster: `2ⁿ` or `n¹⁰`?",
+              uk: "Для великих n яка функція зростає швидше: `2ⁿ` чи `n¹⁰`?",
+            },
+            options: [
+              { id: "a", text: { en: "`n¹⁰`, because the exponent is larger", uk: "`n¹⁰`, бо показник більший" } },
+              { id: "b", text: { en: "`2ⁿ`: any exponential eventually overtakes any polynomial", uk: "`2ⁿ`: будь-яка експонента зрештою обганяє будь-який поліном" } },
+              { id: "c", text: { en: "They grow equally fast", uk: "Вони зростають однаково швидко" } },
+            ],
+            correct: ["b"],
+          },
+        ],
+      },
       {
         kind: "practice",
         slug: "binary-search",
@@ -5988,6 +6528,7201 @@ export const csharpModules: ModuleDef[] = [
             Console.WriteLine(value + " -> " + BinarySearch(numbers, value));
     }`),
         expectedOutput: "7 -> 3\n1 -> 0\n13 -> 6\n4 -> -1\n20 -> -1\n",
+      },
+      { kind: "lecture", slug: "estimating-complexity", title: { en: "Estimating complexity", uk: "Оцінка складності" } },
+      { kind: "lecture", slug: "numbers-complexity", title: { en: "The complexity of algorithms with numbers", uk: "Складність алгоритмів із числами" } },
+      {
+        kind: "quiz",
+        slug: "estimate-quiz",
+        title: { en: "Estimating the complexity of an algorithm", uk: "Оцінка складності алгоритму" },
+        questions: [
+          {
+            id: "doubling",
+            mode: "single",
+            prompt: {
+              en: "What is the complexity of this loop?\n\n```csharp\nfor (int i = 1; i < n; i *= 2)\n    Work();\n```",
+              uk: "Яка складність цього циклу?\n\n```csharp\nfor (int i = 1; i < n; i *= 2)\n    Work();\n```",
+            },
+            options: [
+              { id: "a", text: { en: "O(n)", uk: "O(n)" } },
+              { id: "b", text: { en: "O(log n)", uk: "O(log n)" } },
+              { id: "c", text: { en: "O(n²)", uk: "O(n²)" } },
+              { id: "d", text: { en: "O(1)", uk: "O(1)" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "contains-in-loop",
+            mode: "single",
+            prompt: {
+              en: "What is the complexity of this code, if both `a` and `list` have about `n` elements?\n\n```csharp\nforeach (int x in a)\n    if (list.Contains(x)) count++;\n```",
+              uk: "Яка складність цього коду, якщо і `a`, і `list` мають близько `n` елементів?\n\n```csharp\nforeach (int x in a)\n    if (list.Contains(x)) count++;\n```",
+            },
+            options: [
+              { id: "a", text: { en: "O(n)", uk: "O(n)" } },
+              { id: "b", text: { en: "O(n log n)", uk: "O(n log n)" } },
+              { id: "c", text: { en: "O(n²), because `Contains` is itself a loop", uk: "O(n²), бо `Contains` сам є циклом" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "string-concat",
+            mode: "single",
+            prompt: {
+              en: "What is the complexity of this code?\n\n```csharp\nstring s = \"\";\nfor (int i = 0; i < n; i++)\n    s += \"x\";\n```",
+              uk: "Яка складність цього коду?\n\n```csharp\nstring s = \"\";\nfor (int i = 0; i < n; i++)\n    s += \"x\";\n```",
+            },
+            options: [
+              { id: "a", text: { en: "O(n)", uk: "O(n)" } },
+              { id: "b", text: { en: "O(n²), because each `+=` copies the whole string", uk: "O(n²), бо кожен `+=` копіює весь рядок" } },
+              { id: "c", text: { en: "O(log n)", uk: "O(log n)" } },
+            ],
+            correct: ["b"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "complexity-classes", title: { en: "Complexity classes", uk: "Класи складності" } },
+      {
+        kind: "quiz",
+        slug: "big-o-2-quiz",
+        title: { en: "Big-O notation 2", uk: "O-символіка 2" },
+        questions: [
+          {
+            id: "np-complete",
+            mode: "single",
+            prompt: {
+              en: "Which of these problems is NP-complete, which means that no fast algorithm is known for it?",
+              uk: "Яка з цих задач NP-повна, тобто для неї не відомий швидкий алгоритм?",
+            },
+            options: [
+              { id: "a", text: { en: "Sorting an array", uk: "Сортування масиву" } },
+              { id: "b", text: { en: "Finding the maximum of an array", uk: "Знаходження максимуму масиву" } },
+              { id: "c", text: { en: "The travelling salesman problem (the decision version)", uk: "Задача комівояжера (розв'язувана версія)" } },
+              { id: "d", text: { en: "Binary search", uk: "Двійковий пошук" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "trial-division",
+            mode: "single",
+            prompt: {
+              en: "Trial division up to √N takes about √N steps. Why is it still considered slow for numbers with hundreds of digits?",
+              uk: "Пробне ділення до √N займає близько √N кроків. Чому воно все одно вважається повільним для чисел із сотнями цифр?",
+            },
+            options: [
+              { id: "a", text: { en: "√N is exponential in the number of digits, which is the real size of the input", uk: "√N експоненційне за кількістю цифр, а це справжній розмір входу" } },
+              { id: "b", text: { en: "Because the square root is hard to compute", uk: "Бо квадратний корінь важко обчислити" } },
+              { id: "c", text: { en: "Because the loop has a division inside", uk: "Бо всередині циклу є ділення" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "euclid",
+            mode: "single",
+            prompt: {
+              en: "What is the number of steps of Euclid's algorithm for `Gcd(a, b)`?",
+              uk: "Скільки кроків робить алгоритм Евкліда для `Gcd(a, b)`?",
+            },
+            options: [
+              { id: "a", text: { en: "O(min(a, b))", uk: "O(min(a, b))" } },
+              { id: "b", text: { en: "O(log min(a, b))", uk: "O(log min(a, b))" } },
+              { id: "c", text: { en: "O(1)", uk: "O(1)" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "power",
+            mode: "single",
+            prompt: {
+              en: "How many multiplications does computing `x^p` by repeated squaring need?",
+              uk: "Скільки множень потребує обчислення `x^p` через повторне піднесення до квадрата?",
+            },
+            options: [
+              { id: "a", text: { en: "About `p`", uk: "Близько `p`" } },
+              { id: "b", text: { en: "About `log₂ p`", uk: "Близько `log₂ p`" } },
+              { id: "c", text: { en: "About `p²`", uk: "Близько `p²`" } },
+            ],
+            correct: ["b"],
+          },
+        ],
+      },
+      {
+        kind: "quiz",
+        slug: "complexity-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "dictionary",
+            mode: "single",
+            prompt: {
+              en: "What is the average complexity of looking up a key in a `Dictionary`?",
+              uk: "Яка середня складність пошуку ключа в `Dictionary`?",
+            },
+            options: [
+              { id: "a", text: { en: "O(1)", uk: "O(1)" } },
+              { id: "b", text: { en: "O(log n)", uk: "O(log n)" } },
+              { id: "c", text: { en: "O(n)", uk: "O(n)" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "sort",
+            mode: "single",
+            prompt: {
+              en: "What is the complexity of `Array.Sort` for `n` elements?",
+              uk: "Яка складність `Array.Sort` для `n` елементів?",
+            },
+            options: [
+              { id: "a", text: { en: "O(n)", uk: "O(n)" } },
+              { id: "b", text: { en: "O(n log n)", uk: "O(n log n)" } },
+              { id: "c", text: { en: "O(n²)", uk: "O(n²)" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "binary-needs-sorted",
+            mode: "single",
+            prompt: {
+              en: "What must be true of an array for binary search to work?",
+              uk: "Що має бути правдою щодо масиву, щоб двійковий пошук працював?",
+            },
+            options: [
+              { id: "a", text: { en: "It must be sorted", uk: "Він має бути відсортований" } },
+              { id: "b", text: { en: "It must have an even number of elements", uk: "Він має мати парну кількість елементів" } },
+              { id: "c", text: { en: "It must contain only positive numbers", uk: "Він має містити лише додатні числа" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "small-n",
+            mode: "single",
+            prompt: {
+              en: "When can an O(n²) algorithm be faster in practice than an O(n log n) one?",
+              uk: "Коли алгоритм O(n²) на практиці може бути швидшим за O(n log n)?",
+            },
+            options: [
+              { id: "a", text: { en: "Never: a smaller class is always faster", uk: "Ніколи: менший клас завжди швидший" } },
+              { id: "b", text: { en: "For small inputs, when its constant factors are much smaller", uk: "Для малих вхідних даних, коли його сталі множники значно менші" } },
+              { id: "c", text: { en: "Only on very old computers", uk: "Лише на дуже старих комп'ютерах" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "tsp-brute",
+            mode: "single",
+            prompt: {
+              en: "A brute-force solution of the travelling salesman problem tries all the orders of the `n` cities. What is its complexity?",
+              uk: "Розв'язок задачі комівояжера перебором перевіряє всі порядки `n` міст. Яка його складність?",
+            },
+            options: [
+              { id: "a", text: { en: "O(n²)", uk: "O(n²)" } },
+              { id: "b", text: { en: "O(2ⁿ)", uk: "O(2ⁿ)" } },
+              { id: "c", text: { en: "O(n!)", uk: "O(n!)" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "pixels",
+            mode: "single",
+            prompt: {
+              en: "A filter visits each pixel of an image of `w × h` pixels a constant number of times. What is its complexity?",
+              uk: "Фільтр відвідує кожен піксель зображення `w × h` пікселів сталу кількість разів. Яка його складність?",
+            },
+            options: [
+              { id: "a", text: { en: "O(w + h)", uk: "O(w + h)" } },
+              { id: "b", text: { en: "O(w · h)", uk: "O(w · h)" } },
+              { id: "c", text: { en: "O(log(w · h))", uk: "O(log(w · h))" } },
+            ],
+            correct: ["b"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "grayscale",
+        title: { en: "Practice: Shades of gray", uk: "Практика «Відтінки сірого»" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Show(int[,] image)
+    {
+        for (int r = 0; r < image.GetLength(0); r++)
+        {
+            for (int c = 0; c < image.GetLength(1); c++)
+            {
+                if (c > 0) Console.Write(" ");
+                Console.Write(image[r, c]);
+            }
+            Console.WriteLine();
+        }
+    }
+
+    // gray = (299 * R + 587 * G + 114 * B) / 1000, integer division
+    static int[,] Grayscale(int[,] red, int[,] green, int[,] blue)
+    {
+        // Write your code here
+        return new int[red.GetLength(0), red.GetLength(1)];
+    }
+
+    static void Main()
+    {
+        int[,] red = { { 255, 0, 0 }, { 255, 0, 100 } };
+        int[,] green = { { 0, 255, 0 }, { 255, 0, 150 } };
+        int[,] blue = { { 0, 0, 255 }, { 255, 0, 200 } };
+        Show(Grayscale(red, green, blue));
+    }`),
+        solution: PROGRAM(`    static void Show(int[,] image)
+    {
+        for (int r = 0; r < image.GetLength(0); r++)
+        {
+            for (int c = 0; c < image.GetLength(1); c++)
+            {
+                if (c > 0) Console.Write(" ");
+                Console.Write(image[r, c]);
+            }
+            Console.WriteLine();
+        }
+    }
+
+    // gray = (299 * R + 587 * G + 114 * B) / 1000, integer division
+    static int[,] Grayscale(int[,] red, int[,] green, int[,] blue)
+    {
+        int rows = red.GetLength(0);
+        int cols = red.GetLength(1);
+        int[,] gray = new int[rows, cols];
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                gray[r, c] = (299 * red[r, c] + 587 * green[r, c] + 114 * blue[r, c]) / 1000;
+            }
+        }
+        return gray;
+    }
+
+    static void Main()
+    {
+        int[,] red = { { 255, 0, 0 }, { 255, 0, 100 } };
+        int[,] green = { { 0, 255, 0 }, { 255, 0, 150 } };
+        int[,] blue = { { 0, 0, 255 }, { 255, 0, 200 } };
+        Show(Grayscale(red, green, blue));
+    }`),
+        expectedOutput: "76 149 29\n255 0 140\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "threshold",
+        title: { en: "Practice: Threshold filter", uk: "Практика «Пороговий фільтр»" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Show(int[,] image)
+    {
+        for (int r = 0; r < image.GetLength(0); r++)
+        {
+            for (int c = 0; c < image.GetLength(1); c++)
+            {
+                if (c > 0) Console.Write(" ");
+                Console.Write(image[r, c]);
+            }
+            Console.WriteLine();
+        }
+    }
+
+    // A NEW image: 255 where the pixel is at least t, otherwise 0
+    static int[,] Threshold(int[,] image, int t)
+    {
+        // Write your code here
+        return image;
+    }
+
+    // How many pixels equal 255
+    static int CountWhite(int[,] image)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Main()
+    {
+        int[,] image =
+        {
+            { 10, 200, 30, 250 },
+            { 128, 127, 129, 0 },
+            { 255, 90, 160, 60 },
+        };
+        int[,] bw = Threshold(image, 128);
+        Show(bw);
+        Console.WriteLine(CountWhite(bw));
+        Console.WriteLine(image[0, 0] + " " + image[0, 1] + " " + image[0, 2] + " " + image[0, 3]);
+    }`),
+        solution: PROGRAM(`    static void Show(int[,] image)
+    {
+        for (int r = 0; r < image.GetLength(0); r++)
+        {
+            for (int c = 0; c < image.GetLength(1); c++)
+            {
+                if (c > 0) Console.Write(" ");
+                Console.Write(image[r, c]);
+            }
+            Console.WriteLine();
+        }
+    }
+
+    // A NEW image: 255 where the pixel is at least t, otherwise 0
+    static int[,] Threshold(int[,] image, int t)
+    {
+        int rows = image.GetLength(0);
+        int cols = image.GetLength(1);
+        int[,] result = new int[rows, cols];
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                result[r, c] = image[r, c] >= t ? 255 : 0;
+            }
+        }
+        return result;
+    }
+
+    // How many pixels equal 255
+    static int CountWhite(int[,] image)
+    {
+        int count = 0;
+        foreach (int pixel in image)
+        {
+            if (pixel == 255) count++;
+        }
+        return count;
+    }
+
+    static void Main()
+    {
+        int[,] image =
+        {
+            { 10, 200, 30, 250 },
+            { 128, 127, 129, 0 },
+            { 255, 90, 160, 60 },
+        };
+        int[,] bw = Threshold(image, 128);
+        Show(bw);
+        Console.WriteLine(CountWhite(bw));
+        Console.WriteLine(image[0, 0] + " " + image[0, 1] + " " + image[0, 2] + " " + image[0, 3]);
+    }`),
+        expectedOutput: "0 255 0 255\n255 0 255 0\n255 0 255 0\n6\n10 200 30 250\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "median-filter",
+        title: { en: "Practice: Median filter", uk: "Практика «Медіанний фільтр»" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Show(int[,] image)
+    {
+        for (int r = 0; r < image.GetLength(0); r++)
+        {
+            for (int c = 0; c < image.GetLength(1); c++)
+            {
+                if (c > 0) Console.Write(" ");
+                Console.Write(image[r, c]);
+            }
+            Console.WriteLine();
+        }
+    }
+
+    // A NEW image. Every inner pixel becomes the median of its 3 x 3 neighbourhood
+    // (read from the original image). The border pixels are copied unchanged.
+    static int[,] MedianFilter(int[,] image)
+    {
+        // Write your code here
+        return (int[,])image.Clone();
+    }
+
+    static void Main()
+    {
+        int[,] noisy =
+        {
+            { 10, 10, 10, 10, 10 },
+            { 10, 255, 10, 10, 10 },
+            { 10, 10, 10, 0, 10 },
+            { 10, 10, 10, 10, 10 },
+            { 10, 10, 10, 10, 10 },
+        };
+        Show(MedianFilter(noisy));
+        Console.WriteLine("---");
+
+        int[,] edge =
+        {
+            { 0, 0, 100, 100, 100 },
+            { 0, 0, 100, 100, 100 },
+            { 0, 255, 100, 100, 100 },
+            { 0, 0, 100, 100, 100 },
+            { 0, 0, 100, 100, 100 },
+        };
+        Show(MedianFilter(edge));
+    }`),
+        solution: PROGRAM(`    static void Show(int[,] image)
+    {
+        for (int r = 0; r < image.GetLength(0); r++)
+        {
+            for (int c = 0; c < image.GetLength(1); c++)
+            {
+                if (c > 0) Console.Write(" ");
+                Console.Write(image[r, c]);
+            }
+            Console.WriteLine();
+        }
+    }
+
+    // A NEW image. Every inner pixel becomes the median of its 3 x 3 neighbourhood
+    // (read from the original image). The border pixels are copied unchanged.
+    static int[,] MedianFilter(int[,] image)
+    {
+        int rows = image.GetLength(0);
+        int cols = image.GetLength(1);
+        int[,] result = (int[,])image.Clone();
+        for (int r = 1; r < rows - 1; r++)
+        {
+            for (int c = 1; c < cols - 1; c++)
+            {
+                int[] window = new int[9];
+                int k = 0;
+                for (int dr = -1; dr <= 1; dr++)
+                {
+                    for (int dc = -1; dc <= 1; dc++)
+                    {
+                        window[k++] = image[r + dr, c + dc];
+                    }
+                }
+                Array.Sort(window);
+                result[r, c] = window[4];
+            }
+        }
+        return result;
+    }
+
+    static void Main()
+    {
+        int[,] noisy =
+        {
+            { 10, 10, 10, 10, 10 },
+            { 10, 255, 10, 10, 10 },
+            { 10, 10, 10, 0, 10 },
+            { 10, 10, 10, 10, 10 },
+            { 10, 10, 10, 10, 10 },
+        };
+        Show(MedianFilter(noisy));
+        Console.WriteLine("---");
+
+        int[,] edge =
+        {
+            { 0, 0, 100, 100, 100 },
+            { 0, 0, 100, 100, 100 },
+            { 0, 255, 100, 100, 100 },
+            { 0, 0, 100, 100, 100 },
+            { 0, 0, 100, 100, 100 },
+        };
+        Show(MedianFilter(edge));
+    }`),
+        expectedOutput:
+          "10 10 10 10 10\n10 10 10 10 10\n10 10 10 10 10\n10 10 10 10 10\n10 10 10 10 10\n---\n0 0 100 100 100\n0 0 100 100 100\n0 0 100 100 100\n0 0 100 100 100\n0 0 100 100 100\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "sobel",
+        title: { en: "Practice: Sobel filter", uk: "Практика «Фільтр Собеля»" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Show(int[,] image)
+    {
+        for (int r = 0; r < image.GetLength(0); r++)
+        {
+            for (int c = 0; c < image.GetLength(1); c++)
+            {
+                if (c > 0) Console.Write(" ");
+                Console.Write(image[r, c]);
+            }
+            Console.WriteLine();
+        }
+    }
+
+    // A NEW image of edge strengths. For an inner pixel with the neighbourhood
+    //   a b c
+    //   d p e
+    //   f g h
+    // gx = (c + 2e + h) - (a + 2d + f), gy = (f + 2g + h) - (a + 2b + c),
+    // strength = min(255, |gx| + |gy|). The border pixels are 0.
+    static int[,] Sobel(int[,] image)
+    {
+        // Write your code here
+        return new int[image.GetLength(0), image.GetLength(1)];
+    }
+
+    static void Main()
+    {
+        int[,] vertical =
+        {
+            { 0, 0, 10, 10, 10 },
+            { 0, 0, 10, 10, 10 },
+            { 0, 0, 10, 10, 10 },
+            { 0, 0, 10, 10, 10 },
+            { 0, 0, 10, 10, 10 },
+        };
+        Show(Sobel(vertical));
+        Console.WriteLine("---");
+
+        int[,] horizontal =
+        {
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+            { 100, 100, 100, 100, 100 },
+            { 100, 100, 100, 100, 100 },
+            { 100, 100, 100, 100, 100 },
+        };
+        Show(Sobel(horizontal));
+    }`),
+        solution: PROGRAM(`    static void Show(int[,] image)
+    {
+        for (int r = 0; r < image.GetLength(0); r++)
+        {
+            for (int c = 0; c < image.GetLength(1); c++)
+            {
+                if (c > 0) Console.Write(" ");
+                Console.Write(image[r, c]);
+            }
+            Console.WriteLine();
+        }
+    }
+
+    // A NEW image of edge strengths. For an inner pixel with the neighbourhood
+    //   a b c
+    //   d p e
+    //   f g h
+    // gx = (c + 2e + h) - (a + 2d + f), gy = (f + 2g + h) - (a + 2b + c),
+    // strength = min(255, |gx| + |gy|). The border pixels are 0.
+    static int[,] Sobel(int[,] image)
+    {
+        int rows = image.GetLength(0);
+        int cols = image.GetLength(1);
+        int[,] result = new int[rows, cols];
+        for (int r = 1; r < rows - 1; r++)
+        {
+            for (int col = 1; col < cols - 1; col++)
+            {
+                int a = image[r - 1, col - 1], b = image[r - 1, col], c = image[r - 1, col + 1];
+                int d = image[r, col - 1], e = image[r, col + 1];
+                int f = image[r + 1, col - 1], g = image[r + 1, col], h = image[r + 1, col + 1];
+
+                int gx = (c + 2 * e + h) - (a + 2 * d + f);
+                int gy = (f + 2 * g + h) - (a + 2 * b + c);
+                result[r, col] = Math.Min(255, Math.Abs(gx) + Math.Abs(gy));
+            }
+        }
+        return result;
+    }
+
+    static void Main()
+    {
+        int[,] vertical =
+        {
+            { 0, 0, 10, 10, 10 },
+            { 0, 0, 10, 10, 10 },
+            { 0, 0, 10, 10, 10 },
+            { 0, 0, 10, 10, 10 },
+            { 0, 0, 10, 10, 10 },
+        };
+        Show(Sobel(vertical));
+        Console.WriteLine("---");
+
+        int[,] horizontal =
+        {
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+            { 100, 100, 100, 100, 100 },
+            { 100, 100, 100, 100, 100 },
+            { 100, 100, 100, 100, 100 },
+        };
+        Show(Sobel(horizontal));
+    }`),
+        expectedOutput:
+          "0 0 0 0 0\n0 40 40 0 0\n0 40 40 0 0\n0 40 40 0 0\n0 0 0 0 0\n---\n0 0 0 0 0\n0 255 255 255 0\n0 255 255 255 0\n0 0 0 0 0\n0 0 0 0 0\n",
+        maxScore: 10,
+      },
+    ],
+  },
+  {
+    slug: "recursion",
+    title: { en: "Recursive algorithms", uk: "Рекурсивні алгоритми" },
+    slides: [
+      { kind: "lecture", slug: "recursion", title: { en: "Recursion", uk: "Рекурсія" } },
+      {
+        kind: "practice",
+        slug: "fix-recursion",
+        title: { en: "Fix the recursion", uk: "Виправте рекурсію" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Check(string name, long actual, long expected)
+    {
+        Console.WriteLine((actual == expected ? "ok" : "FAIL") + ": " + name);
+    }
+
+    // n! (0! = 1)
+    static long Factorial(int n)
+    {
+        if (n == 0) return 0;
+        return n * Factorial(n - 1);
+    }
+
+    // 1 + 2 + ... + n (the sum for 0 is 0)
+    static int SumTo(int n)
+    {
+        if (n == 0) return 1;
+        return n + SumTo(n - 1);
+    }
+
+    // x to the power p (anything to the power 0 is 1)
+    static long Power(long x, int p)
+    {
+        if (p == 0) return 1;
+        return x + Power(x, p - 1);
+    }
+
+    // The number of digits of a non-negative number (0 has one digit)
+    static int CountDigits(int n)
+    {
+        if (n < 10) return 0;
+        return 1 + CountDigits(n / 10);
+    }
+
+    static void Main()
+    {
+        Check("Factorial(5)", Factorial(5), 120);
+        Check("Factorial(0)", Factorial(0), 1);
+        Check("SumTo(10)", SumTo(10), 55);
+        Check("SumTo(0)", SumTo(0), 0);
+        Check("Power(2, 10)", Power(2, 10), 1024);
+        Check("Power(5, 0)", Power(5, 0), 1);
+        Check("Power(3, 3)", Power(3, 3), 27);
+        Check("CountDigits(12345)", CountDigits(12345), 5);
+        Check("CountDigits(7)", CountDigits(7), 1);
+        Check("CountDigits(0)", CountDigits(0), 1);
+    }`),
+        solution: PROGRAM(`    static void Check(string name, long actual, long expected)
+    {
+        Console.WriteLine((actual == expected ? "ok" : "FAIL") + ": " + name);
+    }
+
+    // n! (0! = 1)
+    static long Factorial(int n)
+    {
+        if (n == 0) return 1;
+        return n * Factorial(n - 1);
+    }
+
+    // 1 + 2 + ... + n (the sum for 0 is 0)
+    static int SumTo(int n)
+    {
+        if (n == 0) return 0;
+        return n + SumTo(n - 1);
+    }
+
+    // x to the power p (anything to the power 0 is 1)
+    static long Power(long x, int p)
+    {
+        if (p == 0) return 1;
+        return x * Power(x, p - 1);
+    }
+
+    // The number of digits of a non-negative number (0 has one digit)
+    static int CountDigits(int n)
+    {
+        if (n < 10) return 1;
+        return 1 + CountDigits(n / 10);
+    }
+
+    static void Main()
+    {
+        Check("Factorial(5)", Factorial(5), 120);
+        Check("Factorial(0)", Factorial(0), 1);
+        Check("SumTo(10)", SumTo(10), 55);
+        Check("SumTo(0)", SumTo(0), 0);
+        Check("Power(2, 10)", Power(2, 10), 1024);
+        Check("Power(5, 0)", Power(5, 0), 1);
+        Check("Power(3, 3)", Power(3, 3), 27);
+        Check("CountDigits(12345)", CountDigits(12345), 5);
+        Check("CountDigits(7)", CountDigits(7), 1);
+        Check("CountDigits(0)", CountDigits(0), 1);
+    }`),
+        expectedOutput:
+          "ok: Factorial(5)\nok: Factorial(0)\nok: SumTo(10)\nok: SumTo(0)\nok: Power(2, 10)\nok: Power(5, 0)\nok: Power(3, 3)\nok: CountDigits(12345)\nok: CountDigits(7)\nok: CountDigits(0)\n",
+      },
+      { kind: "lecture", slug: "recursion-tree", title: { en: "The recursion tree", uk: "Дерево рекурсії" } },
+      { kind: "lecture", slug: "more-recursion", title: { en: "More examples", uk: "Ще приклади" } },
+      {
+        kind: "quiz",
+        slug: "recursion-quiz",
+        title: { en: "Understanding recursion", uk: "Розуміння рекурсії" },
+        questions: [
+          {
+            id: "base-case",
+            mode: "single",
+            prompt: { en: "What is the base case of a recursive method?", uk: "Що таке базовий випадок рекурсивного методу?" },
+            options: [
+              { id: "a", text: { en: "The input for which the method returns an answer without calling itself", uk: "Вхідні дані, для яких метод повертає відповідь, не викликаючи себе" } },
+              { id: "b", text: { en: "The first call of the method in `Main`", uk: "Перший виклик методу в `Main`" } },
+              { id: "c", text: { en: "The last line of the method", uk: "Останній рядок методу" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "no-base-case",
+            mode: "single",
+            prompt: {
+              en: "What happens when a recursive method has no reachable base case?",
+              uk: "Що станеться, коли в рекурсивного методу немає досяжного базового випадку?",
+            },
+            options: [
+              { id: "a", text: { en: "It returns 0", uk: "Він повертає 0" } },
+              { id: "b", text: { en: "The calls pile up on the stack until a stack overflow ends the program", uk: "Виклики накопичуються на стеку, доки переповнення стека не завершить програму" } },
+              { id: "c", text: { en: "The compiler reports an error", uk: "Компілятор повідомляє про помилку" } },
+              { id: "d", text: { en: "The method silently stops after 1000 calls", uk: "Метод мовчки зупиняється після 1000 викликів" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "sum-value",
+            mode: "single",
+            prompt: {
+              en: "What does this program print?\n\n```csharp\nstatic int F(int n) => n == 0 ? 0 : n + F(n - 1);\n\nConsole.WriteLine(F(4));\n```",
+              uk: "Що друкує ця програма?\n\n```csharp\nstatic int F(int n) => n == 0 ? 0 : n + F(n - 1);\n\nConsole.WriteLine(F(4));\n```",
+            },
+            options: [
+              { id: "a", text: { en: "4", uk: "4" } },
+              { id: "b", text: { en: "10", uk: "10" } },
+              { id: "c", text: { en: "24", uk: "24" } },
+              { id: "d", text: { en: "0", uk: "0" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "fib-calls",
+            mode: "single",
+            prompt: {
+              en: "How many calls (counting the first one) does the naive `Fib(5)` make, where `Fib(n) = n < 2 ? n : Fib(n - 1) + Fib(n - 2)`?",
+              uk: "Скільки викликів (разом із першим) робить наївний `Fib(5)`, де `Fib(n) = n < 2 ? n : Fib(n - 1) + Fib(n - 2)`?",
+            },
+            options: [
+              { id: "a", text: { en: "5", uk: "5" } },
+              { id: "b", text: { en: "8", uk: "8" } },
+              { id: "c", text: { en: "15", uk: "15" } },
+              { id: "d", text: { en: "25", uk: "25" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "stack-depth",
+            mode: "single",
+            prompt: {
+              en: "The naive `Fib(40)` makes over 300 million calls. About how deep does the call stack get?",
+              uk: "Наївний `Fib(40)` робить понад 300 мільйонів викликів. Наскільки глибоким стає стек викликів?",
+            },
+            options: [
+              { id: "a", text: { en: "About 40 frames: the depth of the tree, not its size", uk: "Близько 40 кадрів: глибина дерева, а не його розмір" } },
+              { id: "b", text: { en: "300 million frames", uk: "300 мільйонів кадрів" } },
+              { id: "c", text: { en: "2 frames", uk: "2 кадри" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "memoization",
+            mode: "single",
+            prompt: {
+              en: "What does memoization do to the naive recursive Fibonacci?",
+              uk: "Що робить мемоїзація з наївним рекурсивним Фібоначчі?",
+            },
+            options: [
+              { id: "a", text: { en: "It turns the exponential time into linear time, by solving each sub-problem once", uk: "Перетворює експоненційний час на лінійний, розв'язуючи кожну підзадачу один раз" } },
+              { id: "b", text: { en: "It removes the base case", uk: "Прибирає базовий випадок" } },
+              { id: "c", text: { en: "It makes the recursion deeper", uk: "Робить рекурсію глибшою" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "true-statements",
+            mode: "multi",
+            prompt: { en: "Which statements about recursion are true?", uk: "Які твердження про рекурсію правильні?" },
+            options: [
+              { id: "a", text: { en: "Every recursion can be rewritten with a loop (and, when needed, an explicit stack)", uk: "Будь-яку рекурсію можна переписати циклом (і за потреби явним стеком)" } },
+              { id: "b", text: { en: "A recursive solution is always faster than a loop", uk: "Рекурсивний розв'язок завжди швидший за цикл" } },
+              { id: "c", text: { en: "Each call uses some stack memory", uk: "Кожен виклик використовує трохи пам'яті стека" } },
+              { id: "d", text: { en: "C# guarantees that tail calls never grow the stack", uk: "C# гарантує, що хвостові виклики ніколи не збільшують стек" } },
+            ],
+            correct: ["a", "c"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "divide-conquer", title: { en: "Divide and conquer", uk: "Розділяй і володарюй" } },
+      { kind: "lecture", slug: "subsets", title: { en: "Subsets", uk: "Підмножини" } },
+      {
+        kind: "practice",
+        slug: "password-bruteforce",
+        title: { en: "Password brute force", uk: "Перебір паролів" },
+        language: "csharp",
+        starter: PROGRAM(
+          `    // All the strings of exactly "length" characters over the alphabet, in the order of
+    // the alphabet (with repetition): "ab", 3 -> aaa aab aba abb baa bab bba bbb
+    static List<string> GeneratePasswords(string alphabet, int length)
+    {
+        // Write your code here
+        return new List<string>();
+    }
+
+    static void Main()
+    {
+        List<string> small = GeneratePasswords("ab", 3);
+        Console.WriteLine(small.Count);
+        Console.WriteLine(string.Join(" ", small));
+
+        List<string> big = GeneratePasswords("abc", 4);
+        Console.WriteLine(big.Count);
+        Console.WriteLine(big[0] + " " + big[40] + " " + big[80]);
+        Console.WriteLine(big.IndexOf("cbca") + 1);
+
+        Console.WriteLine(GeneratePasswords("xyz", 0).Count);
+    }`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM(
+          `    static void Build(string alphabet, int length, string prefix, List<string> result)
+    {
+        if (prefix.Length == length)
+        {
+            result.Add(prefix);
+            return;
+        }
+        foreach (char c in alphabet)
+        {
+            Build(alphabet, length, prefix + c, result);
+        }
+    }
+
+    // All the strings of exactly "length" characters over the alphabet, in the order of
+    // the alphabet (with repetition): "ab", 3 -> aaa aab aba abb baa bab bba bbb
+    static List<string> GeneratePasswords(string alphabet, int length)
+    {
+        var result = new List<string>();
+        Build(alphabet, length, "", result);
+        return result;
+    }
+
+    static void Main()
+    {
+        List<string> small = GeneratePasswords("ab", 3);
+        Console.WriteLine(small.Count);
+        Console.WriteLine(string.Join(" ", small));
+
+        List<string> big = GeneratePasswords("abc", 4);
+        Console.WriteLine(big.Count);
+        Console.WriteLine(big[0] + " " + big[40] + " " + big[80]);
+        Console.WriteLine(big.IndexOf("cbca") + 1);
+
+        Console.WriteLine(GeneratePasswords("xyz", 0).Count);
+    }`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "8\naaa aab aba abb baa bab bba bbb\n81\naaaa bbbb cccc\n70\n1\n",
+      },
+      { kind: "lecture", slug: "permutations", title: { en: "Permutations", uk: "Перестановки" } },
+      {
+        kind: "practice",
+        slug: "abandoned-code",
+        title: { en: "Abandoned code :(", uk: "Покинутий код :(" },
+        language: "csharp",
+        starter: PROGRAM(
+          `    // All the permutations of the letters, in the order that comes from
+    // trying the unused letters from left to right at every position.
+    static List<string> Permutations(string letters)
+    {
+        var result = new List<string>();
+        var used = new bool[letters.Length];
+        Build("", letters, used, result);
+        return result;
+    }
+
+    // TODO: finish the permutations before the demo :(
+    static void Build(string prefix, string letters, bool[] used, List<string> result)
+    {
+        // TODO: the base case. When the prefix is as long as the letters, record it and return.
+
+        // TODO: the recursive case. For every letter that is not used yet:
+        //       mark it as used, call Build with the longer prefix, then unmark it (backtrack).
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(string.Join(" ", Permutations("abc")));
+        Console.WriteLine(Permutations("abcd").Count);
+        List<string> four = Permutations("abcd");
+        Console.WriteLine(four[four.Count - 1]);
+        Console.WriteLine(Permutations("a").Count);
+        Console.WriteLine(Permutations("").Count);
+    }`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM(
+          `    // All the permutations of the letters, in the order that comes from
+    // trying the unused letters from left to right at every position.
+    static List<string> Permutations(string letters)
+    {
+        var result = new List<string>();
+        var used = new bool[letters.Length];
+        Build("", letters, used, result);
+        return result;
+    }
+
+    // TODO: finish the permutations before the demo :(
+    static void Build(string prefix, string letters, bool[] used, List<string> result)
+    {
+        if (prefix.Length == letters.Length)
+        {
+            result.Add(prefix);
+            return;
+        }
+
+        for (int i = 0; i < letters.Length; i++)
+        {
+            if (used[i])
+            {
+                continue;
+            }
+            used[i] = true;
+            Build(prefix + letters[i], letters, used, result);
+            used[i] = false;
+        }
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(string.Join(" ", Permutations("abc")));
+        Console.WriteLine(Permutations("abcd").Count);
+        List<string> four = Permutations("abcd");
+        Console.WriteLine(four[four.Count - 1]);
+        Console.WriteLine(Permutations("a").Count);
+        Console.WriteLine(Permutations("").Count);
+    }`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "abc acb bac bca cab cba\n24\ndcba\n1\n1\n",
+      },
+      { kind: "lecture", slug: "arrangements", title: { en: "Arrangements and combinations", uk: "Розміщення та комбінації" } },
+      {
+        kind: "quiz",
+        slug: "recursion-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "subsets-count",
+            mode: "single",
+            prompt: { en: "How many subsets does a set of 5 elements have (counting the empty one)?", uk: "Скільки підмножин має множина з 5 елементів (разом з порожньою)?" },
+            options: [
+              { id: "a", text: { en: "10", uk: "10" } },
+              { id: "b", text: { en: "25", uk: "25" } },
+              { id: "c", text: { en: "32", uk: "32" } },
+              { id: "d", text: { en: "120", uk: "120" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "permutations-count",
+            mode: "single",
+            prompt: { en: "How many permutations do 4 different letters have?", uk: "Скільки перестановок мають 4 різні літери?" },
+            options: [
+              { id: "a", text: { en: "16", uk: "16" } },
+              { id: "b", text: { en: "24", uk: "24" } },
+              { id: "c", text: { en: "8", uk: "8" } },
+              { id: "d", text: { en: "4", uk: "4" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "arrangements-count",
+            mode: "single",
+            prompt: {
+              en: "In how many ways can gold, silver and bronze medals go to 3 of 5 runners (order matters, no repeats)?",
+              uk: "Скількома способами золоту, срібну й бронзову медалі можна віддати 3 із 5 бігунів (порядок важливий, повторів немає)?",
+            },
+            options: [
+              { id: "a", text: { en: "10", uk: "10" } },
+              { id: "b", text: { en: "15", uk: "15" } },
+              { id: "c", text: { en: "60", uk: "60" } },
+              { id: "d", text: { en: "125", uk: "125" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "combinations-count",
+            mode: "single",
+            prompt: {
+              en: "In how many ways can a team of 2 be chosen from 5 people (the order does not matter)?",
+              uk: "Скількома способами можна обрати команду з 2 людей із 5 (порядок не важливий)?",
+            },
+            options: [
+              { id: "a", text: { en: "10", uk: "10" } },
+              { id: "b", text: { en: "20", uk: "20" } },
+              { id: "c", text: { en: "25", uk: "25" } },
+              { id: "d", text: { en: "32", uk: "32" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "password-count",
+            mode: "single",
+            prompt: {
+              en: "How many strings of length 4 are there over the alphabet `a`, `b`, `c` (repetition allowed)?",
+              uk: "Скільки існує рядків довжини 4 над алфавітом `a`, `b`, `c` (повтори дозволено)?",
+            },
+            options: [
+              { id: "a", text: { en: "12", uk: "12" } },
+              { id: "b", text: { en: "24", uk: "24" } },
+              { id: "c", text: { en: "64", uk: "64" } },
+              { id: "d", text: { en: "81", uk: "81" } },
+            ],
+            correct: ["d"],
+          },
+          {
+            id: "merge-sort",
+            mode: "single",
+            prompt: { en: "What is the time complexity of merge sort?", uk: "Яка часова складність сортування злиттям?" },
+            options: [
+              { id: "a", text: { en: "O(n)", uk: "O(n)" } },
+              { id: "b", text: { en: "O(n log n)", uk: "O(n log n)" } },
+              { id: "c", text: { en: "O(n²)", uk: "O(n²)" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "unmark",
+            mode: "single",
+            prompt: {
+              en: "In a backtracking permutation generator with a shared `used` array, why is `used[i] = false` done after the recursive call?",
+              uk: "У генераторі перестановок із поверненням назад зі спільним масивом `used` навіщо `used[i] = false` виконується після рекурсивного виклику?",
+            },
+            options: [
+              { id: "a", text: { en: "So that the element becomes available again for the other branches", uk: "Щоб елемент знову став доступним для інших гілок" } },
+              { id: "b", text: { en: "To free memory", uk: "Щоб звільнити пам'ять" } },
+              { id: "c", text: { en: "Because the compiler requires it", uk: "Бо цього вимагає компілятор" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "password-bruteforce-2",
+        title: { en: "Practice: Password brute force 2", uk: "Практика «Перебір паролів 2»" },
+        language: "csharp",
+        starter: PROGRAM(
+          `    // All the passwords of exactly "length" characters over the alphabet, in the order of
+    // the alphabet, such that
+    //   1. no two equal characters are next to each other, and
+    //   2. there is at least one digit.
+    static List<string> ValidPasswords(string alphabet, int length)
+    {
+        // Write your code here
+        return new List<string>();
+    }
+
+    static void Main()
+    {
+        List<string> a = ValidPasswords("ab1", 5);
+        Console.WriteLine(a.Count);
+        Console.WriteLine(a[0] + " " + a[1] + " " + a[2] + " ... " + a[a.Count - 1]);
+
+        Console.WriteLine(ValidPasswords("ab", 3).Count);
+
+        List<string> b = ValidPasswords("12", 3);
+        Console.WriteLine(b.Count + ": " + string.Join(" ", b));
+    }`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM(
+          `    static void Build(string alphabet, int length, string prefix, bool hasDigit, List<string> result)
+    {
+        if (prefix.Length == length)
+        {
+            if (hasDigit)
+            {
+                result.Add(prefix);
+            }
+            return;
+        }
+        foreach (char c in alphabet)
+        {
+            if (prefix.Length > 0 && prefix[prefix.Length - 1] == c)
+            {
+                continue;
+            }
+            Build(alphabet, length, prefix + c, hasDigit || char.IsDigit(c), result);
+        }
+    }
+
+    // All the passwords of exactly "length" characters over the alphabet, in the order of
+    // the alphabet, such that
+    //   1. no two equal characters are next to each other, and
+    //   2. there is at least one digit.
+    static List<string> ValidPasswords(string alphabet, int length)
+    {
+        var result = new List<string>();
+        Build(alphabet, length, "", false, result);
+        return result;
+    }
+
+    static void Main()
+    {
+        List<string> a = ValidPasswords("ab1", 5);
+        Console.WriteLine(a.Count);
+        Console.WriteLine(a[0] + " " + a[1] + " " + a[2] + " ... " + a[a.Count - 1]);
+
+        Console.WriteLine(ValidPasswords("ab", 3).Count);
+
+        List<string> b = ValidPasswords("12", 3);
+        Console.WriteLine(b.Count + ": " + string.Join(" ", b));
+    }`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "46\nabab1 aba1a aba1b ... 1b1b1\n0\n2: 121 212\n",
+        maxScore: 20,
+      },
+      {
+        kind: "practice",
+        slug: "checkpoints",
+        title: { en: "Practice: Walking through checkpoints", uk: "Практика «Проходження через контрольні точки»" },
+        language: "csharp",
+        starter: PROGRAM(`    // The number of paths from (0, 0) to (rows - 1, cols - 1) with steps right or down
+    // that visit the checkpoints (checkRows[i], checkCols[i]) in the given order.
+    static long CountPaths(int rows, int cols, int[] checkRows, int[] checkCols)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(CountPaths(3, 3, new int[0], new int[0]));
+        Console.WriteLine(CountPaths(3, 3, new[] { 1 }, new[] { 1 }));
+        Console.WriteLine(CountPaths(5, 5, new[] { 2 }, new[] { 2 }));
+        Console.WriteLine(CountPaths(5, 5, new[] { 1, 3 }, new[] { 1, 3 }));
+        Console.WriteLine(CountPaths(17, 17, new int[0], new int[0]));
+        Console.WriteLine(CountPaths(17, 17, new[] { 8 }, new[] { 8 }));
+        Console.WriteLine(CountPaths(5, 5, new[] { 3, 1 }, new[] { 3, 1 }));
+        Console.WriteLine(CountPaths(3, 3, new[] { 0 }, new[] { 0 }));
+        Console.WriteLine(CountPaths(4, 6, new[] { 1, 2 }, new[] { 2, 4 }));
+    }`),
+        solution: PROGRAM(`    // The number of paths with "down" steps down and "right" steps right
+    static long Paths(int down, int right, long[,] memo)
+    {
+        if (down == 0 || right == 0)
+        {
+            return 1;
+        }
+        if (memo[down, right] != 0)
+        {
+            return memo[down, right];
+        }
+        long result = Paths(down - 1, right, memo) + Paths(down, right - 1, memo);
+        memo[down, right] = result;
+        return result;
+    }
+
+    // The number of paths from (r1, c1) to (r2, c2); 0 if (r2, c2) is not reachable
+    static long Segment(int r1, int c1, int r2, int c2)
+    {
+        if (r2 < r1 || c2 < c1)
+        {
+            return 0;
+        }
+        int down = r2 - r1;
+        int right = c2 - c1;
+        return Paths(down, right, new long[down + 1, right + 1]);
+    }
+
+    // The number of paths from (0, 0) to (rows - 1, cols - 1) with steps right or down
+    // that visit the checkpoints (checkRows[i], checkCols[i]) in the given order.
+    static long CountPaths(int rows, int cols, int[] checkRows, int[] checkCols)
+    {
+        long total = 1;
+        int r = 0;
+        int c = 0;
+        for (int i = 0; i < checkRows.Length; i++)
+        {
+            total *= Segment(r, c, checkRows[i], checkCols[i]);
+            r = checkRows[i];
+            c = checkCols[i];
+        }
+        return total * Segment(r, c, rows - 1, cols - 1);
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(CountPaths(3, 3, new int[0], new int[0]));
+        Console.WriteLine(CountPaths(3, 3, new[] { 1 }, new[] { 1 }));
+        Console.WriteLine(CountPaths(5, 5, new[] { 2 }, new[] { 2 }));
+        Console.WriteLine(CountPaths(5, 5, new[] { 1, 3 }, new[] { 1, 3 }));
+        Console.WriteLine(CountPaths(17, 17, new int[0], new int[0]));
+        Console.WriteLine(CountPaths(17, 17, new[] { 8 }, new[] { 8 }));
+        Console.WriteLine(CountPaths(5, 5, new[] { 3, 1 }, new[] { 3, 1 }));
+        Console.WriteLine(CountPaths(3, 3, new[] { 0 }, new[] { 0 }));
+        Console.WriteLine(CountPaths(4, 6, new[] { 1, 2 }, new[] { 2, 4 }));
+    }`),
+        expectedOutput: "6\n4\n36\n24\n601080390\n165636900\n0\n6\n18\n",
+        maxScore: 20,
+      },
+    ],
+  },
+  {
+    slug: "searching-sorting",
+    title: { en: "Searching and sorting", uk: "Пошук і сортування" },
+    slides: [
+      { kind: "lecture", slug: "binary-search-idea", title: { en: "Binary search", uk: "Двійковий пошук" } },
+      { kind: "lecture", slug: "linear-search-analysis", title: { en: "Analysis of linear search", uk: "Аналіз лінійного пошуку" } },
+      {
+        kind: "quiz",
+        slug: "algorithm-analysis-quiz",
+        title: { en: "Algorithm analysis", uk: "Аналіз алгоритму" },
+        questions: [
+          {
+            id: "linear-average",
+            mode: "single",
+            prompt: {
+              en: "A value is present in an unsorted array of `n` elements, at a random position. About how many comparisons does a linear search make on average?",
+              uk: "Значення є в невідсортованому масиві з `n` елементів на випадковій позиції. Скільки порівнянь у середньому робить лінійний пошук?",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "About `n / 2`", uk: "Близько `n / 2`" } },
+              { id: "c", text: { en: "About `log₂ n`", uk: "Близько `log₂ n`" } },
+              { id: "d", text: { en: "About `n²`", uk: "Близько `n²`" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "binary-worst",
+            mode: "single",
+            prompt: {
+              en: "About how many elements does binary search examine, in the worst case, in a sorted array of 1000 elements?",
+              uk: "Скільки елементів приблизно переглядає двійковий пошук у найгіршому випадку у відсортованому масиві з 1000 елементів?",
+            },
+            options: [
+              { id: "a", text: { en: "10", uk: "10" } },
+              { id: "b", text: { en: "100", uk: "100" } },
+              { id: "c", text: { en: "500", uk: "500" } },
+              { id: "d", text: { en: "1000", uk: "1000" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "binary-search-analysis", title: { en: "Analysis of binary search", uk: "Аналіз двійкового пошуку" } },
+      { kind: "lecture", slug: "performance-comparison", title: { en: "Comparing performance", uk: "Порівняння продуктивності" } },
+      {
+        kind: "practice",
+        slug: "recursive-binary-search",
+        title: { en: "Recursive binary search", uk: "Рекурсивний двійковий пошук" },
+        language: "csharp",
+        starter: PROGRAM(`    // The index of value in the sorted array (all values are different), or -1.
+    // Write a RECURSIVE helper with the range left..right.
+    static int Search(int[] sorted, int value)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Main()
+    {
+        int[] small = { 1, 3, 5, 7, 9, 11, 13 };
+        foreach (int v in new[] { 7, 1, 13, 4, 20, 0 })
+        {
+            Console.WriteLine(v + " -> " + Search(small, v));
+        }
+        Console.WriteLine(Search(new int[0], 5));
+
+        int[] big = new int[1000000];
+        for (int i = 0; i < big.Length; i++)
+        {
+            big[i] = i * 2;
+        }
+        Console.WriteLine(Search(big, 1999998));
+        Console.WriteLine(Search(big, 1999999));
+        Console.WriteLine(Search(big, 0));
+    }`),
+        solution: PROGRAM(`    static int Find(int[] sorted, int value, int left, int right)
+    {
+        if (left > right)
+        {
+            return -1;
+        }
+        int middle = left + (right - left) / 2;
+        if (sorted[middle] == value)
+        {
+            return middle;
+        }
+        if (sorted[middle] < value)
+        {
+            return Find(sorted, value, middle + 1, right);
+        }
+        return Find(sorted, value, left, middle - 1);
+    }
+
+    // The index of value in the sorted array (all values are different), or -1.
+    // Write a RECURSIVE helper with the range left..right.
+    static int Search(int[] sorted, int value)
+    {
+        return Find(sorted, value, 0, sorted.Length - 1);
+    }
+
+    static void Main()
+    {
+        int[] small = { 1, 3, 5, 7, 9, 11, 13 };
+        foreach (int v in new[] { 7, 1, 13, 4, 20, 0 })
+        {
+            Console.WriteLine(v + " -> " + Search(small, v));
+        }
+        Console.WriteLine(Search(new int[0], 5));
+
+        int[] big = new int[1000000];
+        for (int i = 0; i < big.Length; i++)
+        {
+            big[i] = i * 2;
+        }
+        Console.WriteLine(Search(big, 1999998));
+        Console.WriteLine(Search(big, 1999999));
+        Console.WriteLine(Search(big, 0));
+    }`),
+        expectedOutput: "7 -> 3\n1 -> 0\n13 -> 6\n4 -> -1\n20 -> -1\n0 -> -1\n-1\n999999\n-1\n0\n",
+      },
+      { kind: "lecture", slug: "bubble-sort", title: { en: "Bubble sort", uk: "Сортування бульбашкою" } },
+      {
+        kind: "practice",
+        slug: "sort-range",
+        title: { en: "Sorting a range", uk: "Сортування діапазону" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Show(int[] a)
+    {
+        for (int i = 0; i < a.Length; i++)
+        {
+            if (i > 0) Console.Write(" ");
+            Console.Write(a[i]);
+        }
+        Console.WriteLine();
+    }
+
+    // Bubble sort of the elements with the indexes from..to-1 (to is not included), in place.
+    // Swap only neighbours, and only when the left one is strictly greater.
+    // Returns the number of swaps.
+    static int SortRange(int[] a, int from, int to)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    static void Main()
+    {
+        int[] a = { 9, 4, 7, 1, 8, 2, 6, 3 };
+        int swaps = SortRange(a, 2, 6);
+        Show(a);
+        Console.WriteLine(swaps);
+        Console.WriteLine(SortRange(a, 0, a.Length));
+        Show(a);
+
+        int[] b = { 5, 4, 3, 2, 1 };
+        Console.WriteLine(SortRange(b, 3, 3));
+        Console.WriteLine(SortRange(b, 1, 2));
+        Show(b);
+    }`),
+        solution: PROGRAM(`    static void Show(int[] a)
+    {
+        for (int i = 0; i < a.Length; i++)
+        {
+            if (i > 0) Console.Write(" ");
+            Console.Write(a[i]);
+        }
+        Console.WriteLine();
+    }
+
+    // Bubble sort of the elements with the indexes from..to-1 (to is not included), in place.
+    // Swap only neighbours, and only when the left one is strictly greater.
+    // Returns the number of swaps.
+    static int SortRange(int[] a, int from, int to)
+    {
+        int swaps = 0;
+        for (int pass = 0; pass < to - from - 1; pass++)
+        {
+            bool swapped = false;
+            for (int i = from; i < to - 1 - pass; i++)
+            {
+                if (a[i] > a[i + 1])
+                {
+                    int temp = a[i];
+                    a[i] = a[i + 1];
+                    a[i + 1] = temp;
+                    swaps++;
+                    swapped = true;
+                }
+            }
+            if (!swapped)
+            {
+                break;
+            }
+        }
+        return swaps;
+    }
+
+    static void Main()
+    {
+        int[] a = { 9, 4, 7, 1, 8, 2, 6, 3 };
+        int swaps = SortRange(a, 2, 6);
+        Show(a);
+        Console.WriteLine(swaps);
+        Console.WriteLine(SortRange(a, 0, a.Length));
+        Show(a);
+
+        int[] b = { 5, 4, 3, 2, 1 };
+        Console.WriteLine(SortRange(b, 3, 3));
+        Console.WriteLine(SortRange(b, 1, 2));
+        Show(b);
+    }`),
+        expectedOutput: "9 4 1 2 7 8 6 3\n3\n15\n1 2 3 4 6 7 8 9\n0\n0\n5 4 3 2 1\n",
+      },
+      { kind: "lecture", slug: "merge-sort", title: { en: "Merge sort", uk: "Сортування злиттям" } },
+      {
+        kind: "practice",
+        slug: "merge-sorted",
+        title: { en: "Merging sorted arrays", uk: "Злиття відсортованих масивів" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Show(int[] a)
+    {
+        for (int i = 0; i < a.Length; i++)
+        {
+            if (i > 0) Console.Write(" ");
+            Console.Write(a[i]);
+        }
+        Console.WriteLine();
+    }
+
+    // A NEW sorted array with all the elements of both sorted arrays: one pass, two pointers.
+    // On equal values, take the element from left first (a stable merge).
+    static int[] Merge(int[] left, int[] right)
+    {
+        // Write your code here
+        return new int[0];
+    }
+
+    static void Main()
+    {
+        Show(Merge(new[] { 1, 4, 9 }, new[] { 2, 3, 10, 11 }));
+        Show(Merge(new int[0], new[] { 5 }));
+        Show(Merge(new[] { 2, 2 }, new[] { 2 }));
+        Show(Merge(new[] { 1 }, new int[0]));
+        Show(Merge(new int[0], new int[0]));
+    }`),
+        solution: PROGRAM(`    static void Show(int[] a)
+    {
+        for (int i = 0; i < a.Length; i++)
+        {
+            if (i > 0) Console.Write(" ");
+            Console.Write(a[i]);
+        }
+        Console.WriteLine();
+    }
+
+    // A NEW sorted array with all the elements of both sorted arrays: one pass, two pointers.
+    // On equal values, take the element from left first (a stable merge).
+    static int[] Merge(int[] left, int[] right)
+    {
+        int[] result = new int[left.Length + right.Length];
+        int i = 0, j = 0, k = 0;
+        while (i < left.Length && j < right.Length)
+        {
+            if (left[i] <= right[j])
+            {
+                result[k++] = left[i++];
+            }
+            else
+            {
+                result[k++] = right[j++];
+            }
+        }
+        while (i < left.Length)
+        {
+            result[k++] = left[i++];
+        }
+        while (j < right.Length)
+        {
+            result[k++] = right[j++];
+        }
+        return result;
+    }
+
+    static void Main()
+    {
+        Show(Merge(new[] { 1, 4, 9 }, new[] { 2, 3, 10, 11 }));
+        Show(Merge(new int[0], new[] { 5 }));
+        Show(Merge(new[] { 2, 2 }, new[] { 2 }));
+        Show(Merge(new[] { 1 }, new int[0]));
+        Show(Merge(new int[0], new int[0]));
+    }`),
+        expectedOutput: "1 2 3 4 9 10 11\n5\n2 2 2\n1\n\n",
+      },
+      { kind: "lecture", slug: "quick-sort", title: { en: "Quicksort", uk: "Швидке сортування" } },
+      {
+        kind: "practice",
+        slug: "partition",
+        title: { en: "Partition", uk: "Розбиття" },
+        language: "csharp",
+        starter: PROGRAM(`    static string Text(int[] a)
+    {
+        string text = "";
+        for (int i = 0; i < a.Length; i++)
+        {
+            if (i > 0) text += " ";
+            text += a[i];
+        }
+        return text;
+    }
+
+    // Lomuto partition of the range low..high (both included) around the pivot a[high]:
+    //   i = low - 1; for j = low .. high - 1: if a[j] <= pivot, then i++ and swap a[i], a[j];
+    //   at the end swap a[i + 1] with a[high]. Returns the final index of the pivot, i + 1.
+    static int Partition(int[] a, int low, int high)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Run(int[] a, int low, int high)
+    {
+        int p = Partition(a, low, high);
+        Console.WriteLine(Text(a) + " -> " + p);
+    }
+
+    static void Main()
+    {
+        Run(new[] { 8, 3, 9, 1, 5, 7, 2, 6 }, 0, 7);
+        Run(new[] { 1, 2, 3, 4, 5 }, 0, 4);
+        Run(new[] { 5, 4, 3, 2, 1 }, 0, 4);
+        Run(new[] { 4, 4, 4, 4 }, 0, 3);
+        Run(new[] { 7 }, 0, 0);
+        Run(new[] { 8, 3, 9, 1, 5, 7, 2, 6 }, 2, 6);
+    }`),
+        solution: PROGRAM(`    static string Text(int[] a)
+    {
+        string text = "";
+        for (int i = 0; i < a.Length; i++)
+        {
+            if (i > 0) text += " ";
+            text += a[i];
+        }
+        return text;
+    }
+
+    static void Swap(int[] a, int i, int j)
+    {
+        int temp = a[i];
+        a[i] = a[j];
+        a[j] = temp;
+    }
+
+    // Lomuto partition of the range low..high (both included) around the pivot a[high]:
+    //   i = low - 1; for j = low .. high - 1: if a[j] <= pivot, then i++ and swap a[i], a[j];
+    //   at the end swap a[i + 1] with a[high]. Returns the final index of the pivot, i + 1.
+    static int Partition(int[] a, int low, int high)
+    {
+        int pivot = a[high];
+        int i = low - 1;
+        for (int j = low; j < high; j++)
+        {
+            if (a[j] <= pivot)
+            {
+                i++;
+                Swap(a, i, j);
+            }
+        }
+        Swap(a, i + 1, high);
+        return i + 1;
+    }
+
+    static void Run(int[] a, int low, int high)
+    {
+        int p = Partition(a, low, high);
+        Console.WriteLine(Text(a) + " -> " + p);
+    }
+
+    static void Main()
+    {
+        Run(new[] { 8, 3, 9, 1, 5, 7, 2, 6 }, 0, 7);
+        Run(new[] { 1, 2, 3, 4, 5 }, 0, 4);
+        Run(new[] { 5, 4, 3, 2, 1 }, 0, 4);
+        Run(new[] { 4, 4, 4, 4 }, 0, 3);
+        Run(new[] { 7 }, 0, 0);
+        Run(new[] { 8, 3, 9, 1, 5, 7, 2, 6 }, 2, 6);
+    }`),
+        expectedOutput:
+          "3 1 5 2 6 7 8 9 -> 4\n1 2 3 4 5 -> 4\n1 4 3 2 5 -> 0\n4 4 4 4 -> 3\n7 -> 0\n8 3 1 2 5 7 9 6 -> 3\n",
+      },
+      {
+        kind: "quiz",
+        slug: "search-sort-quiz",
+        title: { en: "Complexity of searching and sorting", uk: "Складність пошуку та сортування" },
+        questions: [
+          {
+            id: "binary-needs-sorted",
+            mode: "single",
+            prompt: { en: "What must be true of the data for binary search to work?", uk: "Що має бути правдою щодо даних, щоб двійковий пошук працював?" },
+            options: [
+              { id: "a", text: { en: "It must be sorted and allow access by index", uk: "Вони мають бути відсортовані й давати доступ за індексом" } },
+              { id: "b", text: { en: "It must have no duplicates", uk: "У них не має бути дублікатів" } },
+              { id: "c", text: { en: "It must contain only numbers", uk: "Вони мають містити лише числа" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "bubble-worst",
+            mode: "single",
+            prompt: { en: "What is the worst-case complexity of bubble sort?", uk: "Яка складність сортування бульбашкою в найгіршому випадку?" },
+            options: [
+              { id: "a", text: { en: "O(n)", uk: "O(n)" } },
+              { id: "b", text: { en: "O(n log n)", uk: "O(n log n)" } },
+              { id: "c", text: { en: "O(n²)", uk: "O(n²)" } },
+              { id: "d", text: { en: "O(log n)", uk: "O(log n)" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "merge-memory",
+            mode: "single",
+            prompt: { en: "How much extra memory does merge sort need?", uk: "Скільки додаткової пам'яті потребує сортування злиттям?" },
+            options: [
+              { id: "a", text: { en: "O(1)", uk: "O(1)" } },
+              { id: "b", text: { en: "O(log n)", uk: "O(log n)" } },
+              { id: "c", text: { en: "O(n)", uk: "O(n)" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "quick-worst",
+            mode: "single",
+            prompt: {
+              en: "When does quicksort with the last element as the pivot take O(n²) time?",
+              uk: "Коли швидке сортування з останнім елементом як опорним працює за O(n²)?",
+            },
+            options: [
+              { id: "a", text: { en: "On an already sorted array", uk: "На вже відсортованому масиві" } },
+              { id: "b", text: { en: "On a random array", uk: "На випадковому масиві" } },
+              { id: "c", text: { en: "Never", uk: "Ніколи" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "stable",
+            mode: "multi",
+            prompt: { en: "Which of these sorting algorithms are stable?", uk: "Які із цих алгоритмів сортування стабільні?" },
+            options: [
+              { id: "a", text: { en: "Merge sort", uk: "Сортування злиттям" } },
+              { id: "b", text: { en: "Insertion sort", uk: "Сортування вставками" } },
+              { id: "c", text: { en: "Quicksort", uk: "Швидке сортування" } },
+              { id: "d", text: { en: "Bubble sort", uk: "Сортування бульбашкою" } },
+            ],
+            correct: ["a", "b", "d"],
+          },
+          {
+            id: "lower-bound",
+            mode: "single",
+            prompt: {
+              en: "What is the best possible worst-case time of a sorting algorithm that only compares pairs of elements?",
+              uk: "Який найкращий можливий час у найгіршому випадку для алгоритму сортування, що лише порівнює пари елементів?",
+            },
+            options: [
+              { id: "a", text: { en: "O(n)", uk: "O(n)" } },
+              { id: "b", text: { en: "O(n log n)", uk: "O(n log n)" } },
+              { id: "c", text: { en: "O(log n)", uk: "O(log n)" } },
+            ],
+            correct: ["b"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "sorting-comparison", title: { en: "Comparing sorting algorithms", uk: "Порівняння алгоритмів сортування" } },
+      {
+        kind: "quiz",
+        slug: "searching-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "binary-search-library",
+            mode: "single",
+            prompt: {
+              en: "What does `Array.BinarySearch` return when the value is not in the array?",
+              uk: "Що повертає `Array.BinarySearch`, коли значення немає в масиві?",
+            },
+            options: [
+              { id: "a", text: { en: "A negative number: the bitwise complement of the insertion position", uk: "Від'ємне число: побітове доповнення позиції вставки" } },
+              { id: "b", text: { en: "Always -1", uk: "Завжди -1" } },
+              { id: "c", text: { en: "It throws an exception", uk: "Кидає виняток" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "bubble-swaps",
+            mode: "single",
+            prompt: {
+              en: "How many swaps does bubble sort make on the array `[3, 2, 1]`?",
+              uk: "Скільки обмінів робить сортування бульбашкою для масиву `[3, 2, 1]`?",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "2", uk: "2" } },
+              { id: "c", text: { en: "3", uk: "3" } },
+              { id: "d", text: { en: "6", uk: "6" } },
+            ],
+            correct: ["c"],
+          },
+          {
+            id: "middle-formula",
+            mode: "single",
+            prompt: {
+              en: "Why is the middle index written as `left + (right - left) / 2` instead of `(left + right) / 2`?",
+              uk: "Чому середній індекс записують як `left + (right - left) / 2`, а не `(left + right) / 2`?",
+            },
+            options: [
+              { id: "a", text: { en: "To avoid an integer overflow for huge arrays", uk: "Щоб уникнути переповнення цілого для величезних масивів" } },
+              { id: "b", text: { en: "Because it is faster", uk: "Бо так швидше" } },
+              { id: "c", text: { en: "Because the other form rounds down", uk: "Бо інша форма округлює вниз" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "array-sort",
+            mode: "single",
+            prompt: {
+              en: "Which algorithm does `Array.Sort` in .NET use?",
+              uk: "Який алгоритм використовує `Array.Sort` у .NET?",
+            },
+            options: [
+              { id: "a", text: { en: "Bubble sort", uk: "Сортування бульбашкою" } },
+              { id: "b", text: { en: "Introsort: quicksort, switching to heapsort and insertion sort", uk: "Introsort: швидке сортування, що перемикається на пірамідальне та вставки" } },
+              { id: "c", text: { en: "Counting sort", uk: "Сортування підрахунком" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "sort-once",
+            mode: "single",
+            prompt: {
+              en: "You have an unsorted array and many search queries. What is the usual best approach?",
+              uk: "У вас є невідсортований масив і багато пошукових запитів. Який зазвичай найкращий підхід?",
+            },
+            options: [
+              { id: "a", text: { en: "Sort once, then use binary search for every query", uk: "Відсортувати один раз, потім для кожного запиту використати двійковий пошук" } },
+              { id: "b", text: { en: "Sort again before every query", uk: "Сортувати знову перед кожним запитом" } },
+              { id: "c", text: { en: "Use linear search every time", uk: "Щоразу використовувати лінійний пошук" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "lower-bound-def",
+            mode: "single",
+            prompt: {
+              en: "In a sorted array, what is the left (lower) bound of `x`?",
+              uk: "Що таке ліва (нижня) межа `x` у відсортованому масиві?",
+            },
+            options: [
+              { id: "a", text: { en: "The smallest index `i` with `a[i] >= x`", uk: "Найменший індекс `i`, для якого `a[i] >= x`" } },
+              { id: "b", text: { en: "The largest index `i` with `a[i] <= x`", uk: "Найбільший індекс `i`, для якого `a[i] <= x`" } },
+              { id: "c", text: { en: "The index of the middle element", uk: "Індекс середнього елемента" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "left-bound",
+        title: { en: "Practice: Left bound", uk: "Практика «Ліва межа»" },
+        language: "csharp",
+        starter: PROGRAM(`    // The smallest index i with sorted[i] >= x, or sorted.Length if there is none.
+    // Use a binary search.
+    static int LowerBound(int[] sorted, int x)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Main()
+    {
+        int[] a = { 1, 2, 2, 2, 5, 8, 8, 10 };
+        foreach (int x in new[] { 0, 1, 2, 3, 5, 8, 9, 10, 11 })
+        {
+            Console.WriteLine(x + " -> " + LowerBound(a, x));
+        }
+        Console.WriteLine(LowerBound(new int[0], 7));
+    }`),
+        solution: PROGRAM(`    // The smallest index i with sorted[i] >= x, or sorted.Length if there is none.
+    // Use a binary search.
+    static int LowerBound(int[] sorted, int x)
+    {
+        int lo = 0;
+        int hi = sorted.Length;
+        while (lo < hi)
+        {
+            int mid = lo + (hi - lo) / 2;
+            if (sorted[mid] < x)
+            {
+                lo = mid + 1;
+            }
+            else
+            {
+                hi = mid;
+            }
+        }
+        return lo;
+    }
+
+    static void Main()
+    {
+        int[] a = { 1, 2, 2, 2, 5, 8, 8, 10 };
+        foreach (int x in new[] { 0, 1, 2, 3, 5, 8, 9, 10, 11 })
+        {
+            Console.WriteLine(x + " -> " + LowerBound(a, x));
+        }
+        Console.WriteLine(LowerBound(new int[0], 7));
+    }`),
+        expectedOutput: "0 -> 0\n1 -> 0\n2 -> 1\n3 -> 4\n5 -> 4\n8 -> 5\n9 -> 7\n10 -> 7\n11 -> 8\n0\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "right-bound",
+        title: { en: "Practice: Right bound", uk: "Практика «Права межа»" },
+        language: "csharp",
+        starter: PROGRAM(`    // Already written: the smallest index i with sorted[i] >= x
+    static int LowerBound(int[] sorted, int x)
+    {
+        int lo = 0;
+        int hi = sorted.Length;
+        while (lo < hi)
+        {
+            int mid = lo + (hi - lo) / 2;
+            if (sorted[mid] < x) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+
+    // The smallest index i with sorted[i] > x (strictly greater), or sorted.Length
+    static int UpperBound(int[] sorted, int x)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    // How many elements are equal to x
+    static int CountOccurrences(int[] sorted, int x)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Main()
+    {
+        int[] a = { 1, 2, 2, 2, 5, 8, 8, 10 };
+        foreach (int x in new[] { 0, 1, 2, 3, 5, 8, 9, 10, 11 })
+        {
+            Console.WriteLine(x + " -> " + UpperBound(a, x));
+        }
+        Console.WriteLine(CountOccurrences(a, 2));
+        Console.WriteLine(CountOccurrences(a, 8));
+        Console.WriteLine(CountOccurrences(a, 4));
+        Console.WriteLine(CountOccurrences(a, 1));
+        Console.WriteLine(CountOccurrences(a, 11));
+    }`),
+        solution: PROGRAM(`    // Already written: the smallest index i with sorted[i] >= x
+    static int LowerBound(int[] sorted, int x)
+    {
+        int lo = 0;
+        int hi = sorted.Length;
+        while (lo < hi)
+        {
+            int mid = lo + (hi - lo) / 2;
+            if (sorted[mid] < x) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+
+    // The smallest index i with sorted[i] > x (strictly greater), or sorted.Length
+    static int UpperBound(int[] sorted, int x)
+    {
+        int lo = 0;
+        int hi = sorted.Length;
+        while (lo < hi)
+        {
+            int mid = lo + (hi - lo) / 2;
+            if (sorted[mid] <= x)
+            {
+                lo = mid + 1;
+            }
+            else
+            {
+                hi = mid;
+            }
+        }
+        return lo;
+    }
+
+    // How many elements are equal to x
+    static int CountOccurrences(int[] sorted, int x)
+    {
+        return UpperBound(sorted, x) - LowerBound(sorted, x);
+    }
+
+    static void Main()
+    {
+        int[] a = { 1, 2, 2, 2, 5, 8, 8, 10 };
+        foreach (int x in new[] { 0, 1, 2, 3, 5, 8, 9, 10, 11 })
+        {
+            Console.WriteLine(x + " -> " + UpperBound(a, x));
+        }
+        Console.WriteLine(CountOccurrences(a, 2));
+        Console.WriteLine(CountOccurrences(a, 8));
+        Console.WriteLine(CountOccurrences(a, 4));
+        Console.WriteLine(CountOccurrences(a, 1));
+        Console.WriteLine(CountOccurrences(a, 11));
+    }`),
+        expectedOutput: "0 -> 0\n1 -> 1\n2 -> 4\n3 -> 4\n5 -> 5\n8 -> 7\n9 -> 7\n10 -> 8\n11 -> 8\n3\n2\n0\n1\n0\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "autocomplete",
+        title: { en: "Practice: Autocomplete", uk: "Практика «Автодоповнення»" },
+        language: "csharp",
+        starter: PROGRAM(
+          `    // The words are sorted in the ordinal order (string.CompareOrdinal).
+    // At most "limit" words that start with the prefix, in the sorted order.
+    // Find the first candidate with a binary search, then walk forward.
+    static List<string> Suggestions(string[] sortedWords, string prefix, int limit)
+    {
+        // Write your code here
+        return new List<string>();
+    }
+
+    // How many words start with the prefix, without walking over them:
+    // the difference of the lower bounds of prefix + "\\uffff" and of prefix.
+    static int CountWithPrefix(string[] sortedWords, string prefix)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Show(string[] words, string prefix, int limit)
+    {
+        Console.WriteLine("[" + prefix + "] " + CountWithPrefix(words, prefix) + ": " + string.Join(" ", Suggestions(words, prefix, limit)));
+    }
+
+    static void Main()
+    {
+        string[] words =
+        {
+            "apple", "apply", "apricot", "banana", "band", "bandana", "bar", "bark", "barn", "base",
+            "bat", "batch", "bath", "cat", "catalog", "catch", "cattle", "dog", "door", "dot",
+        };
+        Show(words, "ba", 5);
+        Show(words, "bar", 10);
+        Show(words, "cat", 2);
+        Show(words, "z", 3);
+        Show(words, "", 3);
+        Show(words, "app", 5);
+        Show(words, "bat", 1);
+    }`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM(
+          `    // The smallest index i with words[i] >= key in the ordinal order
+    static int LowerBound(string[] words, string key)
+    {
+        int lo = 0;
+        int hi = words.Length;
+        while (lo < hi)
+        {
+            int mid = lo + (hi - lo) / 2;
+            if (string.CompareOrdinal(words[mid], key) < 0)
+            {
+                lo = mid + 1;
+            }
+            else
+            {
+                hi = mid;
+            }
+        }
+        return lo;
+    }
+
+    // The words are sorted in the ordinal order (string.CompareOrdinal).
+    // At most "limit" words that start with the prefix, in the sorted order.
+    // Find the first candidate with a binary search, then walk forward.
+    static List<string> Suggestions(string[] sortedWords, string prefix, int limit)
+    {
+        var result = new List<string>();
+        int i = LowerBound(sortedWords, prefix);
+        while (i < sortedWords.Length
+            && result.Count < limit
+            && sortedWords[i].StartsWith(prefix, StringComparison.Ordinal))
+        {
+            result.Add(sortedWords[i]);
+            i++;
+        }
+        return result;
+    }
+
+    // How many words start with the prefix, without walking over them:
+    // the difference of the lower bounds of prefix + "\\uffff" and of prefix.
+    static int CountWithPrefix(string[] sortedWords, string prefix)
+    {
+        return LowerBound(sortedWords, prefix + "\\uffff") - LowerBound(sortedWords, prefix);
+    }
+
+    static void Show(string[] words, string prefix, int limit)
+    {
+        Console.WriteLine("[" + prefix + "] " + CountWithPrefix(words, prefix) + ": " + string.Join(" ", Suggestions(words, prefix, limit)));
+    }
+
+    static void Main()
+    {
+        string[] words =
+        {
+            "apple", "apply", "apricot", "banana", "band", "bandana", "bar", "bark", "barn", "base",
+            "bat", "batch", "bath", "cat", "catalog", "catch", "cattle", "dog", "door", "dot",
+        };
+        Show(words, "ba", 5);
+        Show(words, "bar", 10);
+        Show(words, "cat", 2);
+        Show(words, "z", 3);
+        Show(words, "", 3);
+        Show(words, "app", 5);
+        Show(words, "bat", 1);
+    }`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput:
+          "[ba] 10: banana band bandana bar bark\n[bar] 3: bar bark barn\n[cat] 4: cat catalog\n[z] 0: \n[] 20: apple apply apricot\n[app] 2: apple apply\n[bat] 3: bat\n",
+        maxScore: 20,
+      },
+      { kind: "lecture", slug: "search-sort-tasks", title: { en: "Seminar problems", uk: "Задачі на семінар" } },
+    ],
+  },
+  {
+    slug: "oop-basics",
+    title: { en: "OOP basics", uk: "Основи ООП" },
+    slides: [
+      { kind: "lecture", slug: "classes", title: { en: "Classes", uk: "Класи" } },
+      {
+        kind: "practice",
+        slug: "creating-classes",
+        title: { en: "Creating classes", uk: "Створення класів" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Write the class Book here`,
+          `        var hobbit = new Book("The Hobbit", "J.R.R. Tolkien", 310);
+        Console.WriteLine(hobbit.Describe());
+        Console.WriteLine(hobbit.IsLong());
+        Console.WriteLine(hobbit.ReadingDays(40));
+
+        var poems = new Book("Poems", "Ann", 80);
+        Console.WriteLine(poems.Describe());
+        Console.WriteLine(poems.IsLong());
+        Console.WriteLine(poems.ReadingDays(40));
+        Console.WriteLine(poems.ReadingDays(100));`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Book
+{
+    private readonly string title;
+    private readonly string author;
+    private readonly int pages;
+
+    public Book(string title, string author, int pages)
+    {
+        this.title = title;
+        this.author = author;
+        this.pages = pages;
+    }
+
+    public string Describe() => title + " by " + author + " (" + pages + " pages)";
+
+    public bool IsLong() => pages >= 300;
+
+    public int ReadingDays(int pagesPerDay) => (pages + pagesPerDay - 1) / pagesPerDay;
+}`,
+          `        var hobbit = new Book("The Hobbit", "J.R.R. Tolkien", 310);
+        Console.WriteLine(hobbit.Describe());
+        Console.WriteLine(hobbit.IsLong());
+        Console.WriteLine(hobbit.ReadingDays(40));
+
+        var poems = new Book("Poems", "Ann", 80);
+        Console.WriteLine(poems.Describe());
+        Console.WriteLine(poems.IsLong());
+        Console.WriteLine(poems.ReadingDays(40));
+        Console.WriteLine(poems.ReadingDays(100));`,
+        ),
+        expectedOutput: "The Hobbit by J.R.R. Tolkien (310 pages)\nTrue\n8\nPoems by Ann (80 pages)\nFalse\n2\n1\n",
+      },
+      { kind: "lecture", slug: "properties", title: { en: "Properties and encapsulation", uk: "Властивості та інкапсуляція" } },
+      {
+        kind: "practice",
+        slug: "short-syntax",
+        title: { en: "Shorthand syntax", uk: "Скорочений синтаксис" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Rewrite this class with auto-properties and expression-bodied members
+class Person
+{
+    private string name;
+    private int birthYear;
+
+    public Person(string name, int birthYear)
+    {
+        this.name = name;
+        this.birthYear = birthYear;
+    }
+
+    public string GetName()
+    {
+        return name;
+    }
+
+    public void SetName(string value)
+    {
+        name = value;
+    }
+
+    public int GetBirthYear()
+    {
+        return birthYear;
+    }
+
+    public string GetGreeting()
+    {
+        return "Hello, " + name + "!";
+    }
+
+    public int GetAgeIn(int year)
+    {
+        return year - birthYear;
+    }
+}`,
+          `        var p = new Person { Name = "Ann", BirthYear = 1990 };
+        Console.WriteLine(p.Greeting);
+        Console.WriteLine(p.AgeIn(2026));
+        p.Name = "Anna";
+        Console.WriteLine(p.Greeting);
+
+        var q = new Person { Name = "Bo" };
+        Console.WriteLine(q.BirthYear);
+        Console.WriteLine(q.AgeIn(2000));`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Person
+{
+    public string Name { get; set; }
+    public int BirthYear { get; set; }
+
+    public string Greeting => "Hello, " + Name + "!";
+
+    public int AgeIn(int year) => year - BirthYear;
+}`,
+          `        var p = new Person { Name = "Ann", BirthYear = 1990 };
+        Console.WriteLine(p.Greeting);
+        Console.WriteLine(p.AgeIn(2026));
+        p.Name = "Anna";
+        Console.WriteLine(p.Greeting);
+
+        var q = new Person { Name = "Bo" };
+        Console.WriteLine(q.BirthYear);
+        Console.WriteLine(q.AgeIn(2000));`,
+        ),
+        expectedOutput: "Hello, Ann!\n36\nHello, Anna!\n0\n2000\n",
+      },
+      { kind: "lecture", slug: "static-vs-instance", title: { en: "Static and instance members", uk: "Статичне й динамічне" } },
+      {
+        kind: "quiz",
+        slug: "class-fields-quiz",
+        title: { en: "Class fields", uk: "Поля класів" },
+        questions: [
+          {
+            id: "default-value",
+            mode: "single",
+            prompt: {
+              en: "What is the value of an `int` field of a class that was never assigned?",
+              uk: "Чому дорівнює поле `int` класу, якому ніколи не присвоювали значення?",
+            },
+            options: [
+              { id: "a", text: { en: "0", uk: "0" } },
+              { id: "b", text: { en: "`null`", uk: "`null`" } },
+              { id: "c", text: { en: "It does not compile until it is assigned", uk: "Не компілюється, доки його не присвоєно" } },
+              { id: "d", text: { en: "An undefined value", uk: "Невизначене значення" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "readonly",
+            mode: "single",
+            prompt: {
+              en: "What does the `readonly` modifier on a field mean?",
+              uk: "Що означає модифікатор `readonly` для поля?",
+            },
+            options: [
+              { id: "a", text: { en: "It can be assigned only in its declaration or in a constructor", uk: "Йому можна присвоювати лише в оголошенні або в конструкторі" } },
+              { id: "b", text: { en: "It can only be read from outside the class, and never inside it", uk: "Його можна читати лише ззовні класу й ніколи всередині" } },
+              { id: "c", text: { en: "It is stored on disk", uk: "Воно зберігається на диску" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "class-methods", title: { en: "Methods of a class", uk: "Методи класу" } },
+      {
+        kind: "quiz",
+        slug: "class-methods-quiz",
+        title: { en: "Class methods", uk: "Методи класів" },
+        questions: [
+          {
+            id: "this",
+            mode: "single",
+            prompt: { en: "What does `this` mean inside an instance method?", uk: "Що означає `this` усередині методу екземпляра?" },
+            options: [
+              { id: "a", text: { en: "The object on which the method was called", uk: "Об'єкт, на якому викликали метод" } },
+              { id: "b", text: { en: "The class itself", uk: "Сам клас" } },
+              { id: "c", text: { en: "The previous object that was created", uk: "Попередній створений об'єкт" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "call-instance",
+            mode: "single",
+            prompt: {
+              en: "`Describe()` is an instance method of `Book`, and `b` is a `Book`. Which call is correct?",
+              uk: "`Describe()` — метод екземпляра `Book`, а `b` — це `Book`. Який виклик правильний?",
+            },
+            options: [
+              { id: "a", text: { en: "`b.Describe()`", uk: "`b.Describe()`" } },
+              { id: "b", text: { en: "`Book.Describe()`", uk: "`Book.Describe()`" } },
+              { id: "c", text: { en: "`Describe(b)`", uk: "`Describe(b)`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "overload",
+            mode: "single",
+            prompt: {
+              en: "Can a class have two methods with the same name?",
+              uk: "Чи може клас мати два методи з однаковою назвою?",
+            },
+            options: [
+              { id: "a", text: { en: "Yes, if their parameter lists differ (overloading)", uk: "Так, якщо їхні списки параметрів різні (перевантаження)" } },
+              { id: "b", text: { en: "Yes, if their return types differ", uk: "Так, якщо різні їхні типи значення, що повертається" } },
+              { id: "c", text: { en: "No, never", uk: "Ні, ніколи" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "constructor",
+            mode: "single",
+            prompt: { en: "What is true about a constructor?", uk: "Що правильно про конструктор?" },
+            options: [
+              { id: "a", text: { en: "It has the name of the class and no return type", uk: "Він має назву класу й не має типу значення, що повертається" } },
+              { id: "b", text: { en: "It always returns `void`", uk: "Він завжди повертає `void`" } },
+              { id: "c", text: { en: "It must be called `Constructor`", uk: "Він має називатися `Constructor`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "no-default-ctor",
+            mode: "single",
+            prompt: {
+              en: "A class `Book` has only the constructor `Book(string title)`. What happens with `new Book()`?",
+              uk: "Клас `Book` має лише конструктор `Book(string title)`. Що станеться з `new Book()`?",
+            },
+            options: [
+              { id: "a", text: { en: "A compile error: there is no constructor without parameters", uk: "Помилка компіляції: конструктора без параметрів немає" } },
+              { id: "b", text: { en: "A book with `title` equal to `null` is created", uk: "Створюється книжка з `title`, що дорівнює `null`" } },
+              { id: "c", text: { en: "An exception is thrown at run time", uk: "Під час виконання кидається виняток" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "quiz",
+        slug: "oop-memory-maps",
+        title: { en: "Memory maps", uk: "Карти пам'яті" },
+        questions: [
+          {
+            id: "class-alias",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nclass P { public int X; }\n\nvar a = new P { X = 1 };\nvar b = a;\nb.X = 5;\nConsole.WriteLine(a.X);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nclass P { public int X; }\n\nvar a = new P { X = 1 };\nvar b = a;\nb.X = 5;\nConsole.WriteLine(a.X);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "5", uk: "5" } },
+              { id: "c", text: { en: "0", uk: "0" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "struct-copy",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nstruct S { public int X; }\n\nvar s1 = new S { X = 1 };\nvar s2 = s1;\ns2.X = 5;\nConsole.WriteLine(s1.X);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nstruct S { public int X; }\n\nvar s1 = new S { X = 1 };\nvar s2 = s1;\ns2.X = 5;\nConsole.WriteLine(s1.X);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1: a struct is copied on assignment", uk: "1: структура копіюється під час присвоєння" } },
+              { id: "b", text: { en: "5", uk: "5" } },
+              { id: "c", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "modify-through-parameter",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nstatic void Change(P p) { p.X = 9; }\n\nvar a = new P { X = 1 };\nChange(a);\nConsole.WriteLine(a.X);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nstatic void Change(P p) { p.X = 9; }\n\nvar a = new P { X = 1 };\nChange(a);\nConsole.WriteLine(a.X);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1", uk: "1" } },
+              { id: "b", text: { en: "9: the method received a reference to the same object", uk: "9: метод отримав посилання на той самий об'єкт" } },
+              { id: "c", text: { en: "0", uk: "0" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "reassign-parameter",
+            mode: "single",
+            prompt: {
+              en: "What does this code print?\n\n```csharp\nstatic void Replace(P p) { p = new P { X = 9 }; }\n\nvar a = new P { X = 1 };\nReplace(a);\nConsole.WriteLine(a.X);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nstatic void Replace(P p) { p = new P { X = 9 }; }\n\nvar a = new P { X = 1 };\nReplace(a);\nConsole.WriteLine(a.X);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "1: only the method's own copy of the reference was changed", uk: "1: змінено лише власну копію посилання в методі" } },
+              { id: "b", text: { en: "9", uk: "9" } },
+              { id: "c", text: { en: "0", uk: "0" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "equality",
+            mode: "single",
+            prompt: {
+              en: "For this class, what does the following print?\n\n```csharp\nclass P { public int X; }\n\nConsole.WriteLine(new P { X = 1 } == new P { X = 1 });\n```",
+              uk: "Для цього класу що друкує наведений код?\n\n```csharp\nclass P { public int X; }\n\nConsole.WriteLine(new P { X = 1 } == new P { X = 1 });\n```",
+            },
+            options: [
+              { id: "a", text: { en: "True, because the fields are equal", uk: "True, бо поля рівні" } },
+              { id: "b", text: { en: "False, because these are two different objects", uk: "False, бо це два різні об'єкти" } },
+              { id: "c", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "null-reference",
+            mode: "single",
+            prompt: {
+              en: "What happens here?\n\n```csharp\nP p = null;\nConsole.WriteLine(p.X);\n```",
+              uk: "Що станеться тут?\n\n```csharp\nP p = null;\nConsole.WriteLine(p.X);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "It prints 0", uk: "Друкується 0" } },
+              { id: "b", text: { en: "A `NullReferenceException` is thrown", uk: "Кидається `NullReferenceException`" } },
+              { id: "c", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["b"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "extension-methods", title: { en: "Extension methods", uk: "Методи розширення" } },
+      {
+        kind: "practice",
+        slug: "creating-extension-methods",
+        title: { en: "Creating extension methods", uk: "Створення методів розширення" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Write the static classes with the extension methods here`,
+          `        Console.WriteLine("Level".IsPalindrome());
+        Console.WriteLine("hello".IsPalindrome());
+        Console.WriteLine("".IsPalindrome());
+        Console.WriteLine("  many   spaces here ".WordCount());
+        Console.WriteLine("Hello, World!".Truncate(8));
+        Console.WriteLine("short".Truncate(10));
+        Console.WriteLine("abcdef".Truncate(3));
+        Console.WriteLine(new[] { 3, 1, 2 }.Total());
+        Console.WriteLine(new[] { 1, 2, 3 }.IsSorted());
+        Console.WriteLine(new[] { 1, 3, 2 }.IsSorted());
+        Console.WriteLine(new int[0].IsSorted());
+        Console.WriteLine(7.IsEven());
+        Console.WriteLine(10.IsEven());`,
+        ),
+        solution: PROGRAM_WITH(
+          `static class StringExtensions
+{
+    public static bool IsPalindrome(this string s)
+    {
+        string lower = s.ToLower();
+        for (int i = 0; i < lower.Length / 2; i++)
+        {
+            if (lower[i] != lower[lower.Length - 1 - i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static int WordCount(this string s)
+    {
+        return s.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length;
+    }
+
+    public static string Truncate(this string s, int maxLength)
+    {
+        if (s.Length <= maxLength)
+        {
+            return s;
+        }
+        return s.Substring(0, maxLength - 3) + "...";
+    }
+}
+
+static class ArrayExtensions
+{
+    public static int Total(this int[] a)
+    {
+        int total = 0;
+        foreach (int x in a)
+        {
+            total += x;
+        }
+        return total;
+    }
+
+    public static bool IsSorted(this int[] a)
+    {
+        for (int i = 1; i < a.Length; i++)
+        {
+            if (a[i - 1] > a[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+static class IntExtensions
+{
+    public static bool IsEven(this int n)
+    {
+        return n % 2 == 0;
+    }
+}`,
+          `        Console.WriteLine("Level".IsPalindrome());
+        Console.WriteLine("hello".IsPalindrome());
+        Console.WriteLine("".IsPalindrome());
+        Console.WriteLine("  many   spaces here ".WordCount());
+        Console.WriteLine("Hello, World!".Truncate(8));
+        Console.WriteLine("short".Truncate(10));
+        Console.WriteLine("abcdef".Truncate(3));
+        Console.WriteLine(new[] { 3, 1, 2 }.Total());
+        Console.WriteLine(new[] { 1, 2, 3 }.IsSorted());
+        Console.WriteLine(new[] { 1, 3, 2 }.IsSorted());
+        Console.WriteLine(new int[0].IsSorted());
+        Console.WriteLine(7.IsEven());
+        Console.WriteLine(10.IsEven());`,
+        ),
+        expectedOutput: "True\nFalse\nTrue\n3\nHello...\nshort\n...\n6\nTrue\nFalse\nTrue\nFalse\nTrue\n",
+      },
+      { kind: "lecture", slug: "directoryinfo-fileinfo", title: { en: "DirectoryInfo and FileInfo", uk: "DirectoryInfo, FileInfo" } },
+      {
+        kind: "practice",
+        slug: "directory-listing",
+        title: { en: "Directory listing", uk: "Список директорій" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class VFile
+{
+    public string Name;
+    public long Size;
+
+    public VFile(string name, long size)
+    {
+        Name = name;
+        Size = size;
+    }
+}
+
+class VDirectory
+{
+    public string Name;
+    public List<VFile> Files = new List<VFile>();
+    public List<VDirectory> Directories = new List<VDirectory>();
+
+    public VDirectory(string name)
+    {
+        Name = name;
+    }
+}`,
+          `        var root = new VDirectory("project");
+        root.Files.Add(new VFile("readme.txt", 120));
+        root.Files.Add(new VFile("app.exe", 5000));
+
+        var docs = new VDirectory("docs");
+        docs.Files.Add(new VFile("guide.txt", 800));
+        docs.Files.Add(new VFile("logo.png", 2400));
+        var old = new VDirectory("old");
+        old.Files.Add(new VFile("notes.txt", 300));
+        docs.Directories.Add(old);
+
+        var src = new VDirectory("src");
+        src.Files.Add(new VFile("main.cs", 1500));
+        src.Files.Add(new VFile("util.cs", 900));
+
+        root.Directories.Add(docs);
+        root.Directories.Add(src);
+        root.Directories.Add(new VDirectory("empty"));
+
+        Print(root, 0);
+        Console.WriteLine("Total: " + TotalSize(root));
+        Console.WriteLine("Files: " + CountFiles(root));
+        foreach (string ext in new[] { ".txt", ".cs", ".zip" })
+        {
+            Console.WriteLine(ext + ": " + string.Join(" ", FindByExtension(root, ext)));
+        }
+        VFile biggest = Largest(root);
+        Console.WriteLine("Largest: " + biggest.Name + " (" + biggest.Size + ")");`,
+          "using System.Collections.Generic;",
+          `    // The folder name with a "/", its files as "name (size)", then its sub-folders,
+    // each level indented by two more spaces
+    static void Print(VDirectory dir, int level)
+    {
+        // Write your code here
+    }
+
+    // The total size of all the files in the folder and below
+    static long TotalSize(VDirectory dir)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // The number of files in the whole tree
+    static int CountFiles(VDirectory dir)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    // The relative paths (such as docs/old/notes.txt) of the files with this extension
+    static List<string> FindByExtension(VDirectory dir, string extension)
+    {
+        // Write your code here
+        return new List<string>();
+    }
+
+    // The file with the biggest size in the whole tree
+    static VFile Largest(VDirectory dir)
+    {
+        // Write your code here
+        return null;
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          `class VFile
+{
+    public string Name;
+    public long Size;
+
+    public VFile(string name, long size)
+    {
+        Name = name;
+        Size = size;
+    }
+}
+
+class VDirectory
+{
+    public string Name;
+    public List<VFile> Files = new List<VFile>();
+    public List<VDirectory> Directories = new List<VDirectory>();
+
+    public VDirectory(string name)
+    {
+        Name = name;
+    }
+}`,
+          `        var root = new VDirectory("project");
+        root.Files.Add(new VFile("readme.txt", 120));
+        root.Files.Add(new VFile("app.exe", 5000));
+
+        var docs = new VDirectory("docs");
+        docs.Files.Add(new VFile("guide.txt", 800));
+        docs.Files.Add(new VFile("logo.png", 2400));
+        var old = new VDirectory("old");
+        old.Files.Add(new VFile("notes.txt", 300));
+        docs.Directories.Add(old);
+
+        var src = new VDirectory("src");
+        src.Files.Add(new VFile("main.cs", 1500));
+        src.Files.Add(new VFile("util.cs", 900));
+
+        root.Directories.Add(docs);
+        root.Directories.Add(src);
+        root.Directories.Add(new VDirectory("empty"));
+
+        Print(root, 0);
+        Console.WriteLine("Total: " + TotalSize(root));
+        Console.WriteLine("Files: " + CountFiles(root));
+        foreach (string ext in new[] { ".txt", ".cs", ".zip" })
+        {
+            Console.WriteLine(ext + ": " + string.Join(" ", FindByExtension(root, ext)));
+        }
+        VFile biggest = Largest(root);
+        Console.WriteLine("Largest: " + biggest.Name + " (" + biggest.Size + ")");`,
+          "using System.Collections.Generic;",
+          `    // The folder name with a "/", its files as "name (size)", then its sub-folders,
+    // each level indented by two more spaces
+    static void Print(VDirectory dir, int level)
+    {
+        string pad = new string(' ', level * 2);
+        Console.WriteLine(pad + dir.Name + "/");
+        foreach (VFile file in dir.Files)
+        {
+            Console.WriteLine(pad + "  " + file.Name + " (" + file.Size + ")");
+        }
+        foreach (VDirectory sub in dir.Directories)
+        {
+            Print(sub, level + 1);
+        }
+    }
+
+    // The total size of all the files in the folder and below
+    static long TotalSize(VDirectory dir)
+    {
+        long total = 0;
+        foreach (VFile file in dir.Files)
+        {
+            total += file.Size;
+        }
+        foreach (VDirectory sub in dir.Directories)
+        {
+            total += TotalSize(sub);
+        }
+        return total;
+    }
+
+    // The number of files in the whole tree
+    static int CountFiles(VDirectory dir)
+    {
+        int count = dir.Files.Count;
+        foreach (VDirectory sub in dir.Directories)
+        {
+            count += CountFiles(sub);
+        }
+        return count;
+    }
+
+    // The relative paths (such as docs/old/notes.txt) of the files with this extension
+    static List<string> FindByExtension(VDirectory dir, string extension)
+    {
+        var result = new List<string>();
+        Collect(dir, "", extension, result);
+        return result;
+    }
+
+    static void Collect(VDirectory dir, string prefix, string extension, List<string> result)
+    {
+        foreach (VFile file in dir.Files)
+        {
+            if (file.Name.EndsWith(extension, StringComparison.Ordinal))
+            {
+                result.Add(prefix + file.Name);
+            }
+        }
+        foreach (VDirectory sub in dir.Directories)
+        {
+            Collect(sub, prefix + sub.Name + "/", extension, result);
+        }
+    }
+
+    // The file with the biggest size in the whole tree
+    static VFile Largest(VDirectory dir)
+    {
+        VFile best = null;
+        foreach (VFile file in dir.Files)
+        {
+            if (best == null || file.Size > best.Size)
+            {
+                best = file;
+            }
+        }
+        foreach (VDirectory sub in dir.Directories)
+        {
+            VFile candidate = Largest(sub);
+            if (candidate != null && (best == null || candidate.Size > best.Size))
+            {
+                best = candidate;
+            }
+        }
+        return best;
+    }`,
+        ),
+        expectedOutput:
+          "project/\n  readme.txt (120)\n  app.exe (5000)\n  docs/\n    guide.txt (800)\n    logo.png (2400)\n    old/\n      notes.txt (300)\n  src/\n    main.cs (1500)\n    util.cs (900)\n  empty/\nTotal: 11020\nFiles: 7\n.txt: readme.txt docs/guide.txt docs/old/notes.txt\n.cs: src/main.cs src/util.cs\n.zip: \nLargest: app.exe (5000)\n",
+      },
+      { kind: "lecture", slug: "static-classes", title: { en: "Static classes", uk: "Статичні класи" } },
+      {
+        kind: "practice",
+        slug: "refactor-static-class",
+        title: { en: "Refactoring a static class", uk: "Рефакторинг статичного класу" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// The balance is passed from call to call. Move this logic into a class Account.
+static class BankMath
+{
+    public static decimal Deposit(decimal balance, decimal amount)
+    {
+        return balance + amount;
+    }
+
+    public static decimal Withdraw(decimal balance, decimal amount)
+    {
+        return balance - amount;
+    }
+}`,
+          `        var acc = new Account("Ann", 100m);
+        acc.Deposit(50m);
+        Console.WriteLine(acc.Withdraw(30m));
+        Console.WriteLine(acc.Balance);
+        Console.WriteLine(acc.Withdraw(500m));
+        Console.WriteLine(acc.Deposit(-5m));
+        Console.WriteLine(acc);
+
+        var other = new Account("Bo", 0m);
+        other.Deposit(10m);
+        Console.WriteLine(other + " / " + acc);`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Account
+{
+    private readonly string owner;
+
+    public decimal Balance { get; private set; }
+
+    public Account(string owner, decimal balance)
+    {
+        this.owner = owner;
+        Balance = balance;
+    }
+
+    public bool Deposit(decimal amount)
+    {
+        if (amount <= 0)
+        {
+            return false;
+        }
+        Balance += amount;
+        return true;
+    }
+
+    public bool Withdraw(decimal amount)
+    {
+        if (amount <= 0 || amount > Balance)
+        {
+            return false;
+        }
+        Balance -= amount;
+        return true;
+    }
+
+    public override string ToString()
+    {
+        return owner + ": " + Balance;
+    }
+}`,
+          `        var acc = new Account("Ann", 100m);
+        acc.Deposit(50m);
+        Console.WriteLine(acc.Withdraw(30m));
+        Console.WriteLine(acc.Balance);
+        Console.WriteLine(acc.Withdraw(500m));
+        Console.WriteLine(acc.Deposit(-5m));
+        Console.WriteLine(acc);
+
+        var other = new Account("Bo", 0m);
+        other.Deposit(10m);
+        Console.WriteLine(other + " / " + acc);`,
+        ),
+        expectedOutput: "True\n120\nFalse\nFalse\nAnn: 120\nBo: 10 / Ann: 120\n",
+      },
+      {
+        kind: "quiz",
+        slug: "oop-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "encapsulation",
+            mode: "single",
+            prompt: { en: "What is encapsulation?", uk: "Що таке інкапсуляція?" },
+            options: [
+              { id: "a", text: { en: "Hiding the internal data of a class, and offering safe operations on it", uk: "Приховування внутрішніх даних класу й надання безпечних операцій над ними" } },
+              { id: "b", text: { en: "Making every member `static`", uk: "Робити кожен член `static`" } },
+              { id: "c", text: { en: "Copying an object", uk: "Копіювання об'єкта" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "private",
+            mode: "single",
+            prompt: {
+              en: "Which access modifier allows a member to be used only inside its own class?",
+              uk: "Який модифікатор доступу дозволяє використовувати член лише всередині його власного класу?",
+            },
+            options: [
+              { id: "a", text: { en: "`public`", uk: "`public`" } },
+              { id: "b", text: { en: "`private`", uk: "`private`" } },
+              { id: "c", text: { en: "`static`", uk: "`static`" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "property-vs-field",
+            mode: "single",
+            prompt: {
+              en: "Why is a public property better than a public field?",
+              uk: "Чим публічна властивість краща за публічне поле?",
+            },
+            options: [
+              { id: "a", text: { en: "The class can validate and control access, and change its internals later without breaking callers", uk: "Клас може перевіряти й контролювати доступ та пізніше змінювати внутрішній устрій, не ламаючи тих, хто викликає" } },
+              { id: "b", text: { en: "A property uses no memory", uk: "Властивість не використовує пам'яті" } },
+              { id: "c", text: { en: "Fields cannot be public", uk: "Поля не можуть бути публічними" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "static-member",
+            mode: "single",
+            prompt: { en: "A `static` member belongs to...", uk: "Член із `static` належить..." },
+            options: [
+              { id: "a", text: { en: "each object separately", uk: "кожному об'єкту окремо" } },
+              { id: "b", text: { en: "the class itself, once for all objects", uk: "самому класу, один раз для всіх об'єктів" } },
+              { id: "c", text: { en: "the `Main` method only", uk: "лише методу `Main`" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "extension-requirements",
+            mode: "multi",
+            prompt: { en: "What is required of an extension method?", uk: "Що потрібно для методу розширення?" },
+            options: [
+              { id: "a", text: { en: "It is a `static` method", uk: "Це метод `static`" } },
+              { id: "b", text: { en: "It is declared in a non-nested `static` class", uk: "Він оголошений у невкладеному `static` класі" } },
+              { id: "c", text: { en: "Its first parameter has the modifier `this`", uk: "Його перший параметр має модифікатор `this`" } },
+              { id: "d", text: { en: "It must be in the same class as the type it extends", uk: "Він має бути в тому самому класі, що й тип, який розширює" } },
+            ],
+            correct: ["a", "b", "c"],
+          },
+          {
+            id: "static-class",
+            mode: "single",
+            prompt: { en: "What can you do with a `static class`?", uk: "Що можна робити зі `static class`?" },
+            options: [
+              { id: "a", text: { en: "Call its static members through the class name; you cannot create objects of it", uk: "Викликати його статичні члени через назву класу; створювати його об'єкти не можна" } },
+              { id: "b", text: { en: "Create objects with `new`", uk: "Створювати об'єкти через `new`" } },
+              { id: "c", text: { en: "Inherit from it", uk: "Успадковувати від нього" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "vector",
+        title: { en: "Practice: Vector", uk: "Практика «Вектор»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Write the class Vector here`,
+          `        var v = new Vector(3, 4);
+        var w = new Vector(1, -2);
+        Console.WriteLine(v);
+        Console.WriteLine(v.Length);
+        Console.WriteLine(v + w);
+        Console.WriteLine(v * 2);
+        Console.WriteLine(v.Dot(w));
+        Console.WriteLine(v.Normalized());
+        Console.WriteLine(Vector.Zero);
+        Console.WriteLine(v - w);`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Vector
+{
+    public double X { get; }
+    public double Y { get; }
+
+    public Vector(double x, double y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public static Vector Zero => new Vector(0, 0);
+
+    public double Length => Math.Sqrt(X * X + Y * Y);
+
+    public double Dot(Vector other) => X * other.X + Y * other.Y;
+
+    public Vector Normalized() => new Vector(X / Length, Y / Length);
+
+    public static Vector operator +(Vector a, Vector b) => new Vector(a.X + b.X, a.Y + b.Y);
+
+    public static Vector operator -(Vector a, Vector b) => new Vector(a.X - b.X, a.Y - b.Y);
+
+    public static Vector operator *(Vector v, double k) => new Vector(v.X * k, v.Y * k);
+
+    public override string ToString() => "(" + X + ", " + Y + ")";
+}`,
+          `        var v = new Vector(3, 4);
+        var w = new Vector(1, -2);
+        Console.WriteLine(v);
+        Console.WriteLine(v.Length);
+        Console.WriteLine(v + w);
+        Console.WriteLine(v * 2);
+        Console.WriteLine(v.Dot(w));
+        Console.WriteLine(v.Normalized());
+        Console.WriteLine(Vector.Zero);
+        Console.WriteLine(v - w);`,
+        ),
+        expectedOutput: "(3, 4)\n5\n(4, 2)\n(6, 8)\n-5\n(0.6, 0.8)\n(0, 0)\n(2, 6)\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "segment",
+        title: { en: "Practice: Segment", uk: "Практика «Відрізок»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class Point
+{
+    public double X { get; }
+    public double Y { get; }
+
+    public Point(double x, double y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public override string ToString() => "(" + X + ", " + Y + ")";
+}
+
+// Write the class Segment here`,
+          `        var s = new Segment(new Point(0, 0), new Point(6, 8));
+        Console.WriteLine(s.Length);
+        Console.WriteLine(s.Midpoint());
+        Console.WriteLine(s.Contains(new Point(3, 4)));
+        Console.WriteLine(s.Contains(new Point(3, 5)));
+        Console.WriteLine(s.Contains(new Point(9, 12)));
+        Console.WriteLine(s.Contains(new Point(0, 0)));
+
+        var t = s.Translate(1, 1);
+        Console.WriteLine(t.Midpoint());
+        Console.WriteLine(s.Midpoint());
+
+        Console.WriteLine(new Segment(new Point(1, 2), new Point(5, 2)).IsHorizontal);
+        Console.WriteLine(s.IsHorizontal);`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Point
+{
+    public double X { get; }
+    public double Y { get; }
+
+    public Point(double x, double y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public override string ToString() => "(" + X + ", " + Y + ")";
+}
+
+class Segment
+{
+    private readonly Point a;
+    private readonly Point b;
+
+    public Segment(Point a, Point b)
+    {
+        this.a = a;
+        this.b = b;
+    }
+
+    public double Length
+    {
+        get
+        {
+            double dx = b.X - a.X;
+            double dy = b.Y - a.Y;
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
+    }
+
+    public bool IsHorizontal => a.Y == b.Y;
+
+    public Point Midpoint() => new Point((a.X + b.X) / 2, (a.Y + b.Y) / 2);
+
+    public bool Contains(Point p)
+    {
+        double cross = (b.X - a.X) * (p.Y - a.Y) - (b.Y - a.Y) * (p.X - a.X);
+        if (Math.Abs(cross) > 1e-9)
+        {
+            return false;
+        }
+        bool insideX = p.X >= Math.Min(a.X, b.X) - 1e-9 && p.X <= Math.Max(a.X, b.X) + 1e-9;
+        bool insideY = p.Y >= Math.Min(a.Y, b.Y) - 1e-9 && p.Y <= Math.Max(a.Y, b.Y) + 1e-9;
+        return insideX && insideY;
+    }
+
+    public Segment Translate(double dx, double dy)
+    {
+        return new Segment(new Point(a.X + dx, a.Y + dy), new Point(b.X + dx, b.Y + dy));
+    }
+}`,
+          `        var s = new Segment(new Point(0, 0), new Point(6, 8));
+        Console.WriteLine(s.Length);
+        Console.WriteLine(s.Midpoint());
+        Console.WriteLine(s.Contains(new Point(3, 4)));
+        Console.WriteLine(s.Contains(new Point(3, 5)));
+        Console.WriteLine(s.Contains(new Point(9, 12)));
+        Console.WriteLine(s.Contains(new Point(0, 0)));
+
+        var t = s.Translate(1, 1);
+        Console.WriteLine(t.Midpoint());
+        Console.WriteLine(s.Midpoint());
+
+        Console.WriteLine(new Segment(new Point(1, 2), new Point(5, 2)).IsHorizontal);
+        Console.WriteLine(s.IsHorizontal);`,
+        ),
+        expectedOutput: "10\n(3, 4)\nTrue\nFalse\nFalse\nTrue\n(4, 5)\n(3, 4)\nTrue\nFalse\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "non-static-methods",
+        title: { en: "Practice: Non-static methods", uk: "Практика «Нестатичні методи»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Turn the static operations into instance methods: Plus, Times, IsLessThan,
+// and add the property Value and ToString(). Then remove the static methods.
+class Fraction
+{
+    public int Numerator { get; }
+    public int Denominator { get; }
+
+    public Fraction(int numerator, int denominator)
+    {
+        if (denominator < 0)
+        {
+            numerator = -numerator;
+            denominator = -denominator;
+        }
+        int g = Gcd(Math.Abs(numerator), denominator);
+        Numerator = numerator / g;
+        Denominator = denominator / g;
+    }
+
+    static int Gcd(int a, int b)
+    {
+        return b == 0 ? a : Gcd(b, a % b);
+    }
+
+    public static Fraction Add(Fraction a, Fraction b)
+    {
+        return new Fraction(a.Numerator * b.Denominator + b.Numerator * a.Denominator, a.Denominator * b.Denominator);
+    }
+
+    public static Fraction Multiply(Fraction a, Fraction b)
+    {
+        return new Fraction(a.Numerator * b.Numerator, a.Denominator * b.Denominator);
+    }
+}`,
+          `        var a = new Fraction(1, 2);
+        var b = new Fraction(1, 3);
+        Console.WriteLine(a.Plus(b));
+        Console.WriteLine(a.Times(b));
+        Console.WriteLine(new Fraction(2, 4));
+        Console.WriteLine(new Fraction(3, -6));
+        Console.WriteLine(a.Plus(a));
+        Console.WriteLine(a.IsLessThan(b));
+        Console.WriteLine(b.IsLessThan(a));
+        Console.WriteLine(new Fraction(3, 4).Value);`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Fraction
+{
+    public int Numerator { get; }
+    public int Denominator { get; }
+
+    public Fraction(int numerator, int denominator)
+    {
+        if (denominator < 0)
+        {
+            numerator = -numerator;
+            denominator = -denominator;
+        }
+        int g = Gcd(Math.Abs(numerator), denominator);
+        Numerator = numerator / g;
+        Denominator = denominator / g;
+    }
+
+    static int Gcd(int a, int b)
+    {
+        return b == 0 ? a : Gcd(b, a % b);
+    }
+
+    public Fraction Plus(Fraction other)
+    {
+        return new Fraction(Numerator * other.Denominator + other.Numerator * Denominator, Denominator * other.Denominator);
+    }
+
+    public Fraction Times(Fraction other)
+    {
+        return new Fraction(Numerator * other.Numerator, Denominator * other.Denominator);
+    }
+
+    public bool IsLessThan(Fraction other)
+    {
+        return Numerator * other.Denominator < other.Numerator * Denominator;
+    }
+
+    public double Value => (double)Numerator / Denominator;
+
+    public override string ToString()
+    {
+        return Denominator == 1 ? Numerator.ToString() : Numerator + "/" + Denominator;
+    }
+}`,
+          `        var a = new Fraction(1, 2);
+        var b = new Fraction(1, 3);
+        Console.WriteLine(a.Plus(b));
+        Console.WriteLine(a.Times(b));
+        Console.WriteLine(new Fraction(2, 4));
+        Console.WriteLine(new Fraction(3, -6));
+        Console.WriteLine(a.Plus(a));
+        Console.WriteLine(a.IsLessThan(b));
+        Console.WriteLine(b.IsLessThan(a));
+        Console.WriteLine(new Fraction(3, 4).Value);`,
+        ),
+        expectedOutput: "5/6\n1/6\n1/2\n-1/2\n1\nFalse\nTrue\n0.75\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "gray-256",
+        title: { en: "Practice: 256 shades", uk: "Практика «256 відтінків»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Write the class GrayImage here`,
+          `        var img = new GrayImage(3, 2);
+        img.Set(0, 0, 0);
+        img.Set(1, 0, 128);
+        img.Set(2, 0, 255);
+        img.Set(0, 1, 300);
+        img.Set(1, 1, -5);
+        img.Set(2, 1, 128);
+        Console.WriteLine(img.Row(0));
+        Console.WriteLine(img.Row(1));
+
+        GrayImage inverted = img.Invert();
+        Console.WriteLine(inverted.Row(0));
+        Console.WriteLine(img.Row(0));
+
+        int[] h = img.Histogram();
+        Console.WriteLine(h[0] + " " + h[128] + " " + h[255] + " " + h.Length);
+        Console.WriteLine(Math.Round(img.Average(), 2));`,
+        ),
+        solution: PROGRAM_WITH(
+          `class GrayImage
+{
+    private readonly int width;
+    private readonly int height;
+    private readonly int[,] pixels;
+
+    public GrayImage(int width, int height)
+    {
+        this.width = width;
+        this.height = height;
+        pixels = new int[height, width];
+    }
+
+    public void Set(int x, int y, int value)
+    {
+        pixels[y, x] = Math.Max(0, Math.Min(255, value));
+    }
+
+    public int Get(int x, int y)
+    {
+        return pixels[y, x];
+    }
+
+    public string Row(int y)
+    {
+        string text = "";
+        for (int x = 0; x < width; x++)
+        {
+            if (x > 0) text += " ";
+            text += pixels[y, x];
+        }
+        return text;
+    }
+
+    public GrayImage Invert()
+    {
+        var result = new GrayImage(width, height);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                result.pixels[y, x] = 255 - pixels[y, x];
+            }
+        }
+        return result;
+    }
+
+    public int[] Histogram()
+    {
+        int[] counts = new int[256];
+        foreach (int pixel in pixels)
+        {
+            counts[pixel]++;
+        }
+        return counts;
+    }
+
+    public double Average()
+    {
+        double sum = 0;
+        foreach (int pixel in pixels)
+        {
+            sum += pixel;
+        }
+        return sum / pixels.Length;
+    }
+}`,
+          `        var img = new GrayImage(3, 2);
+        img.Set(0, 0, 0);
+        img.Set(1, 0, 128);
+        img.Set(2, 0, 255);
+        img.Set(0, 1, 300);
+        img.Set(1, 1, -5);
+        img.Set(2, 1, 128);
+        Console.WriteLine(img.Row(0));
+        Console.WriteLine(img.Row(1));
+
+        GrayImage inverted = img.Invert();
+        Console.WriteLine(inverted.Row(0));
+        Console.WriteLine(img.Row(0));
+
+        int[] h = img.Histogram();
+        Console.WriteLine(h[0] + " " + h[128] + " " + h[255] + " " + h.Length);
+        Console.WriteLine(Math.Round(img.Average(), 2));`,
+        ),
+        expectedOutput: "0 128 255\n255 0 128\n255 127 0\n0 128 255\n2 2 2 256\n127.67\n",
+        maxScore: 10,
+      },
+    ],
+  },
+  {
+    slug: "inheritance",
+    title: { en: "Inheritance", uk: "Успадкування" },
+    slides: [
+      { kind: "lecture", slug: "inheritance-problem", title: { en: "The problem", uk: "Постановка проблеми" } },
+      { kind: "lecture", slug: "inheritance", title: { en: "Inheritance", uk: "Успадкування" } },
+      {
+        kind: "quiz",
+        slug: "inheritance-quiz",
+        title: { en: "Inheritance", uk: "Успадкування" },
+        questions: [
+          {
+            id: "syntax",
+            mode: "single",
+            prompt: {
+              en: "Which declaration makes `Student` a class derived from `Person`?",
+              uk: "Яке оголошення робить `Student` класом, похідним від `Person`?",
+            },
+            options: [
+              { id: "a", text: { en: "`class Student : Person`", uk: "`class Student : Person`" } },
+              { id: "b", text: { en: "`class Student extends Person`", uk: "`class Student extends Person`" } },
+              { id: "c", text: { en: "`class Student inherits Person`", uk: "`class Student inherits Person`" } },
+              { id: "d", text: { en: "`class Student -> Person`", uk: "`class Student -> Person`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "accessible",
+            mode: "multi",
+            prompt: {
+              en: "Which members of the base class can the code of a derived class use directly?",
+              uk: "Які члени базового класу може напряму вживати код похідного класу?",
+            },
+            options: [
+              { id: "a", text: { en: "`public` members", uk: "Члени `public`" } },
+              { id: "b", text: { en: "`protected` members", uk: "Члени `protected`" } },
+              { id: "c", text: { en: "`private` members", uk: "Члени `private`" } },
+            ],
+            correct: ["a", "b"],
+          },
+          {
+            id: "constructor-order",
+            mode: "single",
+            prompt: {
+              en: "`Student` is derived from `Person`. In which order do the constructors run for `new Student(...)`?",
+              uk: "`Student` походить від `Person`. У якому порядку виконуються конструктори для `new Student(...)`?",
+            },
+            options: [
+              { id: "a", text: { en: "First the constructor of `Person`, then the constructor of `Student`", uk: "Спершу конструктор `Person`, потім конструктор `Student`" } },
+              { id: "b", text: { en: "First the constructor of `Student`, then the constructor of `Person`", uk: "Спершу конструктор `Student`, потім конструктор `Person`" } },
+              { id: "c", text: { en: "Only the constructor of `Student`: constructors are inherited", uk: "Лише конструктор `Student`: конструктори успадковуються" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "is-a",
+            mode: "single",
+            prompt: {
+              en: "For which pair is inheritance the right design?",
+              uk: "Для якої пари успадкування — правильне рішення?",
+            },
+            options: [
+              { id: "a", text: { en: "`Dog` and `Animal`: a dog is an animal", uk: "`Dog` і `Animal`: собака є твариною" } },
+              { id: "b", text: { en: "`Car` and `Engine`: a car has an engine", uk: "`Car` і `Engine`: автомобіль має двигун" } },
+              { id: "c", text: { en: "`Order` and `Customer`: an order refers to a customer", uk: "`Order` і `Customer`: замовлення посилається на клієнта" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "inheritance-hierarchy", title: { en: "Inheritance hierarchy", uk: "Ієрархія успадкування" } },
+      {
+        kind: "quiz",
+        slug: "casts-quiz",
+        title: { en: "Casts", uk: "Приведення типів" },
+        questions: [
+          {
+            id: "implicit-down",
+            mode: "single",
+            prompt: {
+              en: "Here `Student` is derived from `Person`. What happens?\n\n```csharp\nPerson p = new Student();\nStudent s = p;\n```",
+              uk: "Тут `Student` походить від `Person`. Що станеться?\n\n```csharp\nPerson p = new Student();\nStudent s = p;\n```",
+            },
+            options: [
+              { id: "a", text: { en: "A compile error: a cast down must be written explicitly", uk: "Помилка компіляції: приведення вниз треба писати явно" } },
+              { id: "b", text: { en: "It works", uk: "Це працює" } },
+              { id: "c", text: { en: "An `InvalidCastException` at run time", uk: "`InvalidCastException` під час виконання" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "wrong-cast",
+            mode: "single",
+            prompt: {
+              en: "What happens here?\n\n```csharp\nPerson p = new Person();\nStudent s = (Student)p;\n```",
+              uk: "Що станеться тут?\n\n```csharp\nPerson p = new Person();\nStudent s = (Student)p;\n```",
+            },
+            options: [
+              { id: "a", text: { en: "An `InvalidCastException` at run time: the object is not a `Student`", uk: "`InvalidCastException` під час виконання: об'єкт не є `Student`" } },
+              { id: "b", text: { en: "A compile error", uk: "Помилка компіляції" } },
+              { id: "c", text: { en: "`s` becomes `null`", uk: "`s` стає `null`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "is-derived",
+            mode: "single",
+            prompt: {
+              en: "`Graduate` is derived from `Student`, and `Student` from `Person`. What does this print?\n\n```csharp\nPerson p = new Graduate();\nConsole.WriteLine(p is Student);\n```",
+              uk: "`Graduate` походить від `Student`, а `Student` — від `Person`. Що друкує цей код?\n\n```csharp\nPerson p = new Graduate();\nConsole.WriteLine(p is Student);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "True", uk: "True" } },
+              { id: "b", text: { en: "False", uk: "False" } },
+              { id: "c", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "as-null",
+            mode: "single",
+            prompt: {
+              en: "What does this print?\n\n```csharp\nPerson p = new Person();\nStudent s = p as Student;\nConsole.WriteLine(s == null);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nPerson p = new Person();\nStudent s = p as Student;\nConsole.WriteLine(s == null);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "True: `as` gives `null` when the cast is impossible", uk: "True: `as` дає `null`, коли приведення неможливе" } },
+              { id: "b", text: { en: "False", uk: "False" } },
+              { id: "c", text: { en: "An `InvalidCastException` is thrown", uk: "Кидається `InvalidCastException`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "get-type",
+            mode: "single",
+            prompt: {
+              en: "What does this print?\n\n```csharp\nPerson p = new Graduate();\nConsole.WriteLine(p.GetType().Name);\n```",
+              uk: "Що друкує цей код?\n\n```csharp\nPerson p = new Graduate();\nConsole.WriteLine(p.GetType().Name);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "Person", uk: "Person" } },
+              { id: "b", text: { en: "Graduate: `GetType` gives the actual type of the object", uk: "Graduate: `GetType` дає справжній тип об'єкта" } },
+              { id: "c", text: { en: "Student", uk: "Student" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "unbox-wrong",
+            mode: "single",
+            prompt: {
+              en: "What happens here?\n\n```csharp\nobject o = \"text\";\nint n = (int)o;\n```",
+              uk: "Що станеться тут?\n\n```csharp\nobject o = \"text\";\nint n = (int)o;\n```",
+            },
+            options: [
+              { id: "a", text: { en: "The text is converted to a number", uk: "Текст перетворюється на число" } },
+              { id: "b", text: { en: "An `InvalidCastException` at run time", uk: "`InvalidCastException` під час виконання" } },
+              { id: "c", text: { en: "A compile error", uk: "Помилка компіляції" } },
+            ],
+            correct: ["b"],
+          },
+          {
+            id: "static-type",
+            mode: "single",
+            prompt: {
+              en: "`Student` has a field `Course`, and `Person` does not. What happens here?\n\n```csharp\nPerson p = new Student();\nConsole.WriteLine(p.Course);\n```",
+              uk: "`Student` має поле `Course`, а `Person` — ні. Що станеться тут?\n\n```csharp\nPerson p = new Student();\nConsole.WriteLine(p.Course);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "A compile error: the static type `Person` has no `Course`", uk: "Помилка компіляції: у статичного типу `Person` немає `Course`" } },
+              { id: "b", text: { en: "It prints the course of the student", uk: "Друкується курс студента" } },
+              { id: "c", text: { en: "An exception is thrown at run time", uk: "Під час виконання кидається виняток" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "system-array", title: { en: "The Array class", uk: "Клас Array" } },
+      {
+        kind: "practice",
+        slug: "print-all",
+        title: { en: "Print them all!", uk: "Друк для всіх!" },
+        language: "csharp",
+        starter: PROGRAM(`    // Prints all the elements of any array in one line, as [a, b, c]
+    static void PrintAll(Array items)
+    {
+        // Write your code here
+    }
+
+    // How many elements of the array are equal to value
+    static int CountOf(Array items, object value)
+    {
+        // Write your code here
+        return 0;
+    }
+
+    static void Main()
+    {
+        PrintAll(new[] { 1, 2, 3 });
+        PrintAll(new[] { "a", "b" });
+        PrintAll(new[] { 'x', 'y' });
+        PrintAll(new[] { true, false });
+        PrintAll(new int[0]);
+        PrintAll(new int[,] { { 1, 2 }, { 3, 4 } });
+        PrintAll(new[] { 1.5, 2 });
+        Console.WriteLine(CountOf(new[] { 1, 2, 1, 3 }, 1));
+        Console.WriteLine(CountOf(new[] { "a", "b", "a" }, "a"));
+        Console.WriteLine(CountOf(new int[,] { { 1, 1 }, { 2, 1 } }, 1));
+        Console.WriteLine(CountOf(new[] { 1, 2, 3 }, 5));
+    }`),
+        solution: PROGRAM(`    // Prints all the elements of any array in one line, as [a, b, c]
+    static void PrintAll(Array items)
+    {
+        string text = "";
+        bool first = true;
+        foreach (object item in items)
+        {
+            if (!first)
+            {
+                text += ", ";
+            }
+            text += item;
+            first = false;
+        }
+        Console.WriteLine("[" + text + "]");
+    }
+
+    // How many elements of the array are equal to value
+    static int CountOf(Array items, object value)
+    {
+        int count = 0;
+        foreach (object item in items)
+        {
+            if (item.Equals(value))
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    static void Main()
+    {
+        PrintAll(new[] { 1, 2, 3 });
+        PrintAll(new[] { "a", "b" });
+        PrintAll(new[] { 'x', 'y' });
+        PrintAll(new[] { true, false });
+        PrintAll(new int[0]);
+        PrintAll(new int[,] { { 1, 2 }, { 3, 4 } });
+        PrintAll(new[] { 1.5, 2 });
+        Console.WriteLine(CountOf(new[] { 1, 2, 1, 3 }, 1));
+        Console.WriteLine(CountOf(new[] { "a", "b", "a" }, "a"));
+        Console.WriteLine(CountOf(new int[,] { { 1, 1 }, { 2, 1 } }, 1));
+        Console.WriteLine(CountOf(new[] { 1, 2, 3 }, 5));
+    }`),
+        expectedOutput: "[1, 2, 3]\n[a, b]\n[x, y]\n[True, False]\n[]\n[1, 2, 3, 4]\n[1.5, 2]\n2\n2\n3\n0\n",
+      },
+      {
+        kind: "practice",
+        slug: "concat-arrays",
+        title: { en: "Joining arrays", uk: "Склеювання масивів" },
+        language: "csharp",
+        starter: PROGRAM(`    static void Show(int[] a)
+    {
+        Console.WriteLine("[" + string.Join(",", a) + "]");
+    }
+
+    // All the elements of a, then all the elements of b
+    static int[] Concat(int[] a, int[] b)
+    {
+        // Write your code here
+        return new int[0];
+    }
+
+    // count elements of a starting at start (fewer if the array ends earlier)
+    static int[] Slice(int[] a, int start, int count)
+    {
+        // Write your code here
+        return new int[0];
+    }
+
+    // A new array where value is inserted at the position index
+    static int[] Insert(int[] a, int index, int value)
+    {
+        // Write your code here
+        return new int[0];
+    }
+
+    static void Main()
+    {
+        int[] a = { 1, 2, 3 };
+        int[] b = { 4, 5 };
+        int[] all = Concat(a, b);
+        Show(all);
+        Show(Concat(a, new int[0]));
+        Show(Concat(new int[0], b));
+        Show(Slice(all, 1, 3));
+        Show(Slice(all, 3, 10));
+        Show(Slice(all, 9, 2));
+        Show(Insert(a, 1, 9));
+        Show(Insert(a, 3, 9));
+        Show(Insert(a, 0, 9));
+        Show(a);
+    }`),
+        solution: PROGRAM(`    static void Show(int[] a)
+    {
+        Console.WriteLine("[" + string.Join(",", a) + "]");
+    }
+
+    // All the elements of a, then all the elements of b
+    static int[] Concat(int[] a, int[] b)
+    {
+        int[] result = new int[a.Length + b.Length];
+        Array.Copy(a, 0, result, 0, a.Length);
+        Array.Copy(b, 0, result, a.Length, b.Length);
+        return result;
+    }
+
+    // count elements of a starting at start (fewer if the array ends earlier)
+    static int[] Slice(int[] a, int start, int count)
+    {
+        int real = Math.Max(0, Math.Min(count, a.Length - start));
+        int[] result = new int[real];
+        if (real > 0)
+        {
+            Array.Copy(a, start, result, 0, real);
+        }
+        return result;
+    }
+
+    // A new array where value is inserted at the position index
+    static int[] Insert(int[] a, int index, int value)
+    {
+        int[] result = new int[a.Length + 1];
+        Array.Copy(a, 0, result, 0, index);
+        result[index] = value;
+        Array.Copy(a, index, result, index + 1, a.Length - index);
+        return result;
+    }
+
+    static void Main()
+    {
+        int[] a = { 1, 2, 3 };
+        int[] b = { 4, 5 };
+        int[] all = Concat(a, b);
+        Show(all);
+        Show(Concat(a, new int[0]));
+        Show(Concat(new int[0], b));
+        Show(Slice(all, 1, 3));
+        Show(Slice(all, 3, 10));
+        Show(Slice(all, 9, 2));
+        Show(Insert(a, 1, 9));
+        Show(Insert(a, 3, 9));
+        Show(Insert(a, 0, 9));
+        Show(a);
+    }`),
+        expectedOutput: "[1,2,3,4,5]\n[1,2,3]\n[4,5]\n[2,3,4]\n[4,5]\n[]\n[1,9,2,3]\n[1,2,3,9]\n[9,1,2,3]\n[1,2,3]\n",
+      },
+      { kind: "lecture", slug: "interfaces", title: { en: "Interfaces", uk: "Інтерфейси" } },
+      {
+        kind: "quiz",
+        slug: "interfaces-quiz",
+        title: { en: "Interfaces", uk: "Інтерфейси" },
+        questions: [
+          {
+            id: "contents",
+            mode: "multi",
+            prompt: {
+              en: "What can the declaration of an interface contain?",
+              uk: "Що може містити оголошення інтерфейсу?",
+            },
+            options: [
+              { id: "a", text: { en: "Methods without a body", uk: "Методи без тіла" } },
+              { id: "b", text: { en: "Properties without an implementation", uk: "Властивості без реалізації" } },
+              { id: "c", text: { en: "Instance fields", uk: "Поля екземпляра" } },
+              { id: "d", text: { en: "Constructors", uk: "Конструктори" } },
+            ],
+            correct: ["a", "b"],
+          },
+          {
+            id: "one-base-many-interfaces",
+            mode: "single",
+            prompt: {
+              en: "How many base classes and how many interfaces can one class have?",
+              uk: "Скільки базових класів і скільки інтерфейсів може мати один клас?",
+            },
+            options: [
+              { id: "a", text: { en: "One base class and any number of interfaces", uk: "Один базовий клас і будь-яка кількість інтерфейсів" } },
+              { id: "b", text: { en: "Any number of both", uk: "Будь-яка кількість обох" } },
+              { id: "c", text: { en: "One base class and one interface", uk: "Один базовий клас і один інтерфейс" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "missing-member",
+            mode: "single",
+            prompt: {
+              en: "A class `Circle : IShape` does not write the method `Area()` that is declared in `IShape`. What happens?",
+              uk: "Клас `Circle : IShape` не пише метод `Area()`, оголошений в `IShape`. Що станеться?",
+            },
+            options: [
+              { id: "a", text: { en: "A compile error", uk: "Помилка компіляції" } },
+              { id: "b", text: { en: "`Area()` returns 0", uk: "`Area()` повертає 0" } },
+              { id: "c", text: { en: "An exception when `Area()` is called", uk: "Виняток під час виклику `Area()`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "new-interface",
+            mode: "single",
+            prompt: {
+              en: "What is wrong with `IShape s = new IShape();`?",
+              uk: "Що не так із `IShape s = new IShape();`?",
+            },
+            options: [
+              { id: "a", text: { en: "An interface has no code, so its object cannot be created", uk: "Інтерфейс не має коду, тому його об'єкт не можна створити" } },
+              { id: "b", text: { en: "Nothing, it is correct", uk: "Нічого, це правильно" } },
+              { id: "c", text: { en: "The variable must be called `shape`", uk: "Змінна має називатися `shape`" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "middle-of-three-again",
+        title: { en: "Middle of three again", uk: "Знову середнє з трьох" },
+        language: "csharp",
+        starter: PROGRAM(`    // The middle one of three comparable values of the same type
+    static IComparable Middle(IComparable a, IComparable b, IComparable c)
+    {
+        // Write your code here
+        return a;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Middle(3, 1, 2));
+        Console.WriteLine(Middle("pear", "apple", "mango"));
+        Console.WriteLine(Middle(2.5, 9.0, 1.0));
+        Console.WriteLine(Middle(5, 5, 1));
+        Console.WriteLine(Middle(7, 7, 7));
+        Console.WriteLine(Middle('b', 'c', 'a'));
+    }`),
+        solution: PROGRAM(`    // The middle one of three comparable values of the same type
+    static IComparable Middle(IComparable a, IComparable b, IComparable c)
+    {
+        if ((a.CompareTo(b) >= 0 && a.CompareTo(c) <= 0) || (a.CompareTo(b) <= 0 && a.CompareTo(c) >= 0))
+        {
+            return a;
+        }
+        if ((b.CompareTo(a) >= 0 && b.CompareTo(c) <= 0) || (b.CompareTo(a) <= 0 && b.CompareTo(c) >= 0))
+        {
+            return b;
+        }
+        return c;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Middle(3, 1, 2));
+        Console.WriteLine(Middle("pear", "apple", "mango"));
+        Console.WriteLine(Middle(2.5, 9.0, 1.0));
+        Console.WriteLine(Middle(5, 5, 1));
+        Console.WriteLine(Middle(7, 7, 7));
+        Console.WriteLine(Middle('b', 'c', 'a'));
+    }`),
+        expectedOutput: "2\nmango\n2.5\n5\n7\nb\n",
+      },
+      {
+        kind: "practice",
+        slug: "find-minimum",
+        title: { en: "Finding the minimum", uk: "Пошук мінімуму" },
+        language: "csharp",
+        starter: PROGRAM(`    // The smallest element, or null for an empty array
+    static IComparable Min(IComparable[] items)
+    {
+        // Write your code here
+        return null;
+    }
+
+    // The biggest element, or null for an empty array
+    static IComparable Max(IComparable[] items)
+    {
+        // Write your code here
+        return null;
+    }
+
+    // The index of the first smallest element, or -1 for an empty array
+    static int IndexOfMin(IComparable[] items)
+    {
+        // Write your code here
+        return -1;
+    }
+
+    static void Main()
+    {
+        var numbers = new IComparable[] { 5, 3, 8, 3 };
+        Console.WriteLine(Min(numbers));
+        Console.WriteLine(Max(numbers));
+        Console.WriteLine(IndexOfMin(numbers));
+
+        var words = new IComparable[] { "pear", "apple", "mango" };
+        Console.WriteLine(Min(words));
+        Console.WriteLine(Max(words));
+
+        Console.WriteLine(Min(new IComparable[0]) == null ? "none" : "value");
+        Console.WriteLine(IndexOfMin(new IComparable[0]));
+
+        var reals = new IComparable[] { 2.5, -1.5, 0.0 };
+        Console.WriteLine(Min(reals));
+        Console.WriteLine(Max(reals));
+    }`),
+        solution: PROGRAM(`    // The smallest element, or null for an empty array
+    static IComparable Min(IComparable[] items)
+    {
+        int index = IndexOfMin(items);
+        return index < 0 ? null : items[index];
+    }
+
+    // The biggest element, or null for an empty array
+    static IComparable Max(IComparable[] items)
+    {
+        if (items.Length == 0)
+        {
+            return null;
+        }
+        IComparable best = items[0];
+        for (int i = 1; i < items.Length; i++)
+        {
+            if (items[i].CompareTo(best) > 0)
+            {
+                best = items[i];
+            }
+        }
+        return best;
+    }
+
+    // The index of the first smallest element, or -1 for an empty array
+    static int IndexOfMin(IComparable[] items)
+    {
+        if (items.Length == 0)
+        {
+            return -1;
+        }
+        int best = 0;
+        for (int i = 1; i < items.Length; i++)
+        {
+            if (items[i].CompareTo(items[best]) < 0)
+            {
+                best = i;
+            }
+        }
+        return best;
+    }
+
+    static void Main()
+    {
+        var numbers = new IComparable[] { 5, 3, 8, 3 };
+        Console.WriteLine(Min(numbers));
+        Console.WriteLine(Max(numbers));
+        Console.WriteLine(IndexOfMin(numbers));
+
+        var words = new IComparable[] { "pear", "apple", "mango" };
+        Console.WriteLine(Min(words));
+        Console.WriteLine(Max(words));
+
+        Console.WriteLine(Min(new IComparable[0]) == null ? "none" : "value");
+        Console.WriteLine(IndexOfMin(new IComparable[0]));
+
+        var reals = new IComparable[] { 2.5, -1.5, 0.0 };
+        Console.WriteLine(Min(reals));
+        Console.WriteLine(Max(reals));
+    }`),
+        expectedOutput: "3\n8\n1\napple\npear\nnone\n-1\n-1.5\n2.5\n",
+      },
+      { kind: "lecture", slug: "implementing-icomparable", title: { en: "Implementing IComparable", uk: "Реалізація IComparable" } },
+      {
+        kind: "practice",
+        slug: "compare-books",
+        title: { en: "Comparing books", uk: "Порівняння книжок" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Make Book comparable: by author, then newest year first, then by title
+class Book
+{
+    public string Title { get; }
+    public string Author { get; }
+    public int Year { get; }
+
+    public Book(string title, string author, int year)
+    {
+        Title = title;
+        Author = author;
+        Year = year;
+    }
+}`,
+          `        var dune = new Book("Dune", "Herbert", 1965);
+        var emma = new Book("Emma", "Austen", 1815);
+        var persuasion = new Book("Persuasion", "Austen", 1817);
+        var zorro = new Book("Zorro", "Herbert", 1965);
+        var ulysses = new Book("Ulysses", "Joyce", 1922);
+        var mansfield = new Book("Mansfield Park", "Austen", 1814);
+
+        Book[] books = { dune, emma, persuasion, zorro, ulysses, mansfield };
+        Array.Sort(books);
+        foreach (Book b in books)
+        {
+            Console.WriteLine(b.Author + ": " + b.Title + " (" + b.Year + ")");
+        }
+
+        Console.WriteLine(Math.Sign(emma.CompareTo(persuasion)));
+        Console.WriteLine(Math.Sign(persuasion.CompareTo(emma)));
+        Console.WriteLine(Math.Sign(emma.CompareTo(emma)));
+        Console.WriteLine(Math.Sign(dune.CompareTo(zorro)));
+        Console.WriteLine(Math.Sign(ulysses.CompareTo(dune)));`,
+        ),
+        solution: PROGRAM_WITH(
+          `// Make Book comparable: by author, then newest year first, then by title
+class Book : IComparable<Book>
+{
+    public string Title { get; }
+    public string Author { get; }
+    public int Year { get; }
+
+    public Book(string title, string author, int year)
+    {
+        Title = title;
+        Author = author;
+        Year = year;
+    }
+
+    public int CompareTo(Book other)
+    {
+        int byAuthor = string.CompareOrdinal(Author, other.Author);
+        if (byAuthor != 0)
+        {
+            return byAuthor;
+        }
+        int byYear = other.Year.CompareTo(Year);
+        if (byYear != 0)
+        {
+            return byYear;
+        }
+        return string.CompareOrdinal(Title, other.Title);
+    }
+}`,
+          `        var dune = new Book("Dune", "Herbert", 1965);
+        var emma = new Book("Emma", "Austen", 1815);
+        var persuasion = new Book("Persuasion", "Austen", 1817);
+        var zorro = new Book("Zorro", "Herbert", 1965);
+        var ulysses = new Book("Ulysses", "Joyce", 1922);
+        var mansfield = new Book("Mansfield Park", "Austen", 1814);
+
+        Book[] books = { dune, emma, persuasion, zorro, ulysses, mansfield };
+        Array.Sort(books);
+        foreach (Book b in books)
+        {
+            Console.WriteLine(b.Author + ": " + b.Title + " (" + b.Year + ")");
+        }
+
+        Console.WriteLine(Math.Sign(emma.CompareTo(persuasion)));
+        Console.WriteLine(Math.Sign(persuasion.CompareTo(emma)));
+        Console.WriteLine(Math.Sign(emma.CompareTo(emma)));
+        Console.WriteLine(Math.Sign(dune.CompareTo(zorro)));
+        Console.WriteLine(Math.Sign(ulysses.CompareTo(dune)));`,
+        ),
+        expectedOutput:
+          "Austen: Persuasion (1817)\nAusten: Emma (1815)\nAusten: Mansfield Park (1814)\nHerbert: Dune (1965)\nHerbert: Zorro (1965)\nJoyce: Ulysses (1922)\n1\n-1\n0\n-1\n1\n",
+      },
+      { kind: "lecture", slug: "icomparer", title: { en: "The IComparer interface", uk: "Інтерфейс IComparer" } },
+      {
+        kind: "practice",
+        slug: "counter-clockwise",
+        title: { en: "Counter-clockwise", uk: "Проти годинникової стрілки" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class Point
+{
+    public int X { get; }
+    public int Y { get; }
+
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public override string ToString() => "(" + X + ", " + Y + ")";
+}
+
+// Write the class AngleComparer here`,
+          `        Point[] points =
+        {
+            new Point(1, 1), new Point(-1, 1), new Point(-1, -1), new Point(1, -1), new Point(3, 0),
+            new Point(1, 0), new Point(0, 2), new Point(0, 5), new Point(-2, 0), new Point(0, -1)
+        };
+        Array.Sort(points, new AngleComparer());
+        Console.WriteLine(string.Join(" ", new List<Point>(points)));
+
+        var cmp = new AngleComparer();
+        Console.WriteLine(Math.Sign(cmp.Compare(new Point(1, 0), new Point(0, 1))));
+        Console.WriteLine(Math.Sign(cmp.Compare(new Point(0, 1), new Point(1, 0))));
+        Console.WriteLine(Math.Sign(cmp.Compare(new Point(1, 0), new Point(1, 0))));
+        Console.WriteLine(Math.Sign(cmp.Compare(new Point(1, 0), new Point(3, 0))));`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM_WITH(
+          `class Point
+{
+    public int X { get; }
+    public int Y { get; }
+
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public override string ToString() => "(" + X + ", " + Y + ")";
+}
+
+class AngleComparer : IComparer<Point>
+{
+    public int Compare(Point a, Point b)
+    {
+        int byAngle = Angle(a).CompareTo(Angle(b));
+        if (byAngle != 0)
+        {
+            return byAngle;
+        }
+        return DistanceSquared(a).CompareTo(DistanceSquared(b));
+    }
+
+    // From 0 (included) to 2π (excluded), counter-clockwise from the positive direction of x
+    static double Angle(Point p)
+    {
+        double angle = Math.Atan2(p.Y, p.X);
+        return angle < 0 ? angle + 2 * Math.PI : angle;
+    }
+
+    static int DistanceSquared(Point p)
+    {
+        return p.X * p.X + p.Y * p.Y;
+    }
+}`,
+          `        Point[] points =
+        {
+            new Point(1, 1), new Point(-1, 1), new Point(-1, -1), new Point(1, -1), new Point(3, 0),
+            new Point(1, 0), new Point(0, 2), new Point(0, 5), new Point(-2, 0), new Point(0, -1)
+        };
+        Array.Sort(points, new AngleComparer());
+        Console.WriteLine(string.Join(" ", new List<Point>(points)));
+
+        var cmp = new AngleComparer();
+        Console.WriteLine(Math.Sign(cmp.Compare(new Point(1, 0), new Point(0, 1))));
+        Console.WriteLine(Math.Sign(cmp.Compare(new Point(0, 1), new Point(1, 0))));
+        Console.WriteLine(Math.Sign(cmp.Compare(new Point(1, 0), new Point(1, 0))));
+        Console.WriteLine(Math.Sign(cmp.Compare(new Point(1, 0), new Point(3, 0))));`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "(1, 0) (3, 0) (1, 1) (0, 2) (0, 5) (-1, 1) (-2, 0) (-1, -1) (0, -1) (1, -1)\n-1\n1\n0\n-1\n",
+      },
+      { kind: "lecture", slug: "polymorphism", title: { en: "Polymorphism", uk: "Поліморфізм" } },
+      { kind: "lecture", slug: "virtual-methods", title: { en: "Virtual methods", uk: "Віртуальні методи" } },
+      {
+        kind: "practice",
+        slug: "tostring-method",
+        title: { en: "The ToString method", uk: "Метод ToString" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Override ToString() in both classes
+class Card
+{
+    public int Rank { get; }
+    public string Suit { get; }
+
+    public Card(int rank, string suit)
+    {
+        Rank = rank;
+        Suit = suit;
+    }
+}
+
+class Hand
+{
+    private readonly List<Card> cards = new List<Card>();
+
+    public void Add(Card card)
+    {
+        cards.Add(card);
+    }
+}`,
+          `        var ace = new Card(1, "Spades");
+        var seven = new Card(7, "Hearts");
+        var queen = new Card(12, "Diamonds");
+        Console.WriteLine(ace);
+        Console.WriteLine("You drew: " + queen);
+        Console.WriteLine(seven.ToString());
+
+        var hand = new Hand();
+        Console.WriteLine(hand);
+        hand.Add(ace);
+        Console.WriteLine(hand);
+        hand.Add(seven);
+        hand.Add(queen);
+        Console.WriteLine(hand);
+
+        object o = new Card(13, "Clubs");
+        Console.WriteLine(o);
+        Console.WriteLine(string.Join(" | ", new List<Card> { ace, seven }));`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM_WITH(
+          `// Override ToString() in both classes
+class Card
+{
+    public int Rank { get; }
+    public string Suit { get; }
+
+    public Card(int rank, string suit)
+    {
+        Rank = rank;
+        Suit = suit;
+    }
+
+    public override string ToString()
+    {
+        string name;
+        if (Rank == 1) name = "Ace";
+        else if (Rank == 11) name = "Jack";
+        else if (Rank == 12) name = "Queen";
+        else if (Rank == 13) name = "King";
+        else name = Rank.ToString();
+        return name + " of " + Suit;
+    }
+}
+
+class Hand
+{
+    private readonly List<Card> cards = new List<Card>();
+
+    public void Add(Card card)
+    {
+        cards.Add(card);
+    }
+
+    public override string ToString()
+    {
+        string word = cards.Count == 1 ? "card" : "cards";
+        return "Hand: [" + string.Join(", ", cards) + "] (" + cards.Count + " " + word + ")";
+    }
+}`,
+          `        var ace = new Card(1, "Spades");
+        var seven = new Card(7, "Hearts");
+        var queen = new Card(12, "Diamonds");
+        Console.WriteLine(ace);
+        Console.WriteLine("You drew: " + queen);
+        Console.WriteLine(seven.ToString());
+
+        var hand = new Hand();
+        Console.WriteLine(hand);
+        hand.Add(ace);
+        Console.WriteLine(hand);
+        hand.Add(seven);
+        hand.Add(queen);
+        Console.WriteLine(hand);
+
+        object o = new Card(13, "Clubs");
+        Console.WriteLine(o);
+        Console.WriteLine(string.Join(" | ", new List<Card> { ace, seven }));`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput:
+          "Ace of Spades\nYou drew: Queen of Diamonds\n7 of Hearts\nHand: [] (0 cards)\nHand: [Ace of Spades] (1 card)\nHand: [Ace of Spades, 7 of Hearts, Queen of Diamonds] (3 cards)\nKing of Clubs\nAce of Spades | 7 of Hearts\n",
+      },
+      {
+        kind: "quiz",
+        slug: "inheritance-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "virtual-dispatch",
+            mode: "single",
+            prompt: {
+              en: "`Dog` overrides the `virtual` method `Sound()` of `Animal`. Which version runs here?\n\n```csharp\nAnimal animal = new Dog();\nanimal.Sound();\n```",
+              uk: "`Dog` перевизначає `virtual` метод `Sound()` класу `Animal`. Яка версія виконується тут?\n\n```csharp\nAnimal animal = new Dog();\nanimal.Sound();\n```",
+            },
+            options: [
+              { id: "a", text: { en: "The version of `Dog`: the actual type of the object decides", uk: "Версія з `Dog`: вирішує справжній тип об'єкта" } },
+              { id: "b", text: { en: "The version of `Animal`: the type of the variable decides", uk: "Версія з `Animal`: вирішує тип змінної" } },
+              { id: "c", text: { en: "Both, one after the other", uk: "Обидві, одна за одною" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "hiding",
+            mode: "single",
+            prompt: {
+              en: "`B` is derived from `A`. `A` has a `virtual` method `Who()`, and `B` declares its own `new string Who()` (without `override`). What does `A x = new B(); x.Who();` run?",
+              uk: "`B` походить від `A`. У `A` є `virtual` метод `Who()`, а `B` оголошує власний `new string Who()` (без `override`). Що виконає `A x = new B(); x.Who();`?",
+            },
+            options: [
+              { id: "a", text: { en: "The version of `A`: the method of `B` only hides it", uk: "Версію з `A`: метод `B` лише ховає її" } },
+              { id: "b", text: { en: "The version of `B`", uk: "Версію з `B`" } },
+              { id: "c", text: { en: "It does not compile", uk: "Це не компілюється" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "abstract",
+            mode: "single",
+            prompt: {
+              en: "What can you do with an `abstract` class?",
+              uk: "Що можна робити з `abstract` класом?",
+            },
+            options: [
+              { id: "a", text: { en: "Derive classes from it, and use it as the type of a variable; but not create its objects with `new`", uk: "Створювати від нього похідні класи й вживати як тип змінної; але не створювати його об'єкти через `new`" } },
+              { id: "b", text: { en: "Create its objects with `new`", uk: "Створювати його об'єкти через `new`" } },
+              { id: "c", text: { en: "Nothing: it cannot be used at all", uk: "Нічого: його взагалі не можна використовувати" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "compare-to-sign",
+            mode: "single",
+            prompt: {
+              en: "What does a **negative** result of `a.CompareTo(b)` mean?",
+              uk: "Що означає **від'ємний** результат `a.CompareTo(b)`?",
+            },
+            options: [
+              { id: "a", text: { en: "`a` goes before `b` in the order", uk: "`a` іде перед `b` у порядку" } },
+              { id: "b", text: { en: "`a` goes after `b`", uk: "`a` іде після `b`" } },
+              { id: "c", text: { en: "`a` and `b` are equal", uk: "`a` і `b` рівні" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "comparer-when",
+            mode: "multi",
+            prompt: {
+              en: "When is `IComparer<T>` a better choice than `IComparable<T>`?",
+              uk: "Коли `IComparer<T>` кращий вибір, ніж `IComparable<T>`?",
+            },
+            options: [
+              { id: "a", text: { en: "When the same class has to be sorted in several different orders", uk: "Коли той самий клас треба сортувати в кількох різних порядках" } },
+              { id: "b", text: { en: "When the class is not yours and you cannot change it", uk: "Коли клас не ваш і ви не можете його змінити" } },
+              { id: "c", text: { en: "When the class has only one natural order", uk: "Коли клас має лише один природний порядок" } },
+            ],
+            correct: ["a", "b"],
+          },
+          {
+            id: "default-tostring",
+            mode: "single",
+            prompt: {
+              en: "What does `Console.WriteLine(p)` print for an object `p` of a class that does not override `ToString()`?",
+              uk: "Що друкує `Console.WriteLine(p)` для об'єкта `p` класу, який не перевизначає `ToString()`?",
+            },
+            options: [
+              { id: "a", text: { en: "The name of the type of the object", uk: "Назву типу об'єкта" } },
+              { id: "b", text: { en: "The values of all its fields", uk: "Значення всіх його полів" } },
+              { id: "c", text: { en: "An empty line", uk: "Порожній рядок" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "earth-digger",
+        title: { en: "Practice: Earth and Digger", uk: "Практика «Земля та Диґер»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `abstract class Cell
+{
+    public abstract char Symbol { get; }
+    public virtual bool CanEnter { get { return false; } }
+    public virtual int Score { get { return 0; } }
+}
+
+class Wall : Cell
+{
+    public override char Symbol { get { return '#'; } }
+}
+
+class Empty : Cell
+{
+    public override char Symbol { get { return '_'; } }
+    public override bool CanEnter { get { return true; } }
+}
+
+class Gold : Cell
+{
+    public override char Symbol { get { return '$'; } }
+    public override bool CanEnter { get { return true; } }
+    public override int Score { get { return 10; } }
+}
+
+// Write the classes Terrain ('.', enterable, 1 point) and Digger ('D', not enterable) here
+
+class Field
+{
+    private readonly Cell[,] cells;
+    private int diggerRow;
+    private int diggerCol;
+
+    public int Score { get; private set; }
+
+    public Field(string[] rows)
+    {
+        cells = new Cell[rows.Length, rows[0].Length];
+        for (int r = 0; r < rows.Length; r++)
+        {
+            for (int c = 0; c < rows[r].Length; c++)
+            {
+                cells[r, c] = Create(rows[r][c]);
+                if (rows[r][c] == 'D')
+                {
+                    diggerRow = r;
+                    diggerCol = c;
+                }
+            }
+        }
+    }
+
+    private static Cell Create(char symbol)
+    {
+        if (symbol == '#') return new Wall();
+        if (symbol == '$') return new Gold();
+        if (symbol == '.') return new Terrain();
+        if (symbol == 'D') return new Digger();
+        return new Empty();
+    }
+
+    // Moves the digger by dRow rows and dCol columns. Returns whether the move happened.
+    public bool Move(int dRow, int dCol)
+    {
+        // Write your code here
+        return false;
+    }
+
+    public override string ToString()
+    {
+        string text = "";
+        for (int r = 0; r < cells.GetLength(0); r++)
+        {
+            if (r > 0) text += "\\n";
+            for (int c = 0; c < cells.GetLength(1); c++)
+            {
+                text += cells[r, c].Symbol;
+            }
+        }
+        return text;
+    }
+}`,
+          `        var field = new Field(new[] { "#####", "#D..#", "#.$.#", "#####" });
+        string result = "";
+        foreach (char m in "RRRDLLUU")
+        {
+            int dRow = 0, dCol = 0;
+            if (m == 'R') dCol = 1;
+            else if (m == 'L') dCol = -1;
+            else if (m == 'D') dRow = 1;
+            else dRow = -1;
+            result += field.Move(dRow, dCol) ? "T" : "F";
+        }
+        Console.WriteLine(result);
+        Console.WriteLine(field);
+        Console.WriteLine("Score: " + field.Score);
+
+        var corridor = new Field(new[] { "D.$" });
+        Console.WriteLine(corridor.Move(0, 1) + " " + corridor.Move(0, 1) + " " + corridor.Move(0, 1));
+        Console.WriteLine(corridor);
+        Console.WriteLine("Score: " + corridor.Score);`,
+        ),
+        solution: PROGRAM_WITH(
+          `abstract class Cell
+{
+    public abstract char Symbol { get; }
+    public virtual bool CanEnter { get { return false; } }
+    public virtual int Score { get { return 0; } }
+}
+
+class Wall : Cell
+{
+    public override char Symbol { get { return '#'; } }
+}
+
+class Empty : Cell
+{
+    public override char Symbol { get { return '_'; } }
+    public override bool CanEnter { get { return true; } }
+}
+
+class Gold : Cell
+{
+    public override char Symbol { get { return '$'; } }
+    public override bool CanEnter { get { return true; } }
+    public override int Score { get { return 10; } }
+}
+
+class Terrain : Cell
+{
+    public override char Symbol { get { return '.'; } }
+    public override bool CanEnter { get { return true; } }
+    public override int Score { get { return 1; } }
+}
+
+class Digger : Cell
+{
+    public override char Symbol { get { return 'D'; } }
+}
+
+class Field
+{
+    private readonly Cell[,] cells;
+    private int diggerRow;
+    private int diggerCol;
+
+    public int Score { get; private set; }
+
+    public Field(string[] rows)
+    {
+        cells = new Cell[rows.Length, rows[0].Length];
+        for (int r = 0; r < rows.Length; r++)
+        {
+            for (int c = 0; c < rows[r].Length; c++)
+            {
+                cells[r, c] = Create(rows[r][c]);
+                if (rows[r][c] == 'D')
+                {
+                    diggerRow = r;
+                    diggerCol = c;
+                }
+            }
+        }
+    }
+
+    private static Cell Create(char symbol)
+    {
+        if (symbol == '#') return new Wall();
+        if (symbol == '$') return new Gold();
+        if (symbol == '.') return new Terrain();
+        if (symbol == 'D') return new Digger();
+        return new Empty();
+    }
+
+    // Moves the digger by dRow rows and dCol columns. Returns whether the move happened.
+    public bool Move(int dRow, int dCol)
+    {
+        int row = diggerRow + dRow;
+        int col = diggerCol + dCol;
+        if (row < 0 || row >= cells.GetLength(0) || col < 0 || col >= cells.GetLength(1))
+        {
+            return false;
+        }
+        Cell target = cells[row, col];
+        if (!target.CanEnter)
+        {
+            return false;
+        }
+        Score += target.Score;
+        cells[row, col] = cells[diggerRow, diggerCol];
+        cells[diggerRow, diggerCol] = new Empty();
+        diggerRow = row;
+        diggerCol = col;
+        return true;
+    }
+
+    public override string ToString()
+    {
+        string text = "";
+        for (int r = 0; r < cells.GetLength(0); r++)
+        {
+            if (r > 0) text += "\\n";
+            for (int c = 0; c < cells.GetLength(1); c++)
+            {
+                text += cells[r, c].Symbol;
+            }
+        }
+        return text;
+    }
+}`,
+          `        var field = new Field(new[] { "#####", "#D..#", "#.$.#", "#####" });
+        string result = "";
+        foreach (char m in "RRRDLLUU")
+        {
+            int dRow = 0, dCol = 0;
+            if (m == 'R') dCol = 1;
+            else if (m == 'L') dCol = -1;
+            else if (m == 'D') dRow = 1;
+            else dRow = -1;
+            result += field.Move(dRow, dCol) ? "T" : "F";
+        }
+        Console.WriteLine(result);
+        Console.WriteLine(field);
+        Console.WriteLine("Score: " + field.Score);
+
+        var corridor = new Field(new[] { "D.$" });
+        Console.WriteLine(corridor.Move(0, 1) + " " + corridor.Move(0, 1) + " " + corridor.Move(0, 1));
+        Console.WriteLine(corridor);
+        Console.WriteLine("Score: " + corridor.Score);`,
+        ),
+        expectedOutput: "TTFTTTTF\n#####\n#D__#\n#___#\n#####\nScore: 14\nTrue True False\n__D\nScore: 11\n",
+        maxScore: 10,
+      },
+      {
+        kind: "practice",
+        slug: "bags-and-gold",
+        title: { en: "Practice: Bags and Gold", uk: "Практика «Мішки та Золото»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          DIGGER_ENGINE(
+            `// Write the class Bag here: a cell 'S' that falls and breaks into gold`,
+            `        if (symbol == 'S') return new Bag();\n`,
+          ),
+          `        var field = new Field(new[]
+        {
+            "#######",
+            "#_S_S_#",
+            "#_____#",
+            "#D__._#",
+            "#_____#",
+            "#######"
+        });
+        Show(field, "Start");
+
+        Tick(field, 4);
+        Show(field, "After 4 ticks");
+
+        Walk(field, "RRRR");
+        Show(field, "Digger walked right");
+
+        Tick(field, 3);
+        Show(field, "After 3 more ticks");
+
+        Walk(field, "DLLL");
+        Show(field, "Digger collected the gold");`,
+          "",
+          `    static void Show(Field field, string title)
+    {
+        Console.WriteLine(title + ":");
+        Console.WriteLine(field);
+        Console.WriteLine("Score: " + field.Score);
+    }
+
+    static void Tick(Field field, int times)
+    {
+        for (int i = 0; i < times; i++)
+        {
+            field.Tick();
+        }
+    }
+
+    static void Walk(Field field, string moves)
+    {
+        foreach (char m in moves)
+        {
+            if (m == 'R') field.Move(0, 1);
+            else if (m == 'L') field.Move(0, -1);
+            else if (m == 'D') field.Move(1, 0);
+            else field.Move(-1, 0);
+        }
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          DIGGER_ENGINE(BAG_CLASS, `        if (symbol == 'S') return new Bag();\n`),
+          `        var field = new Field(new[]
+        {
+            "#######",
+            "#_S_S_#",
+            "#_____#",
+            "#D__._#",
+            "#_____#",
+            "#######"
+        });
+        Show(field, "Start");
+
+        Tick(field, 4);
+        Show(field, "After 4 ticks");
+
+        Walk(field, "RRRR");
+        Show(field, "Digger walked right");
+
+        Tick(field, 3);
+        Show(field, "After 3 more ticks");
+
+        Walk(field, "DLLL");
+        Show(field, "Digger collected the gold");`,
+          "",
+          `    static void Show(Field field, string title)
+    {
+        Console.WriteLine(title + ":");
+        Console.WriteLine(field);
+        Console.WriteLine("Score: " + field.Score);
+    }
+
+    static void Tick(Field field, int times)
+    {
+        for (int i = 0; i < times; i++)
+        {
+            field.Tick();
+        }
+    }
+
+    static void Walk(Field field, string moves)
+    {
+        foreach (char m in moves)
+        {
+            if (m == 'R') field.Move(0, 1);
+            else if (m == 'L') field.Move(0, -1);
+            else if (m == 'D') field.Move(1, 0);
+            else field.Move(-1, 0);
+        }
+    }`,
+        ),
+        expectedOutput:
+          "Start:\n#######\n#_S_S_#\n#_____#\n#D__._#\n#_____#\n#######\nScore: 0\nAfter 4 ticks:\n#######\n#_____#\n#___S_#\n#D__._#\n#_$___#\n#######\nScore: 0\nDigger walked right:\n#######\n#_____#\n#___S_#\n#____D#\n#_$___#\n#######\nScore: 1\nAfter 3 more ticks:\n#######\n#_____#\n#_____#\n#____D#\n#_$_$_#\n#######\nScore: 1\nDigger collected the gold:\n#######\n#_____#\n#_____#\n#_____#\n#_D___#\n#######\nScore: 21\n",
+        maxScore: 20,
+      },
+      {
+        kind: "practice",
+        slug: "monsters",
+        title: { en: "Practice: Monsters", uk: "Практика «Монстри»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          DIGGER_ENGINE(
+            `${BAG_CLASS}\n\n// Write the class Monster here: a cell 'M' that patrols and kills the digger`,
+            `        if (symbol == 'S') return new Bag();\n        if (symbol == 'M') return new Monster();\n`,
+          ),
+          `        var field = new Field(new[]
+        {
+            "#########",
+            "#M__.__D#",
+            "#########"
+        });
+        Console.WriteLine(field);
+        Tick(field, 3);
+        Console.WriteLine(field);
+
+        field.Move(0, -1);
+        field.Move(0, -1);
+        field.Move(0, -1);
+        Console.WriteLine(field);
+        Console.WriteLine("Score: " + field.Score);
+
+        int ticks = 0;
+        while (field.Alive && ticks < 20)
+        {
+            field.Tick();
+            ticks++;
+        }
+        Console.WriteLine("Alive: " + field.Alive + " after " + ticks + " ticks");
+
+        var trap = new Field(new[] { "#_MD#" });
+        Console.WriteLine(trap.Move(0, -1));
+        Console.WriteLine("Alive: " + trap.Alive);
+        Console.WriteLine(trap.Move(0, 1));
+
+        var chase = new Field(new[] { "#M_D#" });
+        chase.Tick();
+        Console.WriteLine(chase + " " + chase.Alive);
+        chase.Tick();
+        Console.WriteLine(chase + " " + chase.Alive);`,
+          "",
+          `    static void Tick(Field field, int times)
+    {
+        for (int i = 0; i < times; i++)
+        {
+            field.Tick();
+        }
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          DIGGER_ENGINE(
+            `${BAG_CLASS}
+
+class Monster : Cell
+{
+    private int direction = 1;
+
+    public override char Symbol { get { return 'M'; } }
+    public override bool CanEnter { get { return true; } }
+    public override bool Kills { get { return true; } }
+
+    public override void Update(Field field, int row, int col)
+    {
+        int next = col + direction;
+        if (next < 0 || next >= field.Cols)
+        {
+            direction = -direction;
+            return;
+        }
+        Cell target = field.Get(row, next);
+        if (target is Digger)
+        {
+            field.Kill();
+        }
+        else if (target is Empty)
+        {
+            field.Set(row, next, this);
+            field.Set(row, col, new Empty());
+        }
+        else
+        {
+            direction = -direction;
+        }
+    }
+}`,
+            `        if (symbol == 'S') return new Bag();\n        if (symbol == 'M') return new Monster();\n`,
+          ),
+          `        var field = new Field(new[]
+        {
+            "#########",
+            "#M__.__D#",
+            "#########"
+        });
+        Console.WriteLine(field);
+        Tick(field, 3);
+        Console.WriteLine(field);
+
+        field.Move(0, -1);
+        field.Move(0, -1);
+        field.Move(0, -1);
+        Console.WriteLine(field);
+        Console.WriteLine("Score: " + field.Score);
+
+        int ticks = 0;
+        while (field.Alive && ticks < 20)
+        {
+            field.Tick();
+            ticks++;
+        }
+        Console.WriteLine("Alive: " + field.Alive + " after " + ticks + " ticks");
+
+        var trap = new Field(new[] { "#_MD#" });
+        Console.WriteLine(trap.Move(0, -1));
+        Console.WriteLine("Alive: " + trap.Alive);
+        Console.WriteLine(trap.Move(0, 1));
+
+        var chase = new Field(new[] { "#M_D#" });
+        chase.Tick();
+        Console.WriteLine(chase + " " + chase.Alive);
+        chase.Tick();
+        Console.WriteLine(chase + " " + chase.Alive);`,
+          "",
+          `    static void Tick(Field field, int times)
+    {
+        for (int i = 0; i < times; i++)
+        {
+            field.Tick();
+        }
+    }`,
+        ),
+        expectedOutput:
+          "#########\n#M__.__D#\n#########\n#########\n#__M.__D#\n#########\n#########\n#__MD___#\n#########\nScore: 1\nAlive: False after 6 ticks\nTrue\nAlive: False\nFalse\n#_MD# True\n#_MD# False\n",
+        maxScore: 10,
+      },
+    ],
+  },
+  {
+    slug: "encapsulation",
+    title: { en: "Encapsulation", uk: "Інкапсуляція" },
+    slides: [
+      { kind: "lecture", slug: "data-integrity", title: { en: "Data integrity", uk: "Цілісність даних" } },
+      { kind: "lecture", slug: "private-keyword", title: { en: "The private keyword", uk: "Ключове слово private" } },
+      {
+        kind: "quiz",
+        slug: "private-quiz",
+        title: { en: "Using private", uk: "Використання private" },
+        questions: [
+          {
+            id: "inaccessible",
+            mode: "single",
+            prompt: {
+              en: "What happens with this code?\n\n```csharp\nclass Account\n{\n    private decimal balance;\n}\n\nclass Program\n{\n    static void Main()\n    {\n        var a = new Account();\n        a.balance = 100;\n    }\n}\n```",
+              uk: "Що станеться з цим кодом?\n\n```csharp\nclass Account\n{\n    private decimal balance;\n}\n\nclass Program\n{\n    static void Main()\n    {\n        var a = new Account();\n        a.balance = 100;\n    }\n}\n```",
+            },
+            options: [
+              { id: "a", text: { en: "A compile error: `balance` is inaccessible due to its protection level", uk: "Помилка компіляції: `balance` недоступне через рівень захисту" } },
+              { id: "b", text: { en: "It works, and the balance is 100", uk: "Це працює, і баланс дорівнює 100" } },
+              { id: "c", text: { en: "An exception at run time", uk: "Виняток під час виконання" } },
+              { id: "d", text: { en: "It compiles with a warning", uk: "Компілюється з попередженням" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      { kind: "lecture", slug: "deferred-errors", title: { en: "Deferred errors", uk: "Відкладені помилки" } },
+      { kind: "lecture", slug: "encapsulation-properties", title: { en: "Properties", uk: "Властивості" } },
+      {
+        kind: "practice",
+        slug: "fail-fast",
+        title: { en: "Do not defer errors", uk: "Не відкладати помилки" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Make the class fail fast: validate the name and the target
+class Thermostat
+{
+    public string Name;
+    public int Target;
+
+    public Thermostat(string name, int target)
+    {
+        Name = name;
+        Target = target;
+    }
+}`,
+          `        var t = new Thermostat("Hall", 20);
+        Console.WriteLine(t.Name + ": " + t.Target);
+        SetTarget(t, 40);
+        Console.WriteLine(t.Target);
+        SetTarget(t, 5);
+        SetTarget(t, 4);
+        Console.WriteLine(t.Target);
+        Warm(t, 10);
+        Console.WriteLine(t.Target);
+        Warm(t, 30);
+        Console.WriteLine(t.Target);
+        Create("Attic", 99);
+        Create("", 20);
+        Create("Attic", 18);`,
+          "",
+          `    static void SetTarget(Thermostat t, int value)
+    {
+        try
+        {
+            t.Target = value;
+            Console.WriteLine("target " + value + ": accepted");
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("target " + value + ": rejected");
+        }
+    }
+
+    static void Warm(Thermostat t, int degrees)
+    {
+        try
+        {
+            t.Warmer(degrees);
+            Console.WriteLine("warmer by " + degrees + ": accepted");
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("warmer by " + degrees + ": rejected");
+        }
+    }
+
+    static void Create(string name, int target)
+    {
+        try
+        {
+            var t = new Thermostat(name, target);
+            Console.WriteLine("created " + t.Name);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("bad target " + target);
+        }
+        catch (ArgumentException)
+        {
+            Console.WriteLine("bad name");
+        }
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Thermostat
+{
+    private int target;
+
+    public string Name { get; }
+
+    public int Target
+    {
+        get { return target; }
+        set
+        {
+            if (value < 5 || value > 30)
+            {
+                throw new ArgumentOutOfRangeException("value", "The target must be from 5 to 30");
+            }
+            target = value;
+        }
+    }
+
+    public Thermostat(string name, int target)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("The name is required", "name");
+        }
+        Name = name;
+        Target = target;
+    }
+
+    public void Warmer(int degrees)
+    {
+        Target = target + degrees;
+    }
+}`,
+          `        var t = new Thermostat("Hall", 20);
+        Console.WriteLine(t.Name + ": " + t.Target);
+        SetTarget(t, 40);
+        Console.WriteLine(t.Target);
+        SetTarget(t, 5);
+        SetTarget(t, 4);
+        Console.WriteLine(t.Target);
+        Warm(t, 10);
+        Console.WriteLine(t.Target);
+        Warm(t, 30);
+        Console.WriteLine(t.Target);
+        Create("Attic", 99);
+        Create("", 20);
+        Create("Attic", 18);`,
+          "",
+          `    static void SetTarget(Thermostat t, int value)
+    {
+        try
+        {
+            t.Target = value;
+            Console.WriteLine("target " + value + ": accepted");
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("target " + value + ": rejected");
+        }
+    }
+
+    static void Warm(Thermostat t, int degrees)
+    {
+        try
+        {
+            t.Warmer(degrees);
+            Console.WriteLine("warmer by " + degrees + ": accepted");
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("warmer by " + degrees + ": rejected");
+        }
+    }
+
+    static void Create(string name, int target)
+    {
+        try
+        {
+            var t = new Thermostat(name, target);
+            Console.WriteLine("created " + t.Name);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("bad target " + target);
+        }
+        catch (ArgumentException)
+        {
+            Console.WriteLine("bad name");
+        }
+    }`,
+        ),
+        expectedOutput:
+          "Hall: 20\ntarget 40: rejected\n20\ntarget 5: accepted\ntarget 4: rejected\n5\nwarmer by 10: accepted\n15\nwarmer by 30: rejected\n15\nbad target 99\nbad name\ncreated Attic\n",
+      },
+      { kind: "lecture", slug: "more-properties", title: { en: "More about properties", uk: "Більше про властивості" } },
+      {
+        kind: "practice",
+        slug: "property-instead-of-field",
+        title: { en: "A property instead of a field", uk: "Властивість замість поля" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// The area is stored, so it gets stale; the sides can be set to nonsense.
+// Use properties: validated Width and Height, and computed Area, Perimeter and IsSquare
+class Rectangle
+{
+    public int Width;
+    public int Height;
+    public int Area;
+
+    public Rectangle(int width, int height)
+    {
+        Width = width;
+        Height = height;
+        Area = width * height;
+    }
+}`,
+          `        var r = new Rectangle(3, 4);
+        Console.WriteLine(r.Area);
+        Console.WriteLine(r.Perimeter);
+        r.Width = 10;
+        Console.WriteLine(r.Area);
+        Console.WriteLine(r.Perimeter);
+        try
+        {
+            r.Height = 0;
+            Console.WriteLine("accepted");
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("rejected");
+        }
+        Console.WriteLine(r.Height);
+        Console.WriteLine(r.IsSquare);
+        r.Height = 10;
+        Console.WriteLine(r.IsSquare);
+        Console.WriteLine(r.Area);
+        try
+        {
+            new Rectangle(-1, 5);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("bad rectangle");
+        }`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Rectangle
+{
+    private int width;
+    private int height;
+
+    public int Width
+    {
+        get { return width; }
+        set
+        {
+            if (value <= 0) throw new ArgumentOutOfRangeException("value");
+            width = value;
+        }
+    }
+
+    public int Height
+    {
+        get { return height; }
+        set
+        {
+            if (value <= 0) throw new ArgumentOutOfRangeException("value");
+            height = value;
+        }
+    }
+
+    public int Area => Width * Height;
+    public int Perimeter => 2 * (Width + Height);
+    public bool IsSquare => Width == Height;
+
+    public Rectangle(int width, int height)
+    {
+        Width = width;
+        Height = height;
+    }
+}`,
+          `        var r = new Rectangle(3, 4);
+        Console.WriteLine(r.Area);
+        Console.WriteLine(r.Perimeter);
+        r.Width = 10;
+        Console.WriteLine(r.Area);
+        Console.WriteLine(r.Perimeter);
+        try
+        {
+            r.Height = 0;
+            Console.WriteLine("accepted");
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("rejected");
+        }
+        Console.WriteLine(r.Height);
+        Console.WriteLine(r.IsSquare);
+        r.Height = 10;
+        Console.WriteLine(r.IsSquare);
+        Console.WriteLine(r.Area);
+        try
+        {
+            new Rectangle(-1, 5);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("bad rectangle");
+        }`,
+        ),
+        expectedOutput: "12\n14\n40\n28\nrejected\n4\nFalse\nTrue\n100\nbad rectangle\n",
+      },
+      { kind: "lecture", slug: "constructors", title: { en: "Constructors", uk: "Конструктори" } },
+      {
+        kind: "practice",
+        slug: "vector-length",
+        title: { en: "Vector", uk: "Вектор" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Hide the coordinates, and add the property Length that can be read and set
+class Vector
+{
+    public double X;
+    public double Y;
+
+    public Vector(double x, double y)
+    {
+        X = x;
+        Y = y;
+    }
+}`,
+          `        var v = new Vector(3, 4);
+        Console.WriteLine(v);
+        Console.WriteLine(v.Length);
+        v.Length = 10;
+        Console.WriteLine(v);
+        Console.WriteLine(v.Length);
+        Console.WriteLine(new Vector());
+        Console.WriteLine(Vector.FromPolar(2, 90));
+        Console.WriteLine(Vector.FromPolar(1, 60));
+        try
+        {
+            v.Length = -1;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("negative length");
+        }
+        Console.WriteLine(v);
+
+        var zero = new Vector();
+        try
+        {
+            zero.Length = 5;
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("no direction");
+        }
+        zero.Length = 0;
+        Console.WriteLine(zero);`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Vector
+{
+    private double x;
+    private double y;
+
+    public Vector(double x, double y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+
+    public Vector() : this(0, 0)
+    {
+    }
+
+    public static Vector FromPolar(double length, double degrees)
+    {
+        double radians = degrees * Math.PI / 180;
+        return new Vector(length * Math.Cos(radians), length * Math.Sin(radians));
+    }
+
+    public double X => x;
+    public double Y => y;
+
+    public double Length
+    {
+        get { return Math.Sqrt(x * x + y * y); }
+        set
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException("value");
+            }
+            double current = Length;
+            if (current == 0)
+            {
+                if (value == 0)
+                {
+                    return;
+                }
+                throw new InvalidOperationException("A zero vector has no direction");
+            }
+            double factor = value / current;
+            x *= factor;
+            y *= factor;
+        }
+    }
+
+    public override string ToString()
+    {
+        return "(" + Math.Round(x, 2) + ", " + Math.Round(y, 2) + ")";
+    }
+}`,
+          `        var v = new Vector(3, 4);
+        Console.WriteLine(v);
+        Console.WriteLine(v.Length);
+        v.Length = 10;
+        Console.WriteLine(v);
+        Console.WriteLine(v.Length);
+        Console.WriteLine(new Vector());
+        Console.WriteLine(Vector.FromPolar(2, 90));
+        Console.WriteLine(Vector.FromPolar(1, 60));
+        try
+        {
+            v.Length = -1;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("negative length");
+        }
+        Console.WriteLine(v);
+
+        var zero = new Vector();
+        try
+        {
+            zero.Length = 5;
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("no direction");
+        }
+        zero.Length = 0;
+        Console.WriteLine(zero);`,
+        ),
+        expectedOutput: "(3, 4)\n5\n(6, 8)\n10\n(0, 0)\n(0, 2)\n(0.5, 0.87)\nnegative length\n(6, 8)\nno direction\n(0, 0)\n",
+      },
+      { kind: "lecture", slug: "readonly-fields", title: { en: "The readonly fields", uk: "Поля readonly" } },
+      {
+        kind: "practice",
+        slug: "fraction",
+        title: { en: "Fraction", uk: "Дріб" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Make the fraction immutable and always valid: a positive denominator that is never zero,
+// and a reduced fraction. Operations return new fractions.
+class Fraction
+{
+    public int Numerator;
+    public int Denominator;
+
+    public Fraction(int numerator, int denominator)
+    {
+        Numerator = numerator;
+        Denominator = denominator;
+    }
+}`,
+          `        var a = new Fraction(6, -8);
+        var b = new Fraction(1, 2);
+        Console.WriteLine(a);
+        Console.WriteLine(a.Plus(b));
+        Console.WriteLine(a.Times(b));
+        Console.WriteLine(a.Inverse());
+        Console.WriteLine(b.Inverse());
+        Console.WriteLine(new Fraction(0, 5));
+        Console.WriteLine(a);
+        try
+        {
+            new Fraction(1, 0);
+        }
+        catch (ArgumentException e)
+        {
+            Console.WriteLine(e.GetType().Name);
+        }
+        try
+        {
+            new Fraction(0, 3).Inverse();
+        }
+        catch (DivideByZeroException e)
+        {
+            Console.WriteLine(e.GetType().Name);
+        }
+        Console.WriteLine(a.Numerator + " " + a.Denominator);`,
+        ),
+        solution: PROGRAM_WITH(
+          `class Fraction
+{
+    private readonly int numerator;
+    private readonly int denominator;
+
+    public int Numerator => numerator;
+    public int Denominator => denominator;
+
+    public Fraction(int numerator, int denominator)
+    {
+        if (denominator == 0)
+        {
+            throw new ArgumentException("The denominator cannot be zero", "denominator");
+        }
+        if (denominator < 0)
+        {
+            numerator = -numerator;
+            denominator = -denominator;
+        }
+        int g = Gcd(Math.Abs(numerator), denominator);
+        this.numerator = numerator / g;
+        this.denominator = denominator / g;
+    }
+
+    static int Gcd(int a, int b)
+    {
+        return b == 0 ? a : Gcd(b, a % b);
+    }
+
+    public Fraction Plus(Fraction other)
+    {
+        return new Fraction(numerator * other.denominator + other.numerator * denominator, denominator * other.denominator);
+    }
+
+    public Fraction Times(Fraction other)
+    {
+        return new Fraction(numerator * other.numerator, denominator * other.denominator);
+    }
+
+    public Fraction Inverse()
+    {
+        if (numerator == 0)
+        {
+            throw new DivideByZeroException("Zero has no inverse");
+        }
+        return new Fraction(denominator, numerator);
+    }
+
+    public override string ToString()
+    {
+        return denominator == 1 ? numerator.ToString() : numerator + "/" + denominator;
+    }
+}`,
+          `        var a = new Fraction(6, -8);
+        var b = new Fraction(1, 2);
+        Console.WriteLine(a);
+        Console.WriteLine(a.Plus(b));
+        Console.WriteLine(a.Times(b));
+        Console.WriteLine(a.Inverse());
+        Console.WriteLine(b.Inverse());
+        Console.WriteLine(new Fraction(0, 5));
+        Console.WriteLine(a);
+        try
+        {
+            new Fraction(1, 0);
+        }
+        catch (ArgumentException e)
+        {
+            Console.WriteLine(e.GetType().Name);
+        }
+        try
+        {
+            new Fraction(0, 3).Inverse();
+        }
+        catch (DivideByZeroException e)
+        {
+            Console.WriteLine(e.GetType().Name);
+        }
+        Console.WriteLine(a.Numerator + " " + a.Denominator);`,
+        ),
+        expectedOutput: "-3/4\n-1/4\n-3/8\n-4/3\n2\n0\n-3/4\nArgumentException\nDivideByZeroException\n-3 4\n",
+      },
+      {
+        kind: "quiz",
+        slug: "encapsulation-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "invariant",
+            mode: "single",
+            prompt: { en: "What is an invariant of a class?", uk: "Що таке інваріант класу?" },
+            options: [
+              { id: "a", text: { en: "A rule about the data of an object that must be true at all times", uk: "Правило про дані об'єкта, яке має виконуватися завжди" } },
+              { id: "b", text: { en: "A method that is never changed", uk: "Метод, який ніколи не змінюється" } },
+              { id: "c", text: { en: "A `static` field", uk: "Поле `static`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "default-access",
+            mode: "single",
+            prompt: {
+              en: "What is the access level of a field in a class if you write no modifier?",
+              uk: "Який рівень доступу має поле класу, якщо модифікатор не вказано?",
+            },
+            options: [
+              { id: "a", text: { en: "`private`", uk: "`private`" } },
+              { id: "b", text: { en: "`public`", uk: "`public`" } },
+              { id: "c", text: { en: "`protected`", uk: "`protected`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "property-benefit",
+            mode: "multi",
+            prompt: {
+              en: "What is better in a property than in a public field?",
+              uk: "Чим властивість краща за публічне поле?",
+            },
+            options: [
+              { id: "a", text: { en: "A check can be added in `set`", uk: "У `set` можна додати перевірку" } },
+              { id: "b", text: { en: "The class can change how the value is stored, and the callers do not change", uk: "Клас може змінити спосіб зберігання значення, а код, що викликає, не змінюється" } },
+              { id: "c", text: { en: "The value can be computed", uk: "Значення можна обчислювати" } },
+              { id: "d", text: { en: "A property uses no memory", uk: "Властивість не використовує пам'яті" } },
+            ],
+            correct: ["a", "b", "c"],
+          },
+          {
+            id: "private-set",
+            mode: "single",
+            prompt: {
+              en: "What does `public int Count { get; private set; }` mean?",
+              uk: "Що означає `public int Count { get; private set; }`?",
+            },
+            options: [
+              { id: "a", text: { en: "Everybody can read it, and only the class itself can change it", uk: "Читати можуть усі, а змінювати — лише сам клас" } },
+              { id: "b", text: { en: "Nobody can read it", uk: "Читати не може ніхто" } },
+              { id: "c", text: { en: "Everybody can change it, and only the class can read it", uk: "Змінювати можуть усі, а читати — лише клас" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "readonly",
+            mode: "single",
+            prompt: {
+              en: "Where can a `readonly` field be assigned?",
+              uk: "Де можна присвоїти значення полю `readonly`?",
+            },
+            options: [
+              { id: "a", text: { en: "In its declaration and in a constructor of the class", uk: "В його оголошенні та в конструкторі класу" } },
+              { id: "b", text: { en: "In any method of the class", uk: "У будь-якому методі класу" } },
+              { id: "c", text: { en: "Nowhere: it is always 0", uk: "Ніде: воно завжди 0" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "validate-first",
+            mode: "single",
+            prompt: {
+              en: "A method has to change two fields and may throw an exception for a bad argument. What is the safe order?",
+              uk: "Метод має змінити два поля й може кинути виняток для поганого аргументу. Який порядок безпечний?",
+            },
+            options: [
+              { id: "a", text: { en: "Check all the arguments first, then change the fields", uk: "Спершу перевірити всі аргументи, потім змінити поля" } },
+              { id: "b", text: { en: "Change the first field, check, then change the second", uk: "Змінити перше поле, перевірити, потім змінити друге" } },
+              { id: "c", text: { en: "The order does not matter", uk: "Порядок не має значення" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "leaked-list",
+            mode: "single",
+            prompt: {
+              en: "What is wrong with this class?\n\n```csharp\nclass Team\n{\n    private readonly List<string> members = new List<string>();\n    public List<string> Members { get { return members; } }\n}\n```",
+              uk: "Що не так із цим класом?\n\n```csharp\nclass Team\n{\n    private readonly List<string> members = new List<string>();\n    public List<string> Members { get { return members; } }\n}\n```",
+            },
+            options: [
+              { id: "a", text: { en: "It gives out the inner list, so the outside code can change it without any checks", uk: "Він віддає внутрішній список, тож зовнішній код може змінювати його без жодних перевірок" } },
+              { id: "b", text: { en: "Nothing: `readonly` makes the list immutable", uk: "Нічого: `readonly` робить список незмінним" } },
+              { id: "c", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "grade-book",
+        title: { en: "Practice: Grade book", uk: "Практика «Журнал оцінок»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Hide the list of marks and guard it: validate the marks and never give out the list itself
+class GradeBook
+{
+    public List<int> Marks = new List<int>();
+}`,
+          `        var book = new GradeBook();
+        foreach (int m in new[] { 80, 95, 60, 95 })
+        {
+            book.Add(m);
+        }
+        Console.WriteLine(book.Count);
+        Console.WriteLine(book.Average);
+        Console.WriteLine(book.Best);
+        Console.WriteLine(book.CountAtLeast(90));
+        try
+        {
+            book.Add(101);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("rejected");
+        }
+        Console.WriteLine(book.Count);
+
+        int[] copy = book.Marks;
+        copy[0] = 0;
+        Console.WriteLine(book.Marks[0]);
+
+        Console.WriteLine(book.Remove(95));
+        Console.WriteLine(book.Remove(10));
+        Console.WriteLine(string.Join(" ", book.Marks));
+
+        var empty = new GradeBook();
+        Console.WriteLine(empty.Average);
+        try
+        {
+            Console.WriteLine(empty.Best);
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("no marks");
+        }`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM_WITH(
+          `class GradeBook
+{
+    private readonly List<int> marks = new List<int>();
+
+    public int Count => marks.Count;
+
+    public int[] Marks => marks.ToArray();
+
+    public double Average
+    {
+        get
+        {
+            if (marks.Count == 0)
+            {
+                return 0;
+            }
+            double sum = 0;
+            foreach (int mark in marks)
+            {
+                sum += mark;
+            }
+            return sum / marks.Count;
+        }
+    }
+
+    public int Best
+    {
+        get
+        {
+            if (marks.Count == 0)
+            {
+                throw new InvalidOperationException("The book has no marks");
+            }
+            int best = marks[0];
+            foreach (int mark in marks)
+            {
+                if (mark > best)
+                {
+                    best = mark;
+                }
+            }
+            return best;
+        }
+    }
+
+    public void Add(int mark)
+    {
+        if (mark < 0 || mark > 100)
+        {
+            throw new ArgumentOutOfRangeException("mark", "A mark must be from 0 to 100");
+        }
+        marks.Add(mark);
+    }
+
+    public bool Remove(int mark)
+    {
+        return marks.Remove(mark);
+    }
+
+    public int CountAtLeast(int threshold)
+    {
+        int count = 0;
+        foreach (int mark in marks)
+        {
+            if (mark >= threshold)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+}`,
+          `        var book = new GradeBook();
+        foreach (int m in new[] { 80, 95, 60, 95 })
+        {
+            book.Add(m);
+        }
+        Console.WriteLine(book.Count);
+        Console.WriteLine(book.Average);
+        Console.WriteLine(book.Best);
+        Console.WriteLine(book.CountAtLeast(90));
+        try
+        {
+            book.Add(101);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("rejected");
+        }
+        Console.WriteLine(book.Count);
+
+        int[] copy = book.Marks;
+        copy[0] = 0;
+        Console.WriteLine(book.Marks[0]);
+
+        Console.WriteLine(book.Remove(95));
+        Console.WriteLine(book.Remove(10));
+        Console.WriteLine(string.Join(" ", book.Marks));
+
+        var empty = new GradeBook();
+        Console.WriteLine(empty.Average);
+        try
+        {
+            Console.WriteLine(empty.Best);
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("no marks");
+        }`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "4\n82.5\n95\n2\nrejected\n4\n80\nTrue\nFalse\n80 60 95\n0\nno marks\n",
+        maxScore: 10,
+      },
+    ],
+  },
+  {
+    slug: "abstraction",
+    title: { en: "Abstraction", uk: "Абстракція" },
+    slides: [
+      { kind: "lecture", slug: "what-is-abstraction", title: { en: "What is abstraction", uk: "Що таке абстракція" } },
+      { kind: "lecture", slug: "abstract-classes", title: { en: "Abstract classes", uk: "Абстрактні класи" } },
+      {
+        kind: "quiz",
+        slug: "abstract-classes-quiz",
+        title: { en: "Abstract classes", uk: "Абстрактні класи" },
+        questions: [
+          {
+            id: "instantiate",
+            mode: "single",
+            prompt: {
+              en: "`Shape` is an abstract class, and `Circle` is derived from it. Which line compiles?",
+              uk: "`Shape` — абстрактний клас, а `Circle` походить від нього. Який рядок компілюється?",
+            },
+            options: [
+              { id: "a", text: { en: "`Shape s = new Circle(1);`", uk: "`Shape s = new Circle(1);`" } },
+              { id: "b", text: { en: "`Shape s = new Shape();`", uk: "`Shape s = new Shape();`" } },
+              { id: "c", text: { en: "Both of them", uk: "Обидва" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "abstract-member-needs-abstract-class",
+            mode: "single",
+            prompt: {
+              en: "A class declares `public abstract double Area { get; }` but is declared as `class Shape` (without `abstract`). What happens?",
+              uk: "Клас оголошує `public abstract double Area { get; }`, але сам оголошений як `class Shape` (без `abstract`). Що станеться?",
+            },
+            options: [
+              { id: "a", text: { en: "A compile error: a class with an abstract member must be abstract", uk: "Помилка компіляції: клас з абстрактним членом мусить бути абстрактним" } },
+              { id: "b", text: { en: "It compiles, and `Area` returns 0", uk: "Компілюється, а `Area` повертає 0" } },
+              { id: "c", text: { en: "It compiles, and an exception is thrown when `Area` is read", uk: "Компілюється, а під час читання `Area` кидається виняток" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "forgot-override",
+            mode: "single",
+            prompt: {
+              en: "`Square : Shape` is not abstract and does not override the abstract member `Area`. What happens?",
+              uk: "`Square : Shape` не є абстрактним і не перевизначає абстрактний член `Area`. Що станеться?",
+            },
+            options: [
+              { id: "a", text: { en: "A compile error: `Square` does not implement the inherited abstract member", uk: "Помилка компіляції: `Square` не реалізує успадкований абстрактний член" } },
+              { id: "b", text: { en: "`Square` silently gets an empty `Area`", uk: "`Square` мовчки отримує порожню `Area`" } },
+              { id: "c", text: { en: "An exception at run time when `Area` is used", uk: "Виняток під час виконання, коли `Area` використовують" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "contents",
+            mode: "multi",
+            prompt: {
+              en: "What can an abstract class contain?",
+              uk: "Що може містити абстрактний клас?",
+            },
+            options: [
+              { id: "a", text: { en: "Fields", uk: "Поля" } },
+              { id: "b", text: { en: "A constructor", uk: "Конструктор" } },
+              { id: "c", text: { en: "Ordinary methods with code", uk: "Звичайні методи з кодом" } },
+              { id: "d", text: { en: "Abstract members without a body", uk: "Абстрактні члени без тіла" } },
+            ],
+            correct: ["a", "b", "c", "d"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "shape-hierarchy",
+        title: { en: "Shapes", uk: "Фігури" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `abstract class Shape
+{
+    public abstract double Area { get; }
+    public abstract double Perimeter { get; }
+    public abstract string Name { get; }
+
+    public string Describe()
+    {
+        return Name + ": area " + Math.Round(Area, 2) + ", perimeter " + Math.Round(Perimeter, 2);
+    }
+}
+
+// Write the classes Rectangle, Circle and Triangle here`,
+          `        Shape[] shapes = { new Rectangle(3, 4), new Circle(1), new Triangle(3, 4, 5) };
+        foreach (Shape s in shapes)
+        {
+            Console.WriteLine(s.Describe());
+        }
+        Console.WriteLine(Largest(shapes).Name);
+        try
+        {
+            new Triangle(1, 2, 10);
+        }
+        catch (ArgumentException)
+        {
+            Console.WriteLine("not a triangle");
+        }`,
+          "",
+          `    static Shape Largest(Shape[] shapes)
+    {
+        Shape best = shapes[0];
+        foreach (Shape s in shapes)
+        {
+            if (s.Area > best.Area)
+            {
+                best = s;
+            }
+        }
+        return best;
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          `abstract class Shape
+{
+    public abstract double Area { get; }
+    public abstract double Perimeter { get; }
+    public abstract string Name { get; }
+
+    public string Describe()
+    {
+        return Name + ": area " + Math.Round(Area, 2) + ", perimeter " + Math.Round(Perimeter, 2);
+    }
+}
+
+class Rectangle : Shape
+{
+    private readonly double width;
+    private readonly double height;
+
+    public Rectangle(double width, double height)
+    {
+        this.width = width;
+        this.height = height;
+    }
+
+    public override double Area => width * height;
+    public override double Perimeter => 2 * (width + height);
+    public override string Name => "Rectangle";
+}
+
+class Circle : Shape
+{
+    private readonly double radius;
+
+    public Circle(double radius)
+    {
+        this.radius = radius;
+    }
+
+    public override double Area => Math.PI * radius * radius;
+    public override double Perimeter => 2 * Math.PI * radius;
+    public override string Name => "Circle";
+}
+
+class Triangle : Shape
+{
+    private readonly double a;
+    private readonly double b;
+    private readonly double c;
+
+    public Triangle(double a, double b, double c)
+    {
+        if (a <= 0 || b <= 0 || c <= 0 || a >= b + c || b >= a + c || c >= a + b)
+        {
+            throw new ArgumentException("These sides cannot form a triangle");
+        }
+        this.a = a;
+        this.b = b;
+        this.c = c;
+    }
+
+    public override double Area
+    {
+        get
+        {
+            double s = Perimeter / 2;
+            return Math.Sqrt(s * (s - a) * (s - b) * (s - c));
+        }
+    }
+
+    public override double Perimeter => a + b + c;
+    public override string Name => "Triangle";
+}`,
+          `        Shape[] shapes = { new Rectangle(3, 4), new Circle(1), new Triangle(3, 4, 5) };
+        foreach (Shape s in shapes)
+        {
+            Console.WriteLine(s.Describe());
+        }
+        Console.WriteLine(Largest(shapes).Name);
+        try
+        {
+            new Triangle(1, 2, 10);
+        }
+        catch (ArgumentException)
+        {
+            Console.WriteLine("not a triangle");
+        }`,
+          "",
+          `    static Shape Largest(Shape[] shapes)
+    {
+        Shape best = shapes[0];
+        foreach (Shape s in shapes)
+        {
+            if (s.Area > best.Area)
+            {
+                best = s;
+            }
+        }
+        return best;
+    }`,
+        ),
+        expectedOutput:
+          "Rectangle: area 12, perimeter 14\nCircle: area 3.14, perimeter 6.28\nTriangle: area 6, perimeter 12\nRectangle\nnot a triangle\n",
+      },
+      { kind: "lecture", slug: "programming-to-interfaces", title: { en: "Programming to interfaces", uk: "Програмування до інтерфейсів" } },
+      {
+        kind: "practice",
+        slug: "loggers",
+        title: { en: "Loggers", uk: "Журнали" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `interface ILogger
+{
+    void Log(string message);
+}
+
+class ConsoleLogger : ILogger
+{
+    public void Log(string message)
+    {
+        Console.WriteLine("console: " + message);
+    }
+}
+
+class OrderService
+{
+    private readonly ILogger logger;
+
+    public OrderService(ILogger logger)
+    {
+        this.logger = logger;
+    }
+
+    public void Place(int id)
+    {
+        logger.Log("Order " + id + " placed");
+    }
+}
+
+// Write the classes ListLogger, PrefixLogger and MultiLogger here`,
+          `        var list = new ListLogger();
+        var service = new OrderService(new PrefixLogger(list, "[orders] "));
+        service.Place(1);
+        service.Place(2);
+        Console.WriteLine(list.Count);
+        foreach (string line in list.Messages)
+        {
+            Console.WriteLine(line);
+        }
+
+        var archive = new ListLogger();
+        var multi = new MultiLogger(new ConsoleLogger(), new PrefixLogger(archive, "ARCHIVE "));
+        new OrderService(multi).Place(3);
+        Console.WriteLine(archive.Messages[0]);`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM_WITH(
+          `interface ILogger
+{
+    void Log(string message);
+}
+
+class ConsoleLogger : ILogger
+{
+    public void Log(string message)
+    {
+        Console.WriteLine("console: " + message);
+    }
+}
+
+class OrderService
+{
+    private readonly ILogger logger;
+
+    public OrderService(ILogger logger)
+    {
+        this.logger = logger;
+    }
+
+    public void Place(int id)
+    {
+        logger.Log("Order " + id + " placed");
+    }
+}
+
+class ListLogger : ILogger
+{
+    private readonly List<string> messages = new List<string>();
+
+    public int Count => messages.Count;
+    public string[] Messages => messages.ToArray();
+
+    public void Log(string message)
+    {
+        messages.Add(message);
+    }
+}
+
+class PrefixLogger : ILogger
+{
+    private readonly ILogger inner;
+    private readonly string prefix;
+
+    public PrefixLogger(ILogger inner, string prefix)
+    {
+        this.inner = inner;
+        this.prefix = prefix;
+    }
+
+    public void Log(string message)
+    {
+        inner.Log(prefix + message);
+    }
+}
+
+class MultiLogger : ILogger
+{
+    private readonly ILogger first;
+    private readonly ILogger second;
+
+    public MultiLogger(ILogger first, ILogger second)
+    {
+        this.first = first;
+        this.second = second;
+    }
+
+    public void Log(string message)
+    {
+        first.Log(message);
+        second.Log(message);
+    }
+}`,
+          `        var list = new ListLogger();
+        var service = new OrderService(new PrefixLogger(list, "[orders] "));
+        service.Place(1);
+        service.Place(2);
+        Console.WriteLine(list.Count);
+        foreach (string line in list.Messages)
+        {
+            Console.WriteLine(line);
+        }
+
+        var archive = new ListLogger();
+        var multi = new MultiLogger(new ConsoleLogger(), new PrefixLogger(archive, "ARCHIVE "));
+        new OrderService(multi).Place(3);
+        Console.WriteLine(archive.Messages[0]);`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "2\n[orders] Order 1 placed\n[orders] Order 2 placed\nconsole: Order 3 placed\nARCHIVE Order 3 placed\n",
+      },
+      { kind: "lecture", slug: "template-method", title: { en: "The template method", uk: "Шаблонний метод" } },
+      {
+        kind: "practice",
+        slug: "report-template",
+        title: { en: "Report formats", uk: "Формати звітів" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `abstract class Report
+{
+    private readonly string[] items;
+
+    protected Report(string[] items)
+    {
+        this.items = items;
+    }
+
+    protected int Count => items.Length;
+
+    protected abstract string Header();
+    protected abstract string FormatItem(int number, string item);
+
+    protected virtual string Footer()
+    {
+        return "";
+    }
+
+    // The template method: the order of the steps is fixed here
+    public string Build()
+    {
+        string text = Header() + "\\n";
+        for (int i = 0; i < items.Length; i++)
+        {
+            text += FormatItem(i + 1, items[i]) + "\\n";
+        }
+        string footer = Footer();
+        if (footer != "")
+        {
+            text += footer + "\\n";
+        }
+        return text;
+    }
+}
+
+// Write the classes TextReport, CsvReport and MarkdownReport here`,
+          `        var fruits = new[] { "apple", "pear", "plum" };
+        Console.Write(new TextReport(fruits).Build());
+        Console.WriteLine("---");
+        Console.Write(new CsvReport(fruits).Build());
+        Console.WriteLine("---");
+        Console.Write(new MarkdownReport(fruits).Build());
+        Console.WriteLine("---");
+        Console.Write(new TextReport(new string[0]).Build());`,
+        ),
+        solution: PROGRAM_WITH(
+          `abstract class Report
+{
+    private readonly string[] items;
+
+    protected Report(string[] items)
+    {
+        this.items = items;
+    }
+
+    protected int Count => items.Length;
+
+    protected abstract string Header();
+    protected abstract string FormatItem(int number, string item);
+
+    protected virtual string Footer()
+    {
+        return "";
+    }
+
+    // The template method: the order of the steps is fixed here
+    public string Build()
+    {
+        string text = Header() + "\\n";
+        for (int i = 0; i < items.Length; i++)
+        {
+            text += FormatItem(i + 1, items[i]) + "\\n";
+        }
+        string footer = Footer();
+        if (footer != "")
+        {
+            text += footer + "\\n";
+        }
+        return text;
+    }
+}
+
+class TextReport : Report
+{
+    public TextReport(string[] items) : base(items) { }
+
+    protected override string Header() { return "REPORT"; }
+    protected override string FormatItem(int number, string item) { return number + ". " + item; }
+    protected override string Footer() { return "Total: " + Count + " items"; }
+}
+
+class CsvReport : Report
+{
+    public CsvReport(string[] items) : base(items) { }
+
+    protected override string Header() { return "number,item"; }
+    protected override string FormatItem(int number, string item) { return number + "," + item; }
+}
+
+class MarkdownReport : Report
+{
+    public MarkdownReport(string[] items) : base(items) { }
+
+    protected override string Header() { return "# Fruits"; }
+    protected override string FormatItem(int number, string item) { return "- " + item; }
+    protected override string Footer() { return "_" + Count + " items_"; }
+}`,
+          `        var fruits = new[] { "apple", "pear", "plum" };
+        Console.Write(new TextReport(fruits).Build());
+        Console.WriteLine("---");
+        Console.Write(new CsvReport(fruits).Build());
+        Console.WriteLine("---");
+        Console.Write(new MarkdownReport(fruits).Build());
+        Console.WriteLine("---");
+        Console.Write(new TextReport(new string[0]).Build());`,
+        ),
+        expectedOutput:
+          "REPORT\n1. apple\n2. pear\n3. plum\nTotal: 3 items\n---\nnumber,item\n1,apple\n2,pear\n3,plum\n---\n# Fruits\n- apple\n- pear\n- plum\n_3 items_\n---\nREPORT\nTotal: 0 items\n",
+      },
+      { kind: "lecture", slug: "abstract-vs-interface", title: { en: "Abstract class or interface", uk: "Абстрактний клас чи інтерфейс" } },
+      {
+        kind: "quiz",
+        slug: "abstraction-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "what-is-abstraction",
+            mode: "single",
+            prompt: { en: "What is abstraction?", uk: "Що таке абстракція?" },
+            options: [
+              { id: "a", text: { en: "Keeping what is important for the purpose and hiding or ignoring the rest", uk: "Збереження того, що важливе для мети, і приховування чи ігнорування решти" } },
+              { id: "b", text: { en: "Making all the fields `private`", uk: "Робити всі поля `private`" } },
+              { id: "c", text: { en: "Copying the code of a class into another class", uk: "Копіювання коду одного класу в інший" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "abstraction-vs-encapsulation",
+            mode: "single",
+            prompt: {
+              en: "Which statement describes the difference between abstraction and encapsulation best?",
+              uk: "Яке твердження найкраще описує різницю між абстракцією та інкапсуляцією?",
+            },
+            options: [
+              { id: "a", text: { en: "Abstraction chooses what the user sees, and encapsulation protects the inside so that only that can be reached", uk: "Абстракція вибирає, що бачить користувач, а інкапсуляція захищає середину, щоб дістатися можна було лише до цього" } },
+              { id: "b", text: { en: "They are two names for the same thing", uk: "Це дві назви для одного й того самого" } },
+              { id: "c", text: { en: "Abstraction is only for interfaces, and encapsulation only for structs", uk: "Абстракція лише для інтерфейсів, а інкапсуляція лише для структур" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "which-tool",
+            mode: "single",
+            prompt: {
+              en: "`Report`, `Photo` and `Chair` are unrelated classes, and all of them must be printable. What fits best?",
+              uk: "`Report`, `Photo` і `Chair` — непов'язані класи, і всі вони мають бути придатними до друку. Що пасує найкраще?",
+            },
+            options: [
+              { id: "a", text: { en: "An interface `IPrintable` that all of them implement", uk: "Інтерфейс `IPrintable`, який реалізують усі" } },
+              { id: "b", text: { en: "A base class `Printable` that all of them derive from", uk: "Базовий клас `Printable`, від якого походять усі" } },
+              { id: "c", text: { en: "A `static` class with a `Print(object)` method that checks the type", uk: "Статичний клас з методом `Print(object)`, що перевіряє тип" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "template-fixed",
+            mode: "single",
+            prompt: {
+              en: "In the template method pattern, which part is written in the base class?",
+              uk: "У шаблоні шаблонного методу яка частина написана в базовому класі?",
+            },
+            options: [
+              { id: "a", text: { en: "The skeleton of the algorithm: the order of the steps", uk: "Кістяк алгоритму: порядок кроків" } },
+              { id: "b", text: { en: "Only the steps that differ", uk: "Лише кроки, що відрізняються" } },
+              { id: "c", text: { en: "Nothing: the base class is empty", uk: "Нічого: базовий клас порожній" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "fake-logger",
+            mode: "single",
+            prompt: {
+              en: "`OrderService` gets an `ILogger` in its constructor. What does it let you do in a test?",
+              uk: "`OrderService` отримує `ILogger` у конструкторі. Що це дозволяє зробити в тесті?",
+            },
+            options: [
+              { id: "a", text: { en: "Pass a simple logger that remembers the messages, and check them", uk: "Передати простий журнал, що запам'ятовує повідомлення, і перевірити їх" } },
+              { id: "b", text: { en: "Nothing: the real logger is always used", uk: "Нічого: завжди вживається справжній журнал" } },
+              { id: "c", text: { en: "Make `Place` run faster", uk: "Прискорити виконання `Place`" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "stack-list",
+            mode: "single",
+            prompt: {
+              en: "What is the problem with `class Stack : List<int> { }`?",
+              uk: "У чому проблема з `class Stack : List<int> { }`?",
+            },
+            options: [
+              { id: "a", text: { en: "A stack inherits all the operations of a list, so anybody can insert into the middle: the class does not control its interface", uk: "Стек успадковує всі операції списку, тож будь-хто може вставляти в середину: клас не контролює свій інтерфейс" } },
+              { id: "b", text: { en: "It does not compile", uk: "Це не компілюється" } },
+              { id: "c", text: { en: "A stack cannot hold numbers", uk: "Стек не може тримати числа" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "text-pipeline",
+        title: { en: "Practice: Text pipeline", uk: "Практика «Конвеєр тексту»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `interface ITextFilter
+{
+    string Apply(string text);
+}
+
+// Write TrimFilter, CollapseSpacesFilter, UpperFilter, RemoveDigitsFilter,
+// ReplaceFilter and Pipeline here`,
+          `        var clean = new Pipeline();
+        clean.Add(new TrimFilter());
+        clean.Add(new CollapseSpacesFilter());
+
+        var shout = new Pipeline();
+        shout.Add(clean);
+        shout.Add(new UpperFilter());
+        shout.Add(new ReplaceFilter("HELLO", "BYE"));
+
+        Console.WriteLine("[" + clean.Apply("   hello    big   world  ") + "]");
+        Console.WriteLine("[" + shout.Apply("   hello    big   world  ") + "]");
+        Console.WriteLine(new RemoveDigitsFilter().Apply("a1b22c333"));
+        Console.WriteLine(new Pipeline().Apply("unchanged"));
+        Console.WriteLine(shout.Count);
+
+        ITextFilter f = new ReplaceFilter("a", "o");
+        Console.WriteLine(f.Apply("banana"));
+
+        var sentence = new Pipeline().Add(new TrimFilter()).Add(new UpperFilter());
+        Console.WriteLine(sentence.Apply("  quiet please "));`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM_WITH(
+          `interface ITextFilter
+{
+    string Apply(string text);
+}
+
+class TrimFilter : ITextFilter
+{
+    public string Apply(string text)
+    {
+        return text.Trim();
+    }
+}
+
+class CollapseSpacesFilter : ITextFilter
+{
+    public string Apply(string text)
+    {
+        string result = "";
+        bool lastWasSpace = false;
+        foreach (char c in text)
+        {
+            if (c == ' ' && lastWasSpace)
+            {
+                continue;
+            }
+            result += c;
+            lastWasSpace = c == ' ';
+        }
+        return result;
+    }
+}
+
+class UpperFilter : ITextFilter
+{
+    public string Apply(string text)
+    {
+        return text.ToUpperInvariant();
+    }
+}
+
+class RemoveDigitsFilter : ITextFilter
+{
+    public string Apply(string text)
+    {
+        string result = "";
+        foreach (char c in text)
+        {
+            if (c < '0' || c > '9')
+            {
+                result += c;
+            }
+        }
+        return result;
+    }
+}
+
+class ReplaceFilter : ITextFilter
+{
+    private readonly string from;
+    private readonly string to;
+
+    public ReplaceFilter(string from, string to)
+    {
+        this.from = from;
+        this.to = to;
+    }
+
+    public string Apply(string text)
+    {
+        return text.Replace(from, to);
+    }
+}
+
+class Pipeline : ITextFilter
+{
+    private readonly List<ITextFilter> filters = new List<ITextFilter>();
+
+    public int Count => filters.Count;
+
+    public Pipeline Add(ITextFilter filter)
+    {
+        filters.Add(filter);
+        return this;
+    }
+
+    public string Apply(string text)
+    {
+        foreach (ITextFilter filter in filters)
+        {
+            text = filter.Apply(text);
+        }
+        return text;
+    }
+}`,
+          `        var clean = new Pipeline();
+        clean.Add(new TrimFilter());
+        clean.Add(new CollapseSpacesFilter());
+
+        var shout = new Pipeline();
+        shout.Add(clean);
+        shout.Add(new UpperFilter());
+        shout.Add(new ReplaceFilter("HELLO", "BYE"));
+
+        Console.WriteLine("[" + clean.Apply("   hello    big   world  ") + "]");
+        Console.WriteLine("[" + shout.Apply("   hello    big   world  ") + "]");
+        Console.WriteLine(new RemoveDigitsFilter().Apply("a1b22c333"));
+        Console.WriteLine(new Pipeline().Apply("unchanged"));
+        Console.WriteLine(shout.Count);
+
+        ITextFilter f = new ReplaceFilter("a", "o");
+        Console.WriteLine(f.Apply("banana"));
+
+        var sentence = new Pipeline().Add(new TrimFilter()).Add(new UpperFilter());
+        Console.WriteLine(sentence.Apply("  quiet please "));`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "[hello big world]\n[BYE BIG WORLD]\nabc\nunchanged\n3\nbonono\nQUIET PLEASE\n",
+        maxScore: 10,
+      },
+    ],
+  },
+  {
+    slug: "polymorphism",
+    title: { en: "Polymorphism", uk: "Поліморфізм" },
+    slides: [
+      { kind: "lecture", slug: "polymorphism-kinds", title: { en: "Kinds of polymorphism", uk: "Види поліморфізму" } },
+      {
+        kind: "practice",
+        slug: "overloads",
+        title: { en: "Overloads", uk: "Перевантаження" },
+        language: "csharp",
+        starter: PROGRAM(`    // Write the eight overloads of Show here
+
+    static void Main()
+    {
+        Console.WriteLine(Show(5));
+        Console.WriteLine(Show(5.5));
+        Console.WriteLine(Show('x'));
+        Console.WriteLine(Show(5L));
+        Console.WriteLine(Show("hi"));
+        Console.WriteLine(Show(true));
+        Console.WriteLine(Show(new[] { 1, 2, 3 }));
+        object o = "text";
+        Console.WriteLine(Show(o));
+        Console.WriteLine(Show(1, 2));
+        Console.WriteLine(Show("ab", 3));
+        Console.WriteLine(Show((object)5));
+        string none = null;
+        Console.WriteLine(Show(none));
+    }`),
+        solution: PROGRAM(`    static string Show(int n)
+    {
+        return "int:" + n;
+    }
+
+    static string Show(double d)
+    {
+        return "double:" + d;
+    }
+
+    static string Show(string s)
+    {
+        return "string:" + s;
+    }
+
+    static string Show(bool b)
+    {
+        return "bool:" + (b ? "yes" : "no");
+    }
+
+    static string Show(int[] items)
+    {
+        return "ints:" + string.Join(",", items);
+    }
+
+    static string Show(object o)
+    {
+        return "object:" + o;
+    }
+
+    static string Show(int a, int b)
+    {
+        return "pair:" + a + "-" + b;
+    }
+
+    static string Show(string s, int times)
+    {
+        string result = "";
+        for (int i = 0; i < times; i++)
+        {
+            result += s;
+        }
+        return result;
+    }
+
+    static void Main()
+    {
+        Console.WriteLine(Show(5));
+        Console.WriteLine(Show(5.5));
+        Console.WriteLine(Show('x'));
+        Console.WriteLine(Show(5L));
+        Console.WriteLine(Show("hi"));
+        Console.WriteLine(Show(true));
+        Console.WriteLine(Show(new[] { 1, 2, 3 }));
+        object o = "text";
+        Console.WriteLine(Show(o));
+        Console.WriteLine(Show(1, 2));
+        Console.WriteLine(Show("ab", 3));
+        Console.WriteLine(Show((object)5));
+        string none = null;
+        Console.WriteLine(Show(none));
+    }`),
+        expectedOutput: "int:5\ndouble:5.5\nint:120\ndouble:5\nstring:hi\nbool:yes\nints:1,2,3\nobject:text\npair:1-2\nababab\nobject:5\nstring:\n",
+      },
+      { kind: "lecture", slug: "equals-hashcode", title: { en: "Equals and GetHashCode", uk: "Equals та GetHashCode" } },
+      {
+        kind: "practice",
+        slug: "equals-point",
+        title: { en: "Equal points", uk: "Рівні точки" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `// Make Point a value object: Equals, GetHashCode, == and !=, and ToString
+class Point
+{
+    public int X { get; }
+    public int Y { get; }
+
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+}`,
+          `        var a = new Point(1, 2);
+        var b = new Point(1, 2);
+        var c = new Point(2, 1);
+        Console.WriteLine(a == b);
+        Console.WriteLine(a.Equals(b));
+        Console.WriteLine(ReferenceEquals(a, b));
+        Console.WriteLine(a != c);
+        Console.WriteLine(a.Equals(null));
+        Console.WriteLine(a.Equals("(1, 2)"));
+        Console.WriteLine(a.GetHashCode() == b.GetHashCode());
+
+        var set = new HashSet<Point> { a, b, c };
+        Console.WriteLine(set.Count);
+        Console.WriteLine(set.Contains(new Point(2, 1)));
+
+        var names = new Dictionary<Point, string>();
+        names[a] = "first";
+        names[b] = "second";
+        Console.WriteLine(names.Count + " " + names[new Point(1, 2)]);
+
+        var list = new List<Point> { c, a };
+        Console.WriteLine(list.IndexOf(new Point(1, 2)));
+        Console.WriteLine(a);
+
+        object boxed = b;
+        Console.WriteLine(a.Equals(boxed));
+        Point none = null;
+        Console.WriteLine(none == null);
+        Console.WriteLine(a == null);`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM_WITH(
+          `class Point
+{
+    public int X { get; }
+    public int Y { get; }
+
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public override bool Equals(object obj)
+    {
+        Point other = obj as Point;
+        if (ReferenceEquals(other, null))
+        {
+            return false;
+        }
+        return X == other.X && Y == other.Y;
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            return X * 31 + Y;
+        }
+    }
+
+    public static bool operator ==(Point a, Point b)
+    {
+        if (ReferenceEquals(a, b))
+        {
+            return true;
+        }
+        if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
+        {
+            return false;
+        }
+        return a.X == b.X && a.Y == b.Y;
+    }
+
+    public static bool operator !=(Point a, Point b)
+    {
+        return !(a == b);
+    }
+
+    public override string ToString()
+    {
+        return "(" + X + ", " + Y + ")";
+    }
+}`,
+          `        var a = new Point(1, 2);
+        var b = new Point(1, 2);
+        var c = new Point(2, 1);
+        Console.WriteLine(a == b);
+        Console.WriteLine(a.Equals(b));
+        Console.WriteLine(ReferenceEquals(a, b));
+        Console.WriteLine(a != c);
+        Console.WriteLine(a.Equals(null));
+        Console.WriteLine(a.Equals("(1, 2)"));
+        Console.WriteLine(a.GetHashCode() == b.GetHashCode());
+
+        var set = new HashSet<Point> { a, b, c };
+        Console.WriteLine(set.Count);
+        Console.WriteLine(set.Contains(new Point(2, 1)));
+
+        var names = new Dictionary<Point, string>();
+        names[a] = "first";
+        names[b] = "second";
+        Console.WriteLine(names.Count + " " + names[new Point(1, 2)]);
+
+        var list = new List<Point> { c, a };
+        Console.WriteLine(list.IndexOf(new Point(1, 2)));
+        Console.WriteLine(a);
+
+        object boxed = b;
+        Console.WriteLine(a.Equals(boxed));
+        Point none = null;
+        Console.WriteLine(none == null);
+        Console.WriteLine(a == null);`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "True\nTrue\nFalse\nTrue\nFalse\nFalse\nTrue\n2\nTrue\n1 second\n1\n(1, 2)\nTrue\nTrue\nFalse\n",
+      },
+      { kind: "lecture", slug: "polymorphic-collections", title: { en: "Polymorphic collections", uk: "Поліморфні колекції" } },
+      {
+        kind: "practice",
+        slug: "payroll",
+        title: { en: "Payroll", uk: "Нарахування зарплат" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `abstract class Employee
+{
+    public string Name { get; }
+
+    protected Employee(string name)
+    {
+        Name = name;
+    }
+
+    public abstract int MonthlyPay();
+
+    public virtual string Role { get { return "staff"; } }
+
+    public override string ToString()
+    {
+        return Name + " (" + Role + "): " + MonthlyPay();
+    }
+}
+
+class ByPay : IComparer<Employee>
+{
+    public int Compare(Employee x, Employee y)
+    {
+        return y.MonthlyPay().CompareTo(x.MonthlyPay());
+    }
+}
+
+// Write the classes Developer, Manager and Intern here`,
+          `        var staff = new List<Employee>
+        {
+            new Developer("Ann", 3000),
+            new Manager("Bob", 4000, 5),
+            new Intern("Cy", 80, 15),
+            new Developer("Di", 3500)
+        };
+        foreach (Employee e in staff)
+        {
+            Console.WriteLine(e);
+        }
+        Console.WriteLine("Total: " + Total(staff));
+        Console.WriteLine("Top: " + Top(staff).Name);
+
+        staff.Sort(new ByPay());
+        string names = "";
+        foreach (Employee e in staff)
+        {
+            names += (names == "" ? "" : " ") + e.Name;
+        }
+        Console.WriteLine(names);`,
+          "using System.Collections.Generic;",
+          `    static int Total(List<Employee> staff)
+    {
+        int total = 0;
+        foreach (Employee e in staff)
+        {
+            total += e.MonthlyPay();
+        }
+        return total;
+    }
+
+    static Employee Top(List<Employee> staff)
+    {
+        Employee best = staff[0];
+        foreach (Employee e in staff)
+        {
+            if (e.MonthlyPay() > best.MonthlyPay())
+            {
+                best = e;
+            }
+        }
+        return best;
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          `abstract class Employee
+{
+    public string Name { get; }
+
+    protected Employee(string name)
+    {
+        Name = name;
+    }
+
+    public abstract int MonthlyPay();
+
+    public virtual string Role { get { return "staff"; } }
+
+    public override string ToString()
+    {
+        return Name + " (" + Role + "): " + MonthlyPay();
+    }
+}
+
+class ByPay : IComparer<Employee>
+{
+    public int Compare(Employee x, Employee y)
+    {
+        return y.MonthlyPay().CompareTo(x.MonthlyPay());
+    }
+}
+
+class Developer : Employee
+{
+    private readonly int salary;
+
+    public Developer(string name, int salary) : base(name)
+    {
+        this.salary = salary;
+    }
+
+    public override int MonthlyPay()
+    {
+        return salary;
+    }
+}
+
+class Manager : Employee
+{
+    private readonly int salary;
+    private readonly int reports;
+
+    public Manager(string name, int salary, int reports) : base(name)
+    {
+        this.salary = salary;
+        this.reports = reports;
+    }
+
+    public override int MonthlyPay()
+    {
+        return salary + 100 * reports;
+    }
+
+    public override string Role { get { return "manager"; } }
+}
+
+class Intern : Employee
+{
+    private readonly int hours;
+    private readonly int rate;
+
+    public Intern(string name, int hours, int rate) : base(name)
+    {
+        this.hours = hours;
+        this.rate = rate;
+    }
+
+    public override int MonthlyPay()
+    {
+        return hours * rate;
+    }
+
+    public override string Role { get { return "intern"; } }
+}`,
+          `        var staff = new List<Employee>
+        {
+            new Developer("Ann", 3000),
+            new Manager("Bob", 4000, 5),
+            new Intern("Cy", 80, 15),
+            new Developer("Di", 3500)
+        };
+        foreach (Employee e in staff)
+        {
+            Console.WriteLine(e);
+        }
+        Console.WriteLine("Total: " + Total(staff));
+        Console.WriteLine("Top: " + Top(staff).Name);
+
+        staff.Sort(new ByPay());
+        string names = "";
+        foreach (Employee e in staff)
+        {
+            names += (names == "" ? "" : " ") + e.Name;
+        }
+        Console.WriteLine(names);`,
+          "using System.Collections.Generic;",
+          `    static int Total(List<Employee> staff)
+    {
+        int total = 0;
+        foreach (Employee e in staff)
+        {
+            total += e.MonthlyPay();
+        }
+        return total;
+    }
+
+    static Employee Top(List<Employee> staff)
+    {
+        Employee best = staff[0];
+        foreach (Employee e in staff)
+        {
+            if (e.MonthlyPay() > best.MonthlyPay())
+            {
+                best = e;
+            }
+        }
+        return best;
+    }`,
+        ),
+        expectedOutput:
+          "Ann (staff): 3000\nBob (manager): 4500\nCy (intern): 1200\nDi (staff): 3500\nTotal: 12200\nTop: Bob\nBob Di Ann Cy\n",
+      },
+      { kind: "lecture", slug: "replace-conditionals", title: { en: "Replacing conditionals", uk: "Заміна умовних конструкцій" } },
+      {
+        kind: "practice",
+        slug: "refactor-type-switch",
+        title: { en: "Refactoring a type switch", uk: "Рефакторинг перевірки типу" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `class Circle
+{
+    public double Radius;
+    public Circle(double radius) { Radius = radius; }
+}
+
+class Square
+{
+    public double Side;
+    public Square(double side) { Side = side; }
+}
+
+class Rectangle
+{
+    public double Width;
+    public double Height;
+    public Rectangle(double width, double height) { Width = width; Height = height; }
+}
+
+// Replace this chain of type checks with polymorphism
+static class Geometry
+{
+    public static double Area(object shape)
+    {
+        if (shape is Circle c) return Math.PI * c.Radius * c.Radius;
+        if (shape is Square s) return s.Side * s.Side;
+        if (shape is Rectangle r) return r.Width * r.Height;
+        throw new ArgumentException("Unknown shape");
+    }
+
+    public static string Name(object shape)
+    {
+        if (shape is Circle) return "Circle";
+        if (shape is Square) return "Square";
+        if (shape is Rectangle) return "Rectangle";
+        throw new ArgumentException("Unknown shape");
+    }
+}`,
+          `        Shape[] shapes = { new Circle(2), new Square(3), new Rectangle(3, 4), new Triangle(6, 3) };
+        foreach (Shape s in shapes)
+        {
+            Console.WriteLine(s.Name + ": " + Math.Round(s.Area, 2));
+        }
+        Console.WriteLine("Total: " + Math.Round(TotalArea(shapes), 2));`,
+          "",
+          `    static double TotalArea(Shape[] shapes)
+    {
+        double total = 0;
+        foreach (Shape s in shapes)
+        {
+            total += s.Area;
+        }
+        return total;
+    }`,
+        ),
+        solution: PROGRAM_WITH(
+          `abstract class Shape
+{
+    public abstract double Area { get; }
+    public abstract string Name { get; }
+}
+
+class Circle : Shape
+{
+    private readonly double radius;
+
+    public Circle(double radius) { this.radius = radius; }
+
+    public override double Area => Math.PI * radius * radius;
+    public override string Name => "Circle";
+}
+
+class Square : Shape
+{
+    private readonly double side;
+
+    public Square(double side) { this.side = side; }
+
+    public override double Area => side * side;
+    public override string Name => "Square";
+}
+
+class Rectangle : Shape
+{
+    private readonly double width;
+    private readonly double height;
+
+    public Rectangle(double width, double height)
+    {
+        this.width = width;
+        this.height = height;
+    }
+
+    public override double Area => width * height;
+    public override string Name => "Rectangle";
+}
+
+class Triangle : Shape
+{
+    private readonly double baseLength;
+    private readonly double height;
+
+    public Triangle(double baseLength, double height)
+    {
+        this.baseLength = baseLength;
+        this.height = height;
+    }
+
+    public override double Area => baseLength * height / 2;
+    public override string Name => "Triangle";
+}`,
+          `        Shape[] shapes = { new Circle(2), new Square(3), new Rectangle(3, 4), new Triangle(6, 3) };
+        foreach (Shape s in shapes)
+        {
+            Console.WriteLine(s.Name + ": " + Math.Round(s.Area, 2));
+        }
+        Console.WriteLine("Total: " + Math.Round(TotalArea(shapes), 2));`,
+          "",
+          `    static double TotalArea(Shape[] shapes)
+    {
+        double total = 0;
+        foreach (Shape s in shapes)
+        {
+            total += s.Area;
+        }
+        return total;
+    }`,
+        ),
+        expectedOutput: "Circle: 12.57\nSquare: 9\nRectangle: 12\nTriangle: 9\nTotal: 42.57\n",
+      },
+      {
+        kind: "quiz",
+        slug: "polymorphism-review",
+        title: { en: "Self-check questions", uk: "Питання для самоперевірки" },
+        questions: [
+          {
+            id: "overload-static",
+            mode: "single",
+            prompt: {
+              en: "There are two methods, `Show(object o)` and `Show(string s)`. What does this call choose?\n\n```csharp\nobject o = \"text\";\nShow(o);\n```",
+              uk: "Є два методи, `Show(object o)` та `Show(string s)`. Що вибирає цей виклик?\n\n```csharp\nobject o = \"text\";\nShow(o);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "`Show(object)`: the compiler decides by the declared type", uk: "`Show(object)`: компілятор вирішує за оголошеним типом" } },
+              { id: "b", text: { en: "`Show(string)`: the object is a string", uk: "`Show(string)`: об'єкт є рядком" } },
+              { id: "c", text: { en: "It is a compile error: the call is ambiguous", uk: "Це помилка компіляції: виклик неоднозначний" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "override-dynamic",
+            mode: "single",
+            prompt: {
+              en: "When is the version of an `override` method chosen?",
+              uk: "Коли вибирається версія методу `override`?",
+            },
+            options: [
+              { id: "a", text: { en: "At run time, by the actual type of the object", uk: "Під час виконання, за справжнім типом об'єкта" } },
+              { id: "b", text: { en: "At compile time, by the declared type of the variable", uk: "Під час компіляції, за оголошеним типом змінної" } },
+              { id: "c", text: { en: "When the program is installed", uk: "Під час установлення програми" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "default-equality",
+            mode: "single",
+            prompt: {
+              en: "`Point` is a class that does not override `Equals` or `==`. What does this print?\n\n```csharp\nvar a = new Point(1, 2);\nvar b = new Point(1, 2);\nConsole.WriteLine(a == b);\n```",
+              uk: "`Point` — клас, що не перевизначає `Equals` чи `==`. Що друкує цей код?\n\n```csharp\nvar a = new Point(1, 2);\nvar b = new Point(1, 2);\nConsole.WriteLine(a == b);\n```",
+            },
+            options: [
+              { id: "a", text: { en: "False: two different objects are compared by reference", uk: "False: два різні об'єкти порівнюються за посиланням" } },
+              { id: "b", text: { en: "True: the fields are equal", uk: "True: поля рівні" } },
+              { id: "c", text: { en: "It does not compile", uk: "Він не компілюється" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "gethashcode",
+            mode: "single",
+            prompt: {
+              en: "Why must you override `GetHashCode()` when you override `Equals(object)`?",
+              uk: "Чому ви мусите перевизначити `GetHashCode()`, коли перевизначаєте `Equals(object)`?",
+            },
+            options: [
+              { id: "a", text: { en: "Equal objects must have equal hash codes, or `HashSet` and `Dictionary` will not find them", uk: "Рівні об'єкти мусять мати рівні хеш-коди, інакше `HashSet` і `Dictionary` їх не знайдуть" } },
+              { id: "b", text: { en: "The compiler cannot compile `Equals` without it", uk: "Компілятор не може скомпілювати `Equals` без нього" } },
+              { id: "c", text: { en: "It makes the object smaller in memory", uk: "Це зменшує об'єкт у пам'яті" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "type-chain",
+            mode: "single",
+            prompt: {
+              en: "A method has a chain `if (x is A) ... else if (x is B) ... else if (x is C) ...`, and it is repeated in five methods. What is the best fix?",
+              uk: "У методі є ланцюжок `if (x is A) ... else if (x is B) ... else if (x is C) ...`, і він повторюється в п'яти методах. Яке виправлення найкраще?",
+            },
+            options: [
+              { id: "a", text: { en: "Add a virtual (or abstract) method to the base type, and move each branch to its class", uk: "Додати віртуальний (або абстрактний) метод до базового типу й перенести кожну гілку в її клас" } },
+              { id: "b", text: { en: "Replace the `if` chain with a `switch` of the same shape", uk: "Замінити ланцюжок `if` на `switch` такої самої форми" } },
+              { id: "c", text: { en: "Copy the chain into a helper method, and call it from the five methods", uk: "Скопіювати ланцюжок у допоміжний метод і викликати його з п'яти методів" } },
+            ],
+            correct: ["a"],
+          },
+          {
+            id: "list-invariance",
+            mode: "single",
+            prompt: {
+              en: "`Dog` is derived from `Animal`. Which line does **not** compile?",
+              uk: "`Dog` походить від `Animal`. Який рядок **не** компілюється?",
+            },
+            options: [
+              { id: "a", text: { en: "`List<Animal> animals = new List<Dog>();`", uk: "`List<Animal> animals = new List<Dog>();`" } },
+              { id: "b", text: { en: "`IEnumerable<Animal> animals = new List<Dog>();`", uk: "`IEnumerable<Animal> animals = new List<Dog>();`" } },
+              { id: "c", text: { en: "`Animal[] animals = new Dog[3];`", uk: "`Animal[] animals = new Dog[3];`" } },
+            ],
+            correct: ["a"],
+          },
+        ],
+      },
+      {
+        kind: "practice",
+        slug: "expression-tree",
+        title: { en: "Practice: Expression tree", uk: "Практика «Дерево виразу»" },
+        language: "csharp",
+        starter: PROGRAM_WITH(
+          `abstract class Expr
+{
+    public abstract int Evaluate(Dictionary<string, int> variables);
+    public abstract int Depth { get; }
+    public abstract override string ToString();
+}
+
+// Write the classes Number, Variable, Add, Multiply and Negate here`,
+          `        var vars = new Dictionary<string, int> { { "x", 4 } };
+
+        Expr e = new Multiply(new Add(new Number(2), new Number(3)), new Variable("x"));
+        Console.WriteLine(e);
+        Console.WriteLine(e.Evaluate(vars));
+        Console.WriteLine(e.Depth);
+
+        Expr n = new Negate(new Add(new Variable("x"), new Number(10)));
+        Console.WriteLine(n + " = " + n.Evaluate(vars));
+        Console.WriteLine(n.Depth);
+
+        Expr big = new Add(e, n);
+        Console.WriteLine(big);
+        Console.WriteLine(big.Evaluate(vars));
+        Console.WriteLine(big.Depth);
+
+        try
+        {
+            new Variable("y").Evaluate(vars);
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("unknown variable");
+        }`,
+          "using System.Collections.Generic;",
+        ),
+        solution: PROGRAM_WITH(
+          `abstract class Expr
+{
+    public abstract int Evaluate(Dictionary<string, int> variables);
+    public abstract int Depth { get; }
+    public abstract override string ToString();
+}
+
+class Number : Expr
+{
+    private readonly int value;
+
+    public Number(int value) { this.value = value; }
+
+    public override int Evaluate(Dictionary<string, int> variables) { return value; }
+    public override int Depth { get { return 1; } }
+    public override string ToString() { return value.ToString(); }
+}
+
+class Variable : Expr
+{
+    private readonly string name;
+
+    public Variable(string name) { this.name = name; }
+
+    public override int Evaluate(Dictionary<string, int> variables)
+    {
+        int value;
+        if (!variables.TryGetValue(name, out value))
+        {
+            throw new InvalidOperationException("Unknown variable " + name);
+        }
+        return value;
+    }
+
+    public override int Depth { get { return 1; } }
+    public override string ToString() { return name; }
+}
+
+class Add : Expr
+{
+    private readonly Expr left;
+    private readonly Expr right;
+
+    public Add(Expr left, Expr right)
+    {
+        this.left = left;
+        this.right = right;
+    }
+
+    public override int Evaluate(Dictionary<string, int> variables)
+    {
+        return left.Evaluate(variables) + right.Evaluate(variables);
+    }
+
+    public override int Depth { get { return 1 + Math.Max(left.Depth, right.Depth); } }
+    public override string ToString() { return "(" + left + " + " + right + ")"; }
+}
+
+class Multiply : Expr
+{
+    private readonly Expr left;
+    private readonly Expr right;
+
+    public Multiply(Expr left, Expr right)
+    {
+        this.left = left;
+        this.right = right;
+    }
+
+    public override int Evaluate(Dictionary<string, int> variables)
+    {
+        return left.Evaluate(variables) * right.Evaluate(variables);
+    }
+
+    public override int Depth { get { return 1 + Math.Max(left.Depth, right.Depth); } }
+    public override string ToString() { return "(" + left + " * " + right + ")"; }
+}
+
+class Negate : Expr
+{
+    private readonly Expr inner;
+
+    public Negate(Expr inner) { this.inner = inner; }
+
+    public override int Evaluate(Dictionary<string, int> variables) { return -inner.Evaluate(variables); }
+    public override int Depth { get { return 1 + inner.Depth; } }
+    public override string ToString() { return "-" + inner; }
+}`,
+          `        var vars = new Dictionary<string, int> { { "x", 4 } };
+
+        Expr e = new Multiply(new Add(new Number(2), new Number(3)), new Variable("x"));
+        Console.WriteLine(e);
+        Console.WriteLine(e.Evaluate(vars));
+        Console.WriteLine(e.Depth);
+
+        Expr n = new Negate(new Add(new Variable("x"), new Number(10)));
+        Console.WriteLine(n + " = " + n.Evaluate(vars));
+        Console.WriteLine(n.Depth);
+
+        Expr big = new Add(e, n);
+        Console.WriteLine(big);
+        Console.WriteLine(big.Evaluate(vars));
+        Console.WriteLine(big.Depth);
+
+        try
+        {
+            new Variable("y").Evaluate(vars);
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("unknown variable");
+        }`,
+          "using System.Collections.Generic;",
+        ),
+        expectedOutput: "((2 + 3) * x)\n20\n3\n-(x + 10) = -14\n3\n(((2 + 3) * x) + -(x + 10))\n6\n4\nunknown variable\n",
+        maxScore: 10,
       },
     ],
   },
