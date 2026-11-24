@@ -129,6 +129,8 @@ export type Database = {
           published: boolean;
           source: ContentSource;
           updated_at: string;
+          copied_from_slide_id: string | null;
+          copied_from_question: string | null;
         };
         Insert: never;
         Update: never;
@@ -282,6 +284,7 @@ export type Database = {
       admin_delete_lecture: { Args: { p_slug: string }; Returns: undefined };
       admin_save_task: { Args: { p_task: Json; p_create: boolean }; Returns: string };
       admin_get_task: { Args: { p_slug: string }; Returns: Json };
+      admin_import_course_items: { Args: { p_items: Json; p_options: Json }; Returns: Json };
       admin_set_task_published: { Args: { p_slug: string; p_published: boolean }; Returns: undefined };
       admin_delete_task: { Args: { p_slug: string }; Returns: undefined };
       get_interview_review: {

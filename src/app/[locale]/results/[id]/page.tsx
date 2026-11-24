@@ -1,4 +1,5 @@
 import { BookOpen, Check, CircleSlash, Clock, HelpCircle, X } from "lucide-react";
+import { isOutputPractice } from "@/lib/playground/frameworks";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
@@ -177,7 +178,10 @@ export default async function ResultsPage({ params }: PageProps<"/[locale]/resul
                   const status = skipped ? "skipped" : r?.is_correct ? "correct" : (r?.score ?? 0) > 0 ? "partial" : "incorrect";
                   const answer = (r?.answer ?? null) as { selected?: string[]; files?: Record<string, string> } | null;
                   const explanation = loc(r?.explanation ?? null, locale);
-                  const lang = task.practice?.framework === "vanilla-js" ? "js" : task.practice?.framework === "react-ts" ? "tsx" : "ts";
+                  const p = task.practice;
+                  const lang = isOutputPractice(p)
+                    ? p.language === "sql" ? "sql" : "csharp"
+                    : p?.framework === "vanilla-js" ? "js" : p?.framework === "react-ts" ? "tsx" : "ts";
                   return (
                     <li key={item.id}>
                       <details className="group rounded-2xl border border-paper-3 bg-white shadow-card open:shadow-lift" open={status !== "correct"}>

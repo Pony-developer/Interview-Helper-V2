@@ -12,15 +12,21 @@ import { AssayMark } from "@/components/brand/Logo";
 import type { CodingGroundHandle } from "@/components/playground/CodingGround";
 import { PillArrow, pillClasses } from "@/components/ui/PillLink";
 import { Link, useRouter } from "@/i18n/navigation";
-import type { PracticePayload } from "@/lib/playground/frameworks";
+import { isOutputPractice, type TaskPractice } from "@/lib/playground/frameworks";
 import type { TestRunState } from "@/lib/playground/types";
 import { InterviewTimer } from "./InterviewTimer";
+import type { OutputGroundHandle } from "./OutputGround";
 import { ProgressRail, type RailStep } from "./ProgressRail";
 import { QuizStep, type QuizVM } from "./QuizStep";
 
 const CodingGround = dynamic(() => import("@/components/playground/CodingGround").then((m) => m.CodingGround), {
   ssr: false,
   loading: () => <div className="h-[min(62vh,560px)] animate-pulse rounded-2xl bg-forest-900" />,
+});
+
+const OutputGround = dynamic(() => import("./OutputGround").then((m) => m.OutputGround), {
+  ssr: false,
+  loading: () => <div className="h-[min(50vh,460px)] animate-pulse rounded-2xl bg-forest-900" />,
 });
 
 export type StepVM = {
@@ -37,7 +43,7 @@ export type StepVM = {
   prompt: ReactNode;
   code?: ReactNode;
   quiz?: QuizVM;
-  practice?: PracticePayload;
+  practice?: TaskPractice;
 };
 
 export type RunnerActions = {
@@ -82,6 +88,7 @@ export function InterviewRunner({
   const [testState, setTestState] = useState<TestRunState>({ status: "waiting" });
   const [skipOpen, setSkipOpen] = useState(false);
   const groundRef = useRef<CodingGroundHandle>(null);
+  const outputRef = useRef<OutputGroundHandle>(null);
   const stepStartedAt = useRef(0);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const finishing = useRef(false);
@@ -144,6 +151,34 @@ export function InterviewRunner({
       return advance("answered");
     }
 
+    // Output practice (C# / SQL): run the code once more and submit what it printed.
+    if (isOutputPractice(step.practice)) {
+      setPhase("testing");
+      const run = await outputRef.current!.run();
+      if (run.status === "unavailable") {
+        // The code never ran: don't grade it, let the user retry (or skip).
+        setPhase("idle");
+        return setError(t("runnerUnavailable", { reason: run.message }));
+      }
+      setPhase("submitting");
+      const res = await actions.submitItem({
+        itemId: step.itemId,
+        answer: { files: outputRef.current!.getFiles(), output: run.output },
+        testsPassed: null,
+        testsTotal: null,
+        timeSpent,
+        skip: false,
+      });
+      setPhase("idle");
+      if (!res.ok && res.error !== "duplicate") return setError(t("submitError"));
+      try {
+        window.localStorage.removeItem(`assay:draft:${step.itemId}`);
+      } catch {
+        /* ignore */
+      }
+      return advance("answered");
+    }
+
     // Practice: tests always run right before submitting.
     setPhase("testing");
     const run = await groundRef.current!.runTests();
@@ -154,7 +189,8 @@ export function InterviewRunner({
     }
     const files = groundRef.current!.getFiles();
     setPhase("submitting");
-    const total = run.total > 0 ? run.total : Math.max(1, step.practice?.testCount ?? 1);
+    const testCount = step.practice && !isOutputPractice(step.practice) ? step.practice.testCount : 1;
+    const total = run.total > 0 ? run.total : Math.max(1, testCount ?? 1);
     const res = await actions.submitItem({
       itemId: step.itemId,
       answer: { files },
@@ -277,7 +313,16 @@ export function InterviewRunner({
                 labelId={headingId}
               />
             ) : null}
-            {step.practice ? (
+            {isOutputPractice(step.practice) ? (
+              <OutputGround
+                key={step.itemId}
+                ref={outputRef}
+                itemId={step.itemId}
+                practice={step.practice}
+                storageKey={`assay:draft:${step.itemId}`}
+                disabled={busy}
+              />
+            ) : step.practice ? (
               <>
                 <CodingGround
                   key={step.itemId}
@@ -288,7 +333,7 @@ export function InterviewRunner({
                 />
                 <p className="mt-3 text-sm text-ink-muted" role="status">
                   {phase === "testing"
-                    ? t("runningTests")
+                    ? t(isOutputPractice(step.practice) ? "runningCode" : "runningTests")
                     : testState.status === "done"
                       ? t("testsSummary", { passed: testState.run.passed, total: testState.run.total })
                       : ""}
@@ -338,7 +383,7 @@ export function InterviewRunner({
                 {busy ? <Loader2 aria-hidden className="h-4 w-4 animate-spin" /> : <PillArrow />}
                 <span>
                   {phase === "testing"
-                    ? t("runningTests")
+                    ? t(isOutputPractice(step.practice) ? "runningCode" : "runningTests")
                     : phase === "submitting"
                       ? t("submitting")
                       : phase === "finishing"

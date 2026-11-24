@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { PracticePayload } from "@/lib/playground/frameworks";
+import type { TaskPractice } from "@/lib/playground/frameworks";
 import { loc } from "@/lib/i18n/localized";
 import type { Json, Tables } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
@@ -22,7 +22,7 @@ export type InterviewTask = {
   prompt: string;
   lectureSlug: string | null;
   quiz: QuizPayload | null;
-  practice: PracticePayload | null;
+  practice: TaskPractice | null;
   skills: { id: string; slug: string; name: string }[];
 };
 
@@ -84,7 +84,7 @@ export async function loadInterview(id: string, locale: string): Promise<LoadedI
         prompt: loc(t.prompt, locale),
         lectureSlug: t.lectures?.slug ?? null,
         quiz: t.quiz as unknown as QuizPayload | null,
-        practice: t.practice as unknown as PracticePayload | null,
+        practice: t.practice as unknown as TaskPractice | null,
         skills: t.task_skills.map((ts) => ts.skills).filter((s): s is NonNullable<typeof s> => !!s),
       } satisfies InterviewTask,
     ]),

@@ -85,6 +85,22 @@ export const practiceDef = taskBase.extend({
 });
 
 export const taskDef = z.discriminatedUnion("kind", [quizDef, practiceDef]);
+
+/** Admin-only: a practice graded by its program output (C# or PostgreSQL), usually copied from a course. */
+export const outputPracticeDef = taskBase.extend({
+  kind: z.literal("practice"),
+  runner: z.literal("output"),
+  language: z.enum(["csharp", "sql"]),
+  starter: z.string(),
+  /** SQL only: the script that creates the practice database. */
+  setup: z.string().optional(),
+  expectedOutput: z.string().min(1, "the expected output is required"),
+  /** Reference solution shown on the results page. */
+  solution: z.string().optional(),
+});
+export const adminTaskDef = z.union([outputPracticeDef, taskDef]);
+export type OutputPracticeDef = z.input<typeof outputPracticeDef>;
+export type AdminTaskDef = z.input<typeof adminTaskDef>;
 export type QuizDef = z.input<typeof quizDef>;
 export type PracticeDef = z.input<typeof practiceDef>;
 export type TaskDef = z.input<typeof taskDef>;

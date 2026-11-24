@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { GraduationCap, Plus } from "lucide-react";
 import { btn, inputCls, SourceBadge } from "@/components/admin/fields";
 import { PageTitle } from "@/components/admin/PageTitle";
 import { Link } from "@/i18n/navigation";
@@ -8,6 +8,8 @@ import { FRAMEWORK_CONFIG, FRAMEWORKS, type Framework } from "@/lib/playground/f
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Tasks" };
+
+const OUTPUT_LABELS: Record<string, string> = { csharp: "C#", sql: "PostgreSQL" };
 
 const one = (v: string | string[] | undefined) => (typeof v === "string" ? v : "");
 
@@ -38,6 +40,9 @@ export default async function AdminTasks({ searchParams }: PageProps<"/[locale]/
   return (
     <>
       <PageTitle title="Quizzes & practice">
+        <Link href="/admin/tasks/import" className={btn.secondary}>
+          <GraduationCap aria-hidden className="h-4 w-4" /> Import from course
+        </Link>
         <Link href="/admin/tasks/new?kind=quiz" className={btn.primary}>
           <Plus aria-hidden className="h-4 w-4" /> Quiz
         </Link>
@@ -66,6 +71,8 @@ export default async function AdminTasks({ searchParams }: PageProps<"/[locale]/
               {FRAMEWORK_CONFIG[fw].label}
             </option>
           ))}
+          <option value="csharp">C# (from courses)</option>
+          <option value="sql">PostgreSQL (from courses)</option>
         </select>
         <select name="skill" defaultValue={f.skill} aria-label="Skill" className={inputCls}>
           <option value="">Any skill</option>
@@ -128,7 +135,7 @@ export default async function AdminTasks({ searchParams }: PageProps<"/[locale]/
                   <p className="font-mono text-xs text-ink-soft">{t.slug}</p>
                 </td>
                 <td className="px-4 py-3">
-                  {t.kind === "quiz" ? "Quiz" : `Practice · ${FRAMEWORK_CONFIG[t.framework as Framework]?.label ?? t.framework}`}
+                  {t.kind === "quiz" ? "Quiz" : `Practice · ${FRAMEWORK_CONFIG[t.framework as Framework]?.label ?? OUTPUT_LABELS[t.framework ?? ""] ?? t.framework}`}
                 </td>
                 <td className="px-4 py-3 text-ink-muted">{t.skills.join(", ")}</td>
                 <td className="px-4 py-3">{t.complexity}/5</td>

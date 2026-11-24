@@ -688,5 +688,90 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
         expect((await db.query(`select 1 from public.tasks where slug = $1`, [used])).rows).toHaveLength(0);
       });
     });
+
+    it("copies course quiz questions and practices into draft tasks, once, and grades output practices", async () => {
+      const skill = (await db.query<{ slug: string }>(`select slug from public.skills order by slug limit 1`)).rows[0].slug;
+      const quizSlide = (
+        await db.query<{ id: string; qid: string; n: number }>(
+          `select id, quiz->'questions'->0->>'id' as qid, jsonb_array_length(quiz->'questions') as n
+             from public.course_slides where slug = 'terminology'`,
+        )
+      ).rows[0];
+      const sqlSlide = (
+        await db.query<{ id: string }>(
+          "select s.id from public.course_slides s join public.courses c on c.id = s.course_id where c.slug = 'databases' and s.slug = 'first-query'",
+        )
+      ).rows[0].id;
+      const items = JSON.stringify([
+        { slide: quizSlide.id, question: quizSlide.qid },
+        { slide: sqlSlide, question: null },
+      ]);
+      const options = JSON.stringify({ skills: [{ slug: skill, weight: 1 }], complexity: 2, quiz_seconds: 90, practice_seconds: 600 });
+
+      await asUser(USER_B, async () => {
+        await expect(db.query(`select public.admin_import_course_items($1::jsonb, $2::jsonb)`, [items, options])).rejects.toThrow(/Only admins/);
+      });
+
+      const slugs = await asUser(USER_A, async () => {
+        const first = (await db.query<{ r: { created: string[]; skipped: number } }>(
+          `select public.admin_import_course_items($1::jsonb, $2::jsonb) as r`,
+          [items, options],
+        )).rows[0].r;
+        expect(first.created).toHaveLength(2);
+        expect(first.skipped).toBe(0);
+        const again = (await db.query<{ r: { created: string[]; skipped: number } }>(
+          `select public.admin_import_course_items($1::jsonb, $2::jsonb) as r`,
+          [items, options],
+        )).rows[0].r;
+        expect(again).toEqual({ created: [], skipped: 2 });
+        return first.created;
+      });
+
+      const rows = (
+        await db.query<{ slug: string; kind: string; published: boolean; title: { en: string }; quiz: { options: unknown[] } | null; practice: { runner: string; language: string; setup: string } | null; correct: string[] | null; expected: string | null; key: string[] | null }>(
+          `select t.slug, t.kind, t.published, t.title, t.quiz, t.practice, sol.correct_option_ids as correct, sol.expected_output as expected,
+                  array(select jsonb_array_elements_text(k.quiz_answers -> t.copied_from_question)) as key
+             from public.tasks t
+             join private.task_solutions sol on sol.task_id = t.id
+             left join private.course_slide_keys k on k.slide_id = t.copied_from_slide_id
+            where t.slug = any($1) order by t.kind`,
+          [slugs],
+        )
+      ).rows;
+      const [quizTask, practiceTask] = rows; // enum order: quiz, practice
+      expect(quizTask.kind).toBe("quiz");
+      expect(quizTask.published).toBe(false);
+      expect(quizTask.quiz?.options.length).toBeGreaterThan(1);
+      expect([...(quizTask.correct ?? [])].sort()).toEqual([...(quizTask.key ?? [])].sort());
+      if (quizSlide.n > 1) expect(quizTask.title.en).toMatch(/ · 1$/);
+      expect(practiceTask.practice).toMatchObject({ runner: "output", language: "sql" });
+      expect(practiceTask.practice?.setup).toContain("CREATE TABLE categories");
+      expect(practiceTask.expected).toBeTruthy();
+
+      // An output practice in an interview: wrong output fails, the expected output passes.
+      const practiceId = (await db.query<{ id: string }>(`select id from public.tasks where slug = $1`, [practiceTask.slug])).rows[0].id;
+      const graded = await asUser(USER_B, async () => {
+        const results: { is_correct: boolean; score: number; tests_passed: number; tests_total: number }[] = [];
+        for (const output of ["nope", practiceTask.expected!]) {
+          const iv = await db.query<{ id: string }>(
+            `insert into public.interviews (method, level, budget_seconds) values ('manual', 'middle', 900) returning id`,
+          );
+          const item = await db.query<{ id: string }>(
+            `insert into public.interview_items (interview_id, task_id, position) values ($1, $2, 0) returning id`,
+            [iv.rows[0].id, practiceId],
+          );
+          await db.query(`select public.submit_item($1, $2::jsonb)`, [
+            item.rows[0].id,
+            JSON.stringify({ files: { "query.sql": "select 1" }, output }),
+          ]);
+          results.push(
+            (await db.query<(typeof results)[number]>(`select is_correct, score, tests_passed, tests_total from public.interview_items where id = $1`, [item.rows[0].id])).rows[0],
+          );
+        }
+        return results;
+      });
+      expect(graded[0]).toMatchObject({ is_correct: false, score: 0, tests_passed: 0, tests_total: 1 });
+      expect(graded[1]).toMatchObject({ is_correct: true, score: 1, tests_passed: 1, tests_total: 1 });
+    });
   });
 });

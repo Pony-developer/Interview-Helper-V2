@@ -583,7 +583,10 @@
     "code": "Code",
     "exit": "Exit interview",
     "cancel": "Cancel",
-    "testsTimedOut": "The tests did not report back, so nothing was submitted. Check the preview for errors and try again."
+    "testsTimedOut": "The tests did not report back, so nothing was submitted. Check the preview for errors and try again.",
+    "runCode": "Run",
+    "runningCode": "Running your code before submitting…",
+    "runnerUnavailable": "Your code couldn't be run, so nothing was submitted. {reason}"
   },
   "results": {
     "metaTitle": "Interview results",

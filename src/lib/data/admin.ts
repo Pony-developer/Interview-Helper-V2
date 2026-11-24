@@ -5,7 +5,7 @@ import type { SkillFormState } from "@/components/admin/SkillEditor";
 import type { FileRow, TaskFormState, TaskMeta } from "@/components/admin/TaskEditor";
 import { practiceTemplate } from "@/lib/admin/templates";
 import { SKILL_CATEGORIES, type SkillCategory } from "@/lib/content/schema";
-import type { Framework, PracticePayload } from "@/lib/playground/frameworks";
+import { isOutputPractice, outputPracticeFile, type Framework, type PracticePayload, type TaskPractice } from "@/lib/playground/frameworks";
 import type { ContentSource, Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -34,7 +34,7 @@ export async function listTasks(): Promise<AdminTaskRow[]> {
   const { data, error } = await supabase
     .from("tasks")
     .select(
-      "slug, kind, complexity, published, source, updated_at, title, framework:practice->>framework, task_skills(weight, skills(slug))",
+      "slug, kind, complexity, published, source, updated_at, title, framework:practice->>framework, language:practice->>language, task_skills(weight, skills(slug))",
     )
     .order("updated_at", { ascending: false });
   if (error) throw error;
@@ -47,6 +47,8 @@ export async function listTasks(): Promise<AdminTaskRow[]> {
     updated_at: string;
     title: Json;
     framework: string | null;
+    /** Output practices (copied from courses): csharp | sql. */
+    language: string | null;
     task_skills: { weight: number; skills: { slug: string } | null }[];
   };
   return (data as unknown as Row[]).map((r) => ({
@@ -57,7 +59,7 @@ export async function listTasks(): Promise<AdminTaskRow[]> {
     source: r.source,
     updatedAt: r.updated_at,
     title: toLoc(r.title).en,
-    framework: r.framework,
+    framework: r.framework ?? r.language,
     skills: [...r.task_skills].sort((a, b) => b.weight - a.weight).flatMap((l) => (l.skills ? [l.skills.slug] : [])),
   }));
 }
@@ -152,6 +154,12 @@ const blankTask = (): Omit<TaskFormState, "kind"> => ({
   activeFile: "",
   tests: "",
   dependencies: "",
+  runner: "tests",
+  language: "csharp",
+  starter: "",
+  setup: "",
+  expectedOutput: "",
+  outputSolution: "",
 });
 
 export function newTaskState(kind: "quiz" | "practice", template?: string, skill?: string): TaskFormState {
@@ -189,7 +197,7 @@ type AdminTask = {
     codeLanguage?: string;
     options: { id: string; text: Json; code?: string }[];
   } | null;
-  practice: PracticePayload | null;
+  practice: TaskPractice | null;
   published: boolean;
   source: ContentSource;
   updated_at: string;
@@ -197,6 +205,8 @@ type AdminTask = {
   skills: { slug: string; weight: number }[];
   correct: string[];
   solution: Record<string, string> | null;
+  expected_output: string | null;
+  copied_from: { course: string; course_title: Json; slide: string; slide_title: Json; question: string | null } | null;
   used_in_interviews: boolean;
 };
 
@@ -235,8 +245,16 @@ export async function getTaskState(slug: string): Promise<{ state: TaskFormState
     }));
     state.correct = t.correct;
   }
-  if (t.kind === "practice" && t.practice) {
+  if (t.kind === "practice" && isOutputPractice(t.practice)) {
     const p = t.practice;
+    state.runner = "output";
+    state.language = p.language;
+    state.starter = p.starter;
+    state.setup = p.setup ?? "";
+    state.expectedOutput = t.expected_output ?? "";
+    state.outputSolution = t.solution?.[outputPracticeFile(p.language)] ?? "";
+  } else if (t.kind === "practice" && t.practice) {
+    const p = t.practice as PracticePayload;
     const visible = p.visibleFiles?.length ? p.visibleFiles : Object.keys(p.files);
     state.framework = p.framework as Framework;
     state.files = Object.entries(p.files).map(([path, starter]): FileRow => ({
@@ -258,6 +276,14 @@ export async function getTaskState(slug: string): Promise<{ state: TaskFormState
       source: t.source,
       usedInInterviews: t.used_in_interviews,
       updatedAt: t.updated_at,
+      copiedFrom: t.copied_from
+        ? {
+            course: t.copied_from.course,
+            courseTitle: toLoc(t.copied_from.course_title).en || t.copied_from.course,
+            slideTitle: toLoc(t.copied_from.slide_title).en || t.copied_from.slide,
+            question: t.copied_from.question,
+          }
+        : null,
     },
   };
 }

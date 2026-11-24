@@ -116,6 +116,27 @@ export type PracticePayload = {
   dependencies?: Record<string, string>;
 };
 
+/**
+ * A practice graded by its output instead of tests (copied from a course practice slide):
+ * C# runs on Wandbox through our server, SQL runs in the browser on PGlite after `setup`.
+ */
+export type OutputPractice = {
+  runner: "output";
+  language: "csharp" | "sql";
+  starter: string;
+  /** SQL only: the script that creates the practice database. */
+  setup?: string;
+};
+
+/** Any practice payload stored in tasks.practice. */
+export type TaskPractice = PracticePayload | OutputPractice;
+
+export const isOutputPractice = (p: TaskPractice | null | undefined): p is OutputPractice =>
+  !!p && (p as OutputPractice).runner === "output";
+
+/** File name an output practice's code is saved under (answers and solutions). */
+export const outputPracticeFile = (language: OutputPractice["language"]) => (language === "sql" ? "query.sql" : "Program.cs");
+
 function relativeFromEntry(entry: string, target: string) {
   const depth = entry.split("/").length - 2; // "/src/main.ts" → 1, "/index.ts" → 0
   return (depth === 0 ? "./" : "../".repeat(depth)) + target.replace(/^\//, "");

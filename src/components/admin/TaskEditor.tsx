@@ -5,7 +5,7 @@ import { Eye, EyeOff, Plus, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { deleteTaskAction, saveTaskAction, setTaskPublishedAction } from "@/app/actions/admin";
 import { useRouter } from "@/i18n/navigation";
-import type { TaskDef } from "@/lib/content/schema";
+import type { AdminTaskDef } from "@/lib/content/schema";
 import { PRACTICE_TEMPLATES } from "@/lib/admin/templates";
 import { countTests, FRAMEWORK_CONFIG, FRAMEWORKS, type Framework, type PracticePayload } from "@/lib/playground/frameworks";
 import {
@@ -59,15 +59,24 @@ export type TaskFormState = {
   activeFile: string;
   tests: string;
   dependencies: string;
+  // practice graded by program output (C# / PostgreSQL)
+  runner: "tests" | "output";
+  language: "csharp" | "sql";
+  starter: string;
+  setup: string;
+  expectedOutput: string;
+  outputSolution: string;
 };
 
 export type TaskMeta = {
   source: "seed" | "admin";
   usedInInterviews: boolean;
   updatedAt: string;
+  /** Set when the task was copied from a course quiz question or practice. */
+  copiedFrom?: { course: string; courseTitle: string; slideTitle: string; question: string | null } | null;
 };
 
-function toTaskDef(s: TaskFormState): TaskDef {
+function toTaskDef(s: TaskFormState): AdminTaskDef {
   const base = {
     slug: s.slug.trim(),
     skills: s.skills.filter((k) => k.slug.trim()).map((k) => ({ slug: k.slug.trim(), weight: k.weight })),
@@ -91,6 +100,18 @@ function toTaskDef(s: TaskFormState): TaskDef {
         code: o.code.trim() ? o.code : undefined,
       })),
       correct: s.correct,
+    };
+  }
+  if (s.runner === "output") {
+    return {
+      ...base,
+      kind: "practice",
+      runner: "output",
+      language: s.language,
+      starter: s.starter,
+      setup: s.language === "sql" && s.setup.trim() ? s.setup : undefined,
+      expectedOutput: s.expectedOutput,
+      solution: s.outputSolution.trim() ? s.outputSolution : undefined,
     };
   }
   const files = Object.fromEntries(s.files.map((f) => [f.path.trim(), f.starter]));
@@ -121,7 +142,7 @@ function toTaskDef(s: TaskFormState): TaskDef {
 
 function practicePayload(s: TaskFormState): PracticePayload {
   const def = toTaskDef(s);
-  if (def.kind !== "practice") throw new Error("not a practice task");
+  if (def.kind !== "practice" || "runner" in def) throw new Error("not a tested practice task");
   return {
     framework: def.framework,
     files: def.files,
@@ -186,6 +207,12 @@ export function TaskEditor({
           <SourceBadge source={meta.source} />
           <span>Last updated {new Date(meta.updatedAt).toLocaleString()}</span>
           {meta.source === "seed" ? <span>· Saving here takes it over from the repository seed.</span> : null}
+          {meta.copiedFrom ? (
+            <span>
+              · Copied from the course <strong className="font-semibold text-ink">{meta.copiedFrom.courseTitle}</strong>, “{meta.copiedFrom.slideTitle}”
+              {meta.copiedFrom.question ? ` (question ${meta.copiedFrom.question})` : ""}. Course edits don&apos;t change it.
+            </span>
+          ) : null}
         </p>
       ) : null}
 
@@ -245,7 +272,24 @@ export function TaskEditor({
         <LocalizedField id="prompt" label="Prompt (Markdown)" value={s.prompt} onChange={(v) => set("prompt", v)} rows={9} markdown />
       </Section>
 
-      {s.kind === "quiz" ? <QuizFields s={s} set={set} /> : <PracticeFields s={s} set={set} setS={setS} create={create} />}
+      {s.kind === "practice" && create ? (
+        <Section title="Practice type">
+          <Field label="Graded by" htmlFor="runner" className="max-w-md">
+            <select id="runner" value={s.runner} onChange={(e) => set("runner", e.target.value as TaskFormState["runner"])} className={inputCls}>
+              <option value="tests">Tests in the browser (JavaScript / TypeScript frameworks)</option>
+              <option value="output">Program output (C# or PostgreSQL)</option>
+            </select>
+          </Field>
+        </Section>
+      ) : null}
+
+      {s.kind === "quiz" ? (
+        <QuizFields s={s} set={set} />
+      ) : s.runner === "output" ? (
+        <OutputPracticeFields s={s} set={set} />
+      ) : (
+        <PracticeFields s={s} set={set} setS={setS} create={create} />
+      )}
 
       <Section title="Explanation" description="Markdown shown on the results page after the interview.">
         <LocalizedField id="explanation" label="Explanation" value={s.explanation} onChange={(v) => set("explanation", v)} rows={7} markdown />
@@ -269,7 +313,7 @@ export function TaskEditor({
   );
 }
 
-function SkillsField({
+export function SkillsField({
   value,
   onChange,
   options,
@@ -704,6 +748,43 @@ function PracticeFields({
           </div>
         ) : null}
       </div>
+    </Section>
+  );
+}
+
+function OutputPracticeFields({ s, set }: { s: TaskFormState; set: SetFn }) {
+  const sql = s.language === "sql";
+  return (
+    <Section
+      title="Coding task (graded by output)"
+      description="The candidate's program passes when its output matches the expected output (trailing spaces and blank lines are ignored). C# runs on Wandbox; PostgreSQL runs in the browser."
+    >
+      <Field label="Language" htmlFor="language" className="max-w-xs">
+        <select id="language" value={s.language} onChange={(e) => set("language", e.target.value as TaskFormState["language"])} className={inputCls}>
+          <option value="csharp">C#</option>
+          <option value="sql">PostgreSQL</option>
+        </select>
+      </Field>
+      {sql ? (
+        <Field label="Database setup (SQL)" hint="Creates and fills the practice database before every run. Candidates can read it.">
+          <CodeArea ariaLabel="Database setup" value={s.setup} onChange={(v) => set("setup", v)} rows={10} language="sql" />
+        </Field>
+      ) : null}
+      <Field label="Starter code" hint={sql ? "query.sql" : "Program.cs"}>
+        <CodeArea ariaLabel="Starter code" value={s.starter} onChange={(v) => set("starter", v)} rows={14} language={s.language} />
+      </Field>
+      <Field label="Expected output" htmlFor="expected-output">
+        <textarea
+          id="expected-output"
+          value={s.expectedOutput}
+          onChange={(e) => set("expectedOutput", e.target.value)}
+          rows={8}
+          className={`${inputCls} font-mono text-[13px]`}
+        />
+      </Field>
+      <Field label="Solution" hint="Shown on the results page; never sent to the browser during an interview.">
+        <CodeArea ariaLabel="Solution" value={s.outputSolution} onChange={(v) => set("outputSolution", v)} rows={14} language={s.language} />
+      </Field>
     </Section>
   );
 }

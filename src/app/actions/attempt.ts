@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { runCSharp, type RunResult } from "@/lib/runner/csharp";
 import { createClient } from "@/lib/supabase/server";
 
 const uuid = z.string().uuid();
@@ -9,6 +10,8 @@ const submitInput = z.object({
   answer: z
     .union([
       z.object({ selected: z.array(z.string().max(20)).max(10) }),
+      // Output practice: the code plus what it printed (null when it didn't compile or failed).
+      z.object({ files: z.record(z.string().max(200), z.string().max(100_000)), output: z.string().max(100_000).nullable() }),
       z.object({ files: z.record(z.string().max(200), z.string().max(100_000)) }),
     ])
     .nullable(),
@@ -48,4 +51,32 @@ export async function finishInterviewAction(interviewId: string) {
   const { data, error } = await supabase.rpc("finish_interview", { p_interview_id: interviewId });
   if (error) return { ok: false as const, error: "server" };
   return { ok: true as const, result: data as { score: number; grade: string } };
+}
+
+/**
+ * Runs the candidate's C# for an output practice of their own open interview. Only grading-free:
+ * the output comes back to the browser and is submitted with the answer. Tied to an interview item
+ * so the endpoint can't be used as an anonymous compiler proxy.
+ */
+export async function runInterviewCodeAction(
+  itemId: string,
+  code: string,
+): Promise<{ ok: true; run: RunResult } | { ok: false; error: "invalid" | "server" }> {
+  if (!uuid.safeParse(itemId).success || typeof code !== "string" || code.length > 50_000) return { ok: false, error: "invalid" };
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims?.claims?.sub) return { ok: false, error: "invalid" };
+  // RLS: only the owner sees the item.
+  const { data, error } = await supabase
+    .from("interview_items")
+    .select("status, tasks(practice), interviews(status)")
+    .eq("id", itemId)
+    .maybeSingle();
+  if (error) return { ok: false, error: "server" };
+  const row = data as unknown as { status: string; tasks: { practice: { runner?: string; language?: string } | null } | null; interviews: { status: string } | null } | null;
+  const practice = row?.tasks?.practice;
+  if (!row || row.status !== "pending" || row.interviews?.status !== "in_progress" || practice?.runner !== "output" || practice.language !== "csharp") {
+    return { ok: false, error: "invalid" };
+  }
+  return { ok: true, run: await runCSharp(code) };
 }

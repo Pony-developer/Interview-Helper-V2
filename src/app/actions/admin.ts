@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { formatIssues, taskIssues } from "@/lib/admin/validate";
 import { isAdmin } from "@/lib/auth/roles";
-import { localized, skillDef, taskDef } from "@/lib/content/schema";
-import { countTests, type PracticePayload } from "@/lib/playground/frameworks";
+import { adminTaskDef, localized, skillDef } from "@/lib/content/schema";
+import { countTests, outputPracticeFile, type PracticePayload } from "@/lib/playground/frameworks";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -39,7 +39,7 @@ function refreshSite() {
 const taskInput = z.object({
   create: z.boolean(),
   published: z.boolean(),
-  task: taskDef,
+  task: adminTaskDef,
 });
 
 export async function saveTaskAction(input: z.input<typeof taskInput>): Promise<AdminResult> {
@@ -47,6 +47,7 @@ export async function saveTaskAction(input: z.input<typeof taskInput>): Promise<
   const parsed = taskInput.safeParse(input);
   if (!parsed.success) return { ok: false, errors: formatIssues(parsed.error) };
   const { task: t, create, published } = parsed.data;
+  if ("runner" in t) return saveOutputPractice(t, create, published);
   const issues = taskIssues(t);
   if (issues.length) return { ok: false, errors: issues };
 
@@ -88,6 +89,77 @@ export async function saveTaskAction(input: z.input<typeof taskInput>): Promise<
     solution: t.kind === "practice" ? t.solution : null,
   };
 
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_save_task", {
+    p_task: JSON.parse(JSON.stringify(payload)) as Json,
+    p_create: create,
+  });
+  if (error) return dbError(error);
+  refreshSite();
+  return { ok: true, slug: t.slug };
+}
+
+const importInput = z.object({
+  items: z
+    .array(z.object({ slide: z.string().uuid(), question: z.string().min(1).max(60).nullable() }))
+    .min(1, "Pick at least one quiz question or practice.")
+    .max(200, "Import at most 200 items at a time."),
+  skills: z.array(z.object({ slug, weight: z.number().gt(0).lte(1) })).min(1, "Add at least one skill."),
+  complexity: z.number().int().min(1).max(5),
+  quizSeconds: z.number().int().min(10).max(3600),
+  practiceSeconds: z.number().int().min(60).max(4 * 3600),
+  lecture: slug.nullable(),
+  published: z.boolean(),
+});
+
+export type ImportResult = { ok: true; created: string[]; skipped: number } | { ok: false; errors: string[] };
+
+/** Copies course quiz questions and practice slides into tasks (see admin_import_course_items). */
+export async function importCourseItemsAction(input: z.input<typeof importInput>): Promise<ImportResult> {
+  if (!(await isAdmin())) return FORBIDDEN as ImportResult;
+  const parsed = importInput.safeParse(input);
+  if (!parsed.success) return { ok: false, errors: formatIssues(parsed.error) };
+  const d = parsed.data;
+  if (new Set(d.skills.map((s) => s.slug)).size !== d.skills.length) return { ok: false, errors: ["skills: each skill can be linked once"] };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("admin_import_course_items", {
+    p_items: d.items,
+    p_options: {
+      skills: d.skills,
+      complexity: d.complexity,
+      quiz_seconds: d.quizSeconds,
+      practice_seconds: d.practiceSeconds,
+      lecture: d.lecture,
+      published: d.published,
+    },
+  });
+  if (error) return dbError(error) as ImportResult;
+  const result = data as { created: string[]; skipped: number };
+  refreshSite();
+  return { ok: true, created: result.created, skipped: result.skipped };
+}
+
+type OutputPracticeTask = Extract<z.output<typeof adminTaskDef>, { runner: "output" }>;
+
+async function saveOutputPractice(t: OutputPracticeTask, create: boolean, published: boolean): Promise<AdminResult> {
+  const skillSlugs = t.skills.map((s) => (typeof s === "string" ? s : s.slug));
+  if (new Set(skillSlugs).size !== skillSlugs.length) return { ok: false, errors: ["skills: each skill can be linked once"] };
+  const payload = {
+    slug: t.slug,
+    kind: "practice",
+    complexity: t.complexity,
+    est_seconds: t.estSeconds,
+    title: t.title,
+    prompt: t.prompt,
+    explanation: t.explanation,
+    published,
+    lecture: t.lecture ?? null,
+    skills: t.skills.map((s) => (typeof s === "string" ? { slug: s, weight: 1 } : s)),
+    practice: { runner: "output", language: t.language, starter: t.starter, setup: t.language === "sql" ? t.setup || undefined : undefined },
+    expected_output: t.expectedOutput,
+    solution: t.solution?.trim() ? { [outputPracticeFile(t.language)]: t.solution } : null,
+  };
   const supabase = await createClient();
   const { error } = await supabase.rpc("admin_save_task", {
     p_task: JSON.parse(JSON.stringify(payload)) as Json,
