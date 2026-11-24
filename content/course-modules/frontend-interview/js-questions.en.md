@@ -162,3 +162,155 @@ These questions come from chapter 4, "Hoisting". One of the book's examples (fun
 114. When a `var` and a function declaration share a name, which is hoisted first?
 115. What happens when a function with the same name is declared twice in one scope?
 116. How do function declarations inside blocks (`if`) behave in modern JavaScript?
+
+## From "You Don't Know JS: Scope & Closures", appendix B
+
+These questions come from appendix B, "Polyfilling Block Scope". Block scope through `catch` and explicit `{ }` blocks for `let` are already in the "You Don't Know JS" module.
+
+117. Why isn't wrapping code in an IIFE a drop-in replacement for a block scope?
+118. How do transpilers turn `let` into code for older engines?
+
+## From "You Don't Know JS: this & Object Prototypes", chapter 1
+
+These questions come from chapter 1, "this Or That?", which is about what `this` is not. The rules that decide `this` are in question 100 and in the "You Don't Know JS" module.
+
+119. Does `this` inside a function refer to the function itself? How can a function refer to itself?
+120. Does `this` refer to the function's lexical scope? Can `this` reach a function's local variables?
+
+## From "You Don't Know JS: this & Object Prototypes", chapter 3
+
+These questions come from chapter 3, "Objects". Copying, freezing, iterating and listing keys of objects are already covered earlier in this module.
+
+121. What is a property descriptor? What do `writable` and `Object.defineProperty` do, and what are the defaults?
+122. What does `configurable: false` prevent, and can it be undone?
+123. How do getters and setters (accessor descriptors) work?
+124. How do you check whether a property exists, and whether it is enumerable?
+125. What happens when you add named or numeric-looking properties to an array?
+
+## From "You Don't Know JS: this & Object Prototypes", chapter 5
+
+These questions come from chapter 5, "Prototypes". The prototype chain, `Object.create` and behavior delegation, `in` versus own-property checks, and checking relationships with `isPrototypeOf` are already covered earlier and in the "You Don't Know JS" module.
+
+126. What happens when you assign to a property that exists higher on the prototype chain (writable, read-only, setter)? What is shadowing?
+127. What does `obj.a++` do when `a` is inherited from the prototype?
+128. Does `new` copy anything? What does the `constructor` property really mean, and why is it unreliable?
+129. How do you link `Bar.prototype` to `Foo.prototype`, and what is wrong with `Bar.prototype = Foo.prototype` or `= new Foo()`?
+130. What does the second argument of `Object.create` do?
+
+## From "You Don't Know JS: Types & Grammar", chapter 1
+
+These questions come from chapter 1, "Types". The list of built-in types, `typeof` (including `typeof null`), functions and arrays as subtypes of object, and undeclared versus undefined variables are already covered earlier and in the "You Don't Know JS" module.
+
+131. What does a function's `length` property return?
+132. How do you safely check whether an optional global (such as `DEBUG`) exists?
+
+## From "You Don't Know JS: Types & Grammar", chapter 3
+
+These questions come from chapter 3, "Natives". Boxing and wrapper objects (including the truthy `new Boolean(false)`), sparse arrays, `new Function` and checking for arrays are already covered earlier and in the "You Don't Know JS" module.
+
+133. What does `Object.prototype.toString.call(value)` return, and why is it useful?
+134. What does `Array(3)` create, and how does it differ from `Array(3, 4)` and `Array.from({ length: 3 })`?
+135. How do built-in constructors such as `Date`, `String`, `Error` and `Symbol` behave with and without `new`?
+136. What are the built-in prototypes like (`Array.prototype`, `Function.prototype`, `RegExp.prototype`), and why shouldn't you use or extend them?
+
+## From "You Don't Know JS: Types & Grammar", chapter 5
+
+These questions come from chapter 5, "Grammar". `x++` versus `++x`, `switch` and the temporal dead zone of `let` are already covered earlier and in the "You Don't Know JS" module.
+
+137. Is an assignment an expression? What does `var a = b = 42` do inside a function?
+138. Why does `{}` sometimes mean a block and sometimes an object literal? Why do `[] + {}` and `{} + []` give different results?
+139. What are labeled statements, and how do `break` and `continue` work with labels?
+140. How do operator precedence and associativity work (`&&` and `||`, the comma operator, chained `? :`)?
+141. What is automatic semicolon insertion (ASI), and when does it bite?
+142. How do `try`, `finally` and `return` interact?
+143. How do default parameters interact with the temporal dead zone and `arguments`?
+
+## From "You Don't Know JS: Async & Performance", chapter 2
+
+These questions come from chapter 2, "Callbacks". Callback problems such as inversion of control and nesting are already in question 103.
+
+144. What goes wrong when a callback is sometimes called synchronously and sometimes asynchronously ("Zalgo")?
+145. How do error-first and split callbacks handle errors, and what can still go wrong?
+146. How do you protect a callback from never being called, or being called more than once?
+
+## From "You Don't Know JS: Async & Performance", chapter 4
+
+These questions come from chapter 4, "Generators". What generators are, how `yield` pauses them and how to make a custom iterable with one are already covered in the Middle module and in question 95.
+
+147. How do you pass values into a generator with `next(value)`, and why is the first `next()` argument ignored?
+148. What happens when you `break` out of a `for..of` over a generator, and what happens to its `return` value?
+149. What does `it.throw(error)` do to a paused generator?
+150. How do generators combined with promises lead to `async/await`?
+151. What does `yield*` delegation do?
+
+## From "You Don't Know JS: Async & Performance", chapter 1
+
+These questions come from chapter 1, "Asynchrony: Now & Later". What the event loop does, asynchronous versus concurrent versus parallel, timer delays and the basic order of promise callbacks and timers are already covered earlier and in the Middle module.
+
+152. Why doesn't `var data = ajax(url); console.log(data)` log the response, and why isn't a synchronous request the fix?
+153. Why can `console.log(obj)` show a value that changed after the call?
+154. What does run-to-completion mean, and what kind of race condition is still possible in single-threaded JavaScript?
+155. Why can't you rely on the order in which two responses arrive?
+156. What are the "gate" and "latch" patterns for coordinating concurrent callbacks?
+157. How do you keep a long-running computation from freezing the page?
+158. How does the job (microtask) queue differ from the event loop queue, and what is starvation?
+159. Can the engine run statements in a different order than they are written?
+
+## From "You Don't Know JS: Async & Performance", chapter 6
+
+These questions come from chapter 6, "Benchmarking & Tuning". Why one-off timings and microbenchmarks mislead, and how to benchmark with many runs and statistics, are already in question 105.
+
+160. What makes a benchmark comparison fair? What is wrong with comparing `arr.sort()` against `arr.sort((a, b) => a - b)`?
+161. Which optimizations are worth your time, and what is the critical path?
+162. What is tail call optimization, and can you rely on it in JavaScript?
+
+## From "You Don't Know JS: ES6 & Beyond", chapter 1
+
+These questions come from chapter 1, "ES? Now & Future". Polyfilling versus transpiling, why new syntax can't be polyfilled and how `Object.is` differs from `===` are already covered earlier, in the Middle module and in the "You Don't Know JS" module.
+
+163. How are ES6 and ES2015 related, and why should you check support feature by feature rather than by edition?
+164. How do you polyfill `Object.is`, and how does the polyfill tell `0` from `-0` and recognize `NaN`?
+165. How do you adopt new language features while still supporting older browsers?
+
+## From "You Don't Know JS: ES6 & Beyond", chapter 2
+
+These questions come from chapter 2, "Syntax". `let`/`const`, block-scoped functions, spread and rest, basic destructuring, arrow functions, `for...of`, template and tagged template literals, and symbols as unique keys are already covered earlier in this course.
+
+166. When are default parameter values evaluated, and can they use other parameters?
+167. How do defaults, renaming and nested patterns work in object destructuring?
+168. What can you do with destructuring assignment (swapping, assigning to existing variables), and what can go wrong?
+169. What do concise methods, computed property names, `__proto__` and `super` add to object literals?
+170. How does JavaScript handle Unicode characters outside the basic range (`length`, the `u` flag, `normalize`)?
+171. What is the global symbol registry (`Symbol.for`), and how hidden are symbol keys?
+172. What does the sticky (`y`) regex flag do?
+
+## From "You Don't Know JS: ES6 & Beyond", chapter 6
+
+These questions come from chapter 6, "API Additions". `Array.from` for array-likes, `fill`, `find`/`findIndex`, `Object.is`, `Object.setPrototypeOf`, `Object.getOwnPropertySymbols`, `Number.isNaN`, `Number.isInteger`, `Number.EPSILON`, safe integers, `Math.trunc`, `includes`/`startsWith`/`endsWith`, `codePointAt` and `normalize` are already covered earlier and in the "You Don't Know JS" module.
+
+173. What do `Array.of`, the map function of `Array.from` and `copyWithin` do?
+174. How does `Number.isFinite` differ from the global `isFinite`?
+175. What exactly does `Object.assign` copy, and how does it treat getters and setters?
+176. What do `String.raw` and `repeat` do?
+177. What do the array iterators `keys()`, `values()` and `entries()` return, and how do they treat holes?
+
+## From "You Don't Know JS: ES6 & Beyond", chapter 8
+
+These questions come from chapter 8, "Beyond ES6". Object spread and rest, `Array.prototype.includes`, SIMD and WebAssembly are already covered earlier in this module.
+
+178. What does an `async` function return, what can you `await`, and can you cancel it?
+179. How does the exponentiation operator `**` work, and what are its gotchas?
+180. What happened to `Object.observe`, and what do you use instead?
+
+## From "You Don't Know JS: ES6 & Beyond", chapter 7
+
+These questions come from chapter 7, "Meta Programming". `new.target`, `Symbol.species`, `Symbol.iterator`, `Symbol.toStringTag` with `Object.prototype.toString`, proxy basics, `bound` function names and tail call optimization are already covered earlier and in the "You Don't Know JS" module.
+
+181. How is a function's `name` inferred, and when is it empty or `"anonymous"`?
+182. How does `Symbol.toPrimitive` work, and which hint do `+`, `*` and `String()` pass?
+183. What do `Symbol.hasInstance`, `Symbol.isConcatSpreadable` and the regex symbols (`Symbol.replace` and others) let you customize?
+184. What can't a proxy intercept, what is a revocable proxy, and why forward traps with `Reflect`?
+185. What is the difference between the "proxy first" and "proxy last" patterns?
+186. How does the `Reflect` API differ from the similar `Object` methods?
+187. In what order does `Reflect.ownKeys` list keys, and how do `Object.keys`, `JSON.stringify` and `for..in` differ?
+188. How do you feature-test new syntax at runtime?
