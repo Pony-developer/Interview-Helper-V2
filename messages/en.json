@@ -35,7 +35,8 @@
     "signOut": "Sign out",
     "account": "Account",
     "admin": "Admin",
-    "adminPanel": "Admin panel"
+    "adminPanel": "Admin panel",
+    "contact": "Contact"
   },
   "auth": {
     "title": "Sign in to Assay",
@@ -653,5 +654,49 @@
       "untried": "Not tried"
     },
     "start": "Start an interview"
+  },
+  "contact": {
+    "eyebrow": "Get in touch",
+    "title": "Contact us",
+    "description": "Questions, bug reports or content ideas for Assay — write to us and a real person will reply.",
+    "intro": "Found a bug in a task, have an idea for a lecture, or just want to say hi? Write to us — a real person reads every message.",
+    "copy": "Copy address",
+    "copied": "Copied",
+    "notesTitle": "Before you write",
+    "notes": {
+      "bug": {
+        "title": "Reporting a bug?",
+        "body": "Include the task or lecture link and what you expected to happen. A screenshot helps a lot."
+      },
+      "content": {
+        "title": "Spotted a content issue?",
+        "body": "Wrong answer, outdated API, a typo — tell us which slide and we'll fix it in the next content update."
+      },
+      "reply": {
+        "title": "When we reply",
+        "body": "Usually within two working days, in English or Ukrainian — whichever you write in."
+      }
+    },
+    "faqNudge": "Quick question? It may already be answered in the <link>FAQ</link>.",
+    "formTitle": "Send us a message",
+    "form": {
+      "topicLabel": "What is it about?",
+      "topics": {
+        "general": "General",
+        "content": "Content",
+        "bug": "Bug report",
+        "partnership": "Partnership"
+      },
+      "name": "Your name",
+      "namePlaceholder": "Ada Lovelace",
+      "email": "Your email",
+      "emailPlaceholder": "you@example.com",
+      "message": "Message",
+      "messagePlaceholder": "Tell us what's on your mind…",
+      "hint": "Sending opens your email app with the message ready to go.",
+      "opened": "Your email app should open now — just hit send there.",
+      "submit": "Send message",
+      "subjectFrom": "Message from {name}"
+    }
   }
 }

@@ -39,6 +39,11 @@ export async function SiteFooter() {
                 {nav("faq")}
               </Link>
             </li>
+            <li>
+              <Link className={linkClass} href="/contact">
+                {nav("contact")}
+              </Link>
+            </li>
           </ul>
         </nav>
         <nav aria-labelledby="footer-learn">
