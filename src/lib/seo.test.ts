@@ -49,6 +49,15 @@ describe("publicPageMetadata", () => {
     expect(meta.twitter).toMatchObject({ card: "summary_large_image", title: "T", description: "D" });
   });
 
+  it("always carries the locale's social image, since a page's openGraph replaces the layout's", () => {
+    const meta = publicPageMetadata({ path: "/contact", locale: "en", title: "T", description: "D" });
+    const url = `${siteConfig.url}/en/opengraph-image/default`;
+    expect(meta.openGraph).toMatchObject({ images: [{ url, width: 1200, height: 630, alt: "T" }] });
+    expect(meta.twitter).toMatchObject({ images: [{ url, alt: "T" }] });
+    const article = publicPageMetadata({ path: "/x", locale: "uk", title: "T", description: "D", openGraph: { type: "article" } });
+    expect(article.openGraph).toMatchObject({ images: [{ url: `${siteConfig.url}/uk/opengraph-image/default` }] });
+  });
+
   it("lets a page override the Open Graph type", () => {
     const meta = publicPageMetadata({ path: "/x", locale: "en", title: "T", description: "D", openGraph: { type: "article" } });
     expect(meta.openGraph).toMatchObject({ type: "article", siteName: "Assay" });

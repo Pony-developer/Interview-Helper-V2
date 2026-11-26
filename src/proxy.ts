@@ -61,6 +61,7 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip API routes, auth route handlers, Next internals and files with an extension.
-  matcher: ["/((?!api|auth|_next|_vercel|.*\\..*).*)"],
+  // Skip API routes, auth route handlers, Next internals, generated OG images (so `/en/opengraph-image/…`
+  // is served directly instead of 307-ing to an unprefixed path) and files with an extension.
+  matcher: ["/((?!api|auth|_next|_vercel|.*opengraph-image|.*\\..*).*)"],
 };

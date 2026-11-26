@@ -2,8 +2,9 @@ import { toLocale } from "@/i18n/locale";
 import { ImageResponse } from "next/og";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { OG_IMAGE_SIZE } from "@/lib/seo";
 
-const size = { width: 1200, height: 630 };
+const size = { ...OG_IMAGE_SIZE };
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

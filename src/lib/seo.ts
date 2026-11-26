@@ -22,11 +22,21 @@ export function ogLocale(locale: Locale | string) {
 
 type OpenGraph = NonNullable<Metadata["openGraph"]>;
 
+export const OG_IMAGE_SIZE = { width: 1200, height: 630 } as const;
+
+/**
+ * Absolute URL of the locale's social card, served by `app/[locale]/opengraph-image.tsx`.
+ * Always locale-prefixed: the proxy skips this path, so it answers 200 without a redirect.
+ */
+export function ogImageUrl(locale: string) {
+  return absoluteUrl(`/${locale}/opengraph-image/default`);
+}
+
 /**
  * Metadata for a public, indexable page: canonical, hreflang, Open Graph and Twitter.
  * Next.js merges metadata shallowly, so a page that sets `openGraph` replaces the layout's whole
- * object; this rebuilds the shared fields (site name, locales) every time. The image comes from
- * the `opengraph-image` file convention, which Next.js adds to both cards.
+ * object — including the image from the `opengraph-image` file convention. This rebuilds the shared
+ * fields (site name, locales, image) every time so every page keeps a social card.
  */
 export function publicPageMetadata({
   path,
@@ -41,6 +51,7 @@ export function publicPageMetadata({
   description: string;
   openGraph?: OpenGraph;
 }): Metadata {
+  const image = { url: ogImageUrl(locale), ...OG_IMAGE_SIZE, alt: title, type: "image/png" };
   return {
     description,
     alternates: alternatesFor(path, locale),
@@ -52,12 +63,14 @@ export function publicPageMetadata({
       url: absoluteUrl(localizedPath(path, locale)),
       locale: ogLocale(locale),
       alternateLocale: routing.locales.filter((l) => l !== locale).map(ogLocale),
+      images: [image],
       ...openGraph,
     } as OpenGraph,
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [{ url: image.url, alt: title }],
       ...(siteConfig.twitter ? { site: siteConfig.twitter, creator: siteConfig.twitter } : {}),
     },
   };

@@ -14,7 +14,8 @@ function entry(path: string, priority: number, lastModified?: string): MetadataR
   languages["x-default"] = absoluteUrl(localizedPath(path, routing.defaultLocale));
   return {
     url: absoluteUrl(localizedPath(path, routing.defaultLocale)),
-    lastModified: lastModified ? new Date(lastModified) : new Date(),
+    // Only real modification dates: a "now" timestamp on every regeneration makes Google distrust lastmod.
+    ...(lastModified ? { lastModified: new Date(lastModified) } : {}),
     changeFrequency: path === "/" ? "weekly" : "monthly",
     priority,
     alternates: { languages },

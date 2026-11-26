@@ -6,9 +6,10 @@ import { ContactForm, CopyEmail } from "@/components/contact/ContactForm";
 import { PageHero } from "@/components/site/PageHero";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
+import { JsonLd } from "@/components/site/JsonLd";
 import { Link } from "@/i18n/navigation";
-import { publicPageMetadata } from "@/lib/seo";
-import { siteConfig } from "@/lib/site";
+import { localizedPath, organizationId, organizationJsonLd, publicPageMetadata, websiteId } from "@/lib/seo";
+import { absoluteUrl, siteConfig } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/contact">): Promise<Metadata> {
   const locale = toLocale((await params).locale);
@@ -23,7 +24,9 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
   const locale = toLocale((await params).locale);
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "contact" });
+  const nav = await getTranslations({ locale, namespace: "nav" });
   const email = siteConfig.contactEmail;
+  const pageUrl = absoluteUrl(localizedPath("/contact", locale));
 
   const notes = [
     { icon: Bug, title: t("notes.bug.title"), body: t("notes.bug.body") },
@@ -99,6 +102,41 @@ export default async function ContactPage({ params }: PageProps<"/[locale]/conta
         </div>
       </main>
       <SiteFooter />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              ...organizationJsonLd,
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "customer support",
+                email,
+                availableLanguage: ["English", "Ukrainian"],
+              },
+            },
+            {
+              "@type": "ContactPage",
+              "@id": `${pageUrl}#webpage`,
+              url: pageUrl,
+              name: t("title"),
+              description: t("description"),
+              inLanguage: locale,
+              isPartOf: { "@id": websiteId },
+              about: { "@id": organizationId },
+              breadcrumb: { "@id": `${pageUrl}#breadcrumb` },
+            },
+            {
+              "@type": "BreadcrumbList",
+              "@id": `${pageUrl}#breadcrumb`,
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: nav("home"), item: absoluteUrl(localizedPath("/", locale)) },
+                { "@type": "ListItem", position: 2, name: nav("contact"), item: pageUrl },
+              ],
+            },
+          ],
+        }}
+      />
     </>
   );
 }
