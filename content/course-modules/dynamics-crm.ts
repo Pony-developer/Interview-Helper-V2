@@ -5,11 +5,20 @@ import {
   sampleAppModule,
   webResourcesModule,
 } from "./dynamics-crm-modules/client";
+import { csharpBasicsModule } from "./dynamics-crm-modules/csharp-basics";
+import { fetchDrillsModule } from "./dynamics-crm-modules/fetch-drills";
+import { firstPluginsModule } from "./dynamics-crm-modules/first-plugins";
+import { firstStepsModule } from "./dynamics-crm-modules/first-steps";
+import { jsBasicsModule } from "./dynamics-crm-modules/js-basics";
+import { dataMigrationModule } from "./dynamics-crm-modules/data-migration";
+import { diagnosticsModule } from "./dynamics-crm-modules/diagnostics";
 import { executeModule } from "./dynamics-crm-modules/execute";
 import { extensibilityModule } from "./dynamics-crm-modules/extensibility";
+import { interviewModule } from "./dynamics-crm-modules/interview";
 import { platformModule } from "./dynamics-crm-modules/platform";
 import { pluginFundamentalsModule } from "./dynamics-crm-modules/plugin-fundamentals";
 import { pluginQualityModule } from "./dynamics-crm-modules/plugin-quality";
+import { powerAutomateModule } from "./dynamics-crm-modules/power-automate";
 import { sdkModule } from "./dynamics-crm-modules/sdk";
 import { securityModule } from "./dynamics-crm-modules/security";
 import { solutionsModule } from "./dynamics-crm-modules/solutions";
@@ -27,13 +36,20 @@ import type { ModuleDef } from "./types";
  */
 export const dynamicsCrmModules: ModuleDef[] = [
   platformModule,
+  firstStepsModule,
   solutionsModule,
+  csharpBasicsModule,
   sdkModule,
+  fetchDrillsModule,
   pluginFundamentalsModule,
+  firstPluginsModule,
   workflowsModule,
   executeModule,
   pluginQualityModule,
   extensibilityModule,
+  powerAutomateModule,
+  dataMigrationModule,
+  jsBasicsModule,
   clientModule,
   clientAdvancedModule,
   clientBestPracticesModule,
@@ -41,4 +57,6 @@ export const dynamicsCrmModules: ModuleDef[] = [
   webApiModule,
   sampleAppModule,
   securityModule,
+  diagnosticsModule,
+  interviewModule,
 ];

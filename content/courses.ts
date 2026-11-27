@@ -110,7 +110,10 @@ export const courses: CourseContent[] = [
       uk: "Серверна та клієнтська розробка на Dynamics 365 і Dataverse: модель даних, рішення та ALM, SDK і FetchXML, плагіни та конвеєр подій, Custom API та інтеграції, скрипти форм і PCF, модель безпеки, з практикою на C# і SQL, що моделює платформу.",
     },
     topics: [
-      { en: "Dynamics 365, Power Platform and Dataverse tables", uk: "Dynamics 365, Power Platform і таблиці Dataverse" },
+      { en: "Dynamics 365, Power Platform and Dataverse: tables, column types, data modelling, model-driven apps and platform services", uk: "Dynamics 365, Power Platform і Dataverse: таблиці, типи стовпців, моделювання даних, model-driven застосунки та сервіси платформи" },
+      { en: "First steps for new developers: the vocabulary, your first table and app, what happens on Save", uk: "Перші кроки для нових розробників: словник, перша таблиця й застосунок, що відбувається при збереженні" },
+      { en: "C# and JavaScript basics for plug-ins and form scripts", uk: "Основи C# і JavaScript для плагінів і скриптів форм" },
+      { en: "Easy drills: reading FetchXML as SQL and your first plug-ins", uk: "Прості вправи: читаємо FetchXML як SQL і перші плагіни" },
       { en: "Solutions, layers and ALM pipelines", uk: "Рішення, шари та конвеєри ALM" },
       { en: "IOrganizationService, QueryExpression and FetchXML", uk: "IOrganizationService, QueryExpression і FetchXML" },
       { en: "Plug-in fundamentals: architecture, messages, the pipeline, a Hello World plug-in", uk: "Основи плагінів: архітектура, повідомлення, конвеєр, плагін Hello World" },
@@ -123,6 +126,10 @@ export const courses: CourseContent[] = [
       { en: "Client-side best practices: TypeScript, performance, debugging, supported code", uk: "Найкращі практики клієнта: TypeScript, продуктивність, налагодження, підтримуваний код" },
       { en: "HTML web resources and the Web API", uk: "HTML веб-ресурси та Web API" },
       { en: "Security: business units, roles, teams and column security", uk: "Безпека: бізнес-підрозділи, ролі, команди та безпека стовпців" },
+      { en: "Power Automate cloud flows on Dataverse: triggers, solutions, error handling and limits", uk: "Хмарні потоки Power Automate на Dataverse: тригери, рішення, обробка помилок і ліміти" },
+      { en: "Data migration: load order, keys, bulk APIs, bypassing logic and reconciliation", uk: "Міграція даних: порядок завантаження, ключі, масові API, обхід логіки та звірка" },
+      { en: "Diagnostics, query performance and optimistic concurrency", uk: "Діагностика, продуктивність запитів і оптимістична конкурентність" },
+      { en: "Interview preparation: common questions and design scenarios", uk: "Підготовка до співбесіди: типові питання та задачі на проєктування" },
     ],
   },
   {
