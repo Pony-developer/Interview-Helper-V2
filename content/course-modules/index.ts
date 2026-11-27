@@ -2,6 +2,7 @@ import { advancedCsharpModules } from "./advanced-csharp";
 import { csharpModules } from "./csharp";
 import { databasesModules } from "./databases";
 import { designPatternsModules } from "./design-patterns";
+import { dotnetInterviewModules } from "./dotnet-interview";
 import { dynamicsCrmModules } from "./dynamics-crm";
 import { frontendInterviewModules } from "./frontend-interview";
 import type { ModuleDef } from "./types";
@@ -14,6 +15,7 @@ export const courseModules: Record<string, ModuleDef[]> = {
   csharp: csharpModules,
   databases: databasesModules,
   "design-patterns": designPatternsModules,
+  "dotnet-interview": dotnetInterviewModules,
   "dynamics-crm": dynamicsCrmModules,
   "frontend-interview": frontendInterviewModules,
 };

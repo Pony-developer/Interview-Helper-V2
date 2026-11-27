@@ -60,7 +60,8 @@ describe("matchSkills (Ukrainian post)", () => {
 
 describe("special tokens", () => {
   it("matches symbols and dotted names", () => {
-    expect(slugs("We use C#, C++ and ASP.NET Core with Node.js")).toEqual(expect.arrayContaining(["csharp", "cpp", "dotnet", "nodejs"]));
+    expect(slugs("We use C#, C++ and ASP.NET Core with Node.js")).toEqual(expect.arrayContaining(["csharp", "cpp", "aspnet-core", "nodejs"]));
+    expect(slugs("Backend on .NET 8")).toEqual(expect.arrayContaining(["dotnet"]));
   });
   it("matches hyphen/space variants", () => {
     expect(slugs("react-native and end to end testing")).toEqual(expect.arrayContaining(["react-native", "e2e-testing"]));

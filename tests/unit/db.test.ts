@@ -689,12 +689,43 @@ describe.skipIf(!existsSync(seedPath))("database schema, RLS and RPCs", () => {
       });
     });
 
+    it("seeds published .NET interview tasks copied from the C# courses", async () => {
+      const rows = (
+        await db.query<{ kind: string; n: number; linked: number; keyed: number }>(
+          `select t.kind, count(*)::int as n, count(t.copied_from_slide_id)::int as linked,
+                  count(coalesce(sol.expected_output, array_to_string(sol.correct_option_ids, ',')))::int as keyed
+             from public.tasks t
+             join public.course_slides s on s.id = t.copied_from_slide_id
+             join public.courses c on c.id = s.course_id and c.slug = 'dotnet-interview'
+             join private.task_solutions sol on sol.task_id = t.id
+            where t.published and t.source = 'seed'
+            group by t.kind order by t.kind`,
+        )
+      ).rows;
+      expect(rows.map((r) => r.kind)).toEqual(["quiz", "practice"]);
+      for (const r of rows) {
+        expect(r.n).toBeGreaterThan(10);
+        expect(r.linked).toBe(r.n);
+        expect(r.keyed).toBe(r.n);
+      }
+      const flags = (
+        await db.query<{ slug: string; has_content: boolean; lecture: string | null }>(
+          `select s.slug, s.has_content, (select l.slug from public.lectures l where l.skill_id = s.id limit 1) as lecture
+             from public.skills s where s.slug in ('csharp', 'dotnet', 'aspnet-core', 'linq', 'dotnet-async') order by s.slug`,
+        )
+      ).rows;
+      expect(flags).toHaveLength(5);
+      for (const f of flags) expect(f, f.slug).toMatchObject({ has_content: true, lecture: f.slug });
+    });
+
     it("copies course quiz questions and practices into draft tasks, once, and grades output practices", async () => {
       const skill = (await db.query<{ slug: string }>(`select slug from public.skills order by slug limit 1`)).rows[0].slug;
       const quizSlide = (
         await db.query<{ id: string; qid: string; n: number }>(
-          `select id, quiz->'questions'->0->>'id' as qid, jsonb_array_length(quiz->'questions') as n
-             from public.course_slides where slug = 'terminology'`,
+          // A course the seed doesn't copy into tasks itself (content/course-tasks.ts), so nothing is imported yet.
+          `select s.id, s.quiz->'questions'->0->>'id' as qid, jsonb_array_length(s.quiz->'questions') as n
+             from public.course_slides s join public.courses c on c.id = s.course_id
+            where c.slug = 'databases' and s.kind = 'quiz' order by s.sort_order limit 1`,
         )
       ).rows[0];
       const sqlSlide = (

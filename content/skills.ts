@@ -438,7 +438,22 @@ export const skills = defineSkills([
   // ── Languages ───────────────────────────────────────────────────────────────
   s("python", "Python", "languages", ["python", "python3", "python 3", "пайтон"], { popularity: 90 }),
   s("java", "Java", "languages", ["java", "java 8", "java 11", "java 17", "java 21", "jvm"], { popularity: 85 }),
-  s("csharp", "C#", "languages", ["c#", "csharp", "c sharp"], { popularity: 80 }),
+  s("csharp", "C#", "languages", ["c#", "csharp", "c sharp", "сі шарп"], {
+    ...core,
+    popularity: 80,
+    description: {
+      en: "The C# language: types, classes and structs, generics, delegates, exceptions, records and pattern matching.",
+      uk: "Мова C#: типи, класи й структури, дженерики, делегати, винятки, записи (records) і зіставлення зі зразком.",
+    },
+  }),
+  s("linq", "LINQ", "languages", ["linq", "plinq", "linq to objects", "linq to sql", "expression trees"], {
+    ...core,
+    popularity: 55,
+    description: {
+      en: "Language-Integrated Query in C#: deferred execution, query operators, IEnumerable vs IQueryable, expression trees.",
+      uk: "LINQ у C#: відкладене виконання, оператори запитів, IEnumerable проти IQueryable, дерева виразів.",
+    },
+  }),
   s("cpp", "C++", "languages", ["c++", "cpp", "c++17", "c++20", "stl"], { popularity: 65 }),
   s("c", "C", "languages", ["c language", "ansi c", "embedded c", "c programming"], { popularity: 40 }),
   s("go", "Go", "languages", ["golang"], { popularity: 70, caseSensitiveAliases: ["Go"] }),
@@ -659,7 +674,30 @@ export const skills = defineSkills([
   s("fastapi", "FastAPI", "backend", ["fastapi"], { popularity: 35 }),
   s("spring", "Spring Boot", "backend", ["spring boot", "spring framework", "spring mvc", "spring cloud", "spring data"], { popularity: 60, caseSensitiveAliases: ["Spring"] }),
   s("hibernate", "Hibernate / JPA", "backend", ["hibernate", "jpa"], { popularity: 35 }),
-  s("dotnet", ".NET", "backend", [".net", "dotnet", ".net core", "asp.net", "asp.net core", ".net 6", ".net 8"], { popularity: 65 }),
+  s("dotnet", ".NET", "backend", [".net", "dotnet", ".net core", ".net 6", ".net 8", ".net 9", "clr", ".net framework"], {
+    ...core,
+    popularity: 65,
+    description: {
+      en: "The .NET platform: the CLR, JIT, assemblies, the type system, memory, the garbage collector and IDisposable.",
+      uk: "Платформа .NET: CLR, JIT, збірки, система типів, пам'ять, збирач сміття та IDisposable.",
+    },
+  }),
+  s("aspnet-core", "ASP.NET Core", "backend", ["asp.net", "asp.net core", "asp.net mvc", "asp.net web api", "minimal api", "minimal apis"], {
+    ...core,
+    popularity: 60,
+    description: {
+      en: "Web apps and APIs on ASP.NET Core: hosting, middleware, dependency injection, configuration, routing and caching.",
+      uk: "Вебзастосунки й API на ASP.NET Core: хостинг, middleware, впровадження залежностей, конфігурація, маршрутизація й кешування.",
+    },
+  }),
+  s("dotnet-async", ".NET Async & Threading", "backend", ["task parallel library", "tpl dataflow", "system.threading", "thread pool"], {
+    ...core,
+    popularity: 50,
+    description: {
+      en: "Tasks and async/await in .NET, threads and the thread pool, locks, SemaphoreSlim, concurrent collections and Parallel.",
+      uk: "Task і async/await у .NET, потоки й пул потоків, блокування, SemaphoreSlim, конкурентні колекції та Parallel.",
+    },
+  }),
   s("entity-framework", "Entity Framework", "backend", ["entity framework", "ef core"], { popularity: 35 }),
   s("laravel", "Laravel", "backend", ["laravel"], { popularity: 35 }),
   s("symfony", "Symfony", "backend", ["symfony"], { popularity: 20 }),
@@ -868,4 +906,10 @@ export const CORE_SKILL_SLUGS = [
   "module-pattern",
   "event-emitters",
   "dynamics-crm",
+  // .NET: tasks come from the C#/.NET courses (content/course-tasks.ts).
+  "csharp",
+  "dotnet",
+  "aspnet-core",
+  "linq",
+  "dotnet-async",
 ] as const;

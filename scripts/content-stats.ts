@@ -3,11 +3,16 @@
  *   npx tsx scripts/content-stats.ts
  * Counts only a task's primary skill (its first skill reference).
  */
+import { loadCourseModules } from "@/lib/content/course-loader";
+import { deriveCourseTasks } from "@/lib/content/course-tasks";
 import { loadContent } from "@/lib/content/loader";
 import { CORE_SKILL_SLUGS } from "@content/skills";
 
 async function main() {
-  const { tasks, lectures } = await loadContent();
+  const { tasks: authored, lectures, skills } = await loadContent();
+  // Includes the tasks copied from courses (content/course-tasks.ts).
+  const fromCourses = deriveCourseTasks(loadCourseModules().courses, new Set(skills.map((s) => s.slug))).tasks;
+  const tasks = [...authored, ...fromCourses];
   const rows = CORE_SKILL_SLUGS.map((slug) => {
     const own = tasks.filter((t) => {
       const first = t.skills[0];

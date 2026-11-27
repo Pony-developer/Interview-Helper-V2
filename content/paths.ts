@@ -101,6 +101,13 @@ export const paths: PathContent[] = [
         },
       },
       {
+        course: "dotnet-interview",
+        why: {
+          en: "Before the interview, check the .NET side end to end: the typical Junior, Middle and Senior questions on the CLR, memory, async, collections, ASP.NET Core, databases and distributed systems, with model answers, quizzes and the coding tasks interviewers actually give. It turns what you learned in the C# and database stages into confident spoken answers.",
+          uk: "Перед співбесідою перевірте .NET-частину від початку до кінця: типові питання рівнів Junior, Middle і Senior про CLR, пам'ять, async, колекції, ASP.NET Core, бази даних і розподілені системи зі зразковими відповідями, квізами та задачами з коду, які справді дають на співбесідах. Це перетворює знання з етапів C# і баз даних на впевнені відповіді вголос.",
+        },
+      },
+      {
         course: "frontend-interview",
         why: {
           en: "Dynamics developers also own the client side: form scripts, web resources and PCF controls. This stage prepares you for the frontend questions of the interview.",
