@@ -113,14 +113,14 @@ const patternSolution = `        switch (item)
         {
             case null:
                 throw new ArgumentNullException("item");
-            case Book b when b.IsEbook:
-                return b.BasePrice * 0.9m;
-            case Food f when f.DaysToExpiry <= 0:
-                return 0m;
-            case Food f when f.DaysToExpiry <= 2:
-                return f.BasePrice / 2;
-            case Gadget g when g.Brand == "Acme":
-                return g.BasePrice + 15m;
+            case Book b:
+                return b.IsEbook ? b.BasePrice * 0.9m : b.BasePrice;
+            case Food f:
+                if (f.DaysToExpiry <= 0) return 0m;
+                if (f.DaysToExpiry <= 2) return f.BasePrice / 2;
+                return f.BasePrice;
+            case Gadget g:
+                return g.Brand == "Acme" ? g.BasePrice + 15m : g.BasePrice;
             default:
                 return item.BasePrice;
         }`;

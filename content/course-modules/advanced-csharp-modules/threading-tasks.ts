@@ -66,16 +66,16 @@ const throttleSolution = `        var gate = new SemaphoreSlim(maxParallel);
         for (int i = 0; i < items.Count; i++)
         {
             T item = items[i];
-            tasks[i] = RunOne(item);
+            tasks[i] = RunOne(item, gate, work);
         }
         return await Task.WhenAll(tasks);
+    }
 
-        async Task<TResult> RunOne(T item)
-        {
-            await gate.WaitAsync();
-            try { return await work(item); }
-            finally { gate.Release(); }
-        }`;
+    private static async Task<TResult> RunOne<T, TResult>(T item, SemaphoreSlim gate, Func<T, Task<TResult>> work)
+    {
+        await gate.WaitAsync();
+        try { return await work(item); }
+        finally { gate.Release(); }`;
 
 const throttleMain = `        int running = 0, maxSeen = 0;
         var gateLock = new object();

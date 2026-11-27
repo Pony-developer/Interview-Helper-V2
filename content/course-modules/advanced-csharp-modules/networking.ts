@@ -38,7 +38,8 @@ const querySolution = `        var parts = new List<string>();
         }
         return result;`;
 
-const queryMain = `        string url = Query.Build("https://shop.test/search", new[]
+const queryMain = `        Console.OutputEncoding = new UTF8Encoding(false);   // print non-ASCII text correctly
+        string url = Query.Build("https://shop.test/search", new[]
         {
             new KeyValuePair<string, string>("q", "C# & .NET"),
             new KeyValuePair<string, string>("city", "Київ"),
@@ -114,7 +115,8 @@ const framingSolution = `        byte[] header = new byte[4];
         }
         return total;`;
 
-const framingMain = `        var wire = new MemoryStream();
+const framingMain = `        Console.OutputEncoding = new UTF8Encoding(false);   // print non-ASCII text correctly
+        var wire = new MemoryStream();
         Framing.WriteMessage(wire, "HELLO");
         Framing.WriteMessage(wire, "ORDER 42: 3 × pens");
         Framing.WriteMessage(wire, "");
@@ -231,8 +233,10 @@ export const networkingModule: ModuleDef = {
       ),
     ]),
     practice("query-string-practice", "Building and parsing query strings", "Побудова й розбір рядків запиту", {
-      starter: PROGRAM_WITH(queryTypes(`${TODO}@@${TODO}`), queryMain, "using System.Collections.Generic;"),
-      solution: PROGRAM_WITH(queryTypes(querySolution), queryMain, "using System.Collections.Generic;"),
+      starter: PROGRAM_WITH(queryTypes(`${TODO}@@${TODO}`), queryMain, "using System.Collections.Generic;
+using System.Text;"),
+      solution: PROGRAM_WITH(queryTypes(querySolution), queryMain, "using System.Collections.Generic;
+using System.Text;"),
       expectedOutput:
         "https://shop.test/search?q=C%23%20%26%20.NET&city=%D0%9A%D0%B8%D1%97%D0%B2&page=2\nhttps://shop.test/\nC# & .NET | Київ | 2 | 3\nsort=name flag=''\nshop.test /search https 443\n",
     }),

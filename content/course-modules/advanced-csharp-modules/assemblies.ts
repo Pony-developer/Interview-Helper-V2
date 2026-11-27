@@ -33,7 +33,8 @@ const resourceSolution = `        for (CultureInfo c = culture; ; c = c.Parent)
         }
         return "[" + key + "]";`;
 
-const resourceMain = `        var res = new Resources();
+const resourceMain = `        Console.OutputEncoding = new UTF8Encoding(false);   // print non-ASCII text correctly
+        var res = new Resources();
         res.Add("", "Greeting", "Hello");
         res.Add("", "Cart", "Cart");
         res.Add("", "Checkout", "Checkout");
@@ -152,8 +153,10 @@ export const assembliesModule: ModuleDef = {
       ),
     ]),
     practice("resource-fallback-practice", "Culture fallback like a ResourceManager", "Відкат культур, як у ResourceManager", {
-      starter: PROGRAM_WITH(resourceTypes(TODO), resourceMain, "using System.Collections.Generic;\nusing System.Globalization;\nusing System.Reflection;"),
-      solution: PROGRAM_WITH(resourceTypes(resourceSolution), resourceMain, "using System.Collections.Generic;\nusing System.Globalization;\nusing System.Reflection;"),
+      starter: PROGRAM_WITH(resourceTypes(TODO), resourceMain, "using System.Collections.Generic;\nusing System.Globalization;\nusing System.Reflection;
+using System.Text;"),
+      solution: PROGRAM_WITH(resourceTypes(resourceSolution), resourceMain, "using System.Collections.Generic;\nusing System.Globalization;\nusing System.Reflection;
+using System.Text;"),
       expectedOutput:
         "uk-UA: Вітаємо / Кошик / Checkout / [Missing]\nuk: Привіт / Кошик / Checkout / [Missing]\nde-AT: Hello / Warenkorb / Checkout / [Missing]\nfr-FR: Hello / Cart / Checkout / [Missing]\nShop.Core 2.1.0.7 major=2 culture=''\n",
     }),

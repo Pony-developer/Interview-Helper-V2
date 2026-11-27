@@ -4,7 +4,7 @@ import type { ModuleDef } from "../types";
 import { lecture, practice, quiz, TODO } from "./shared";
 
 const sliceTypes = (body: string) => `// A read-only view over part of a string: no copying, like ReadOnlySpan<char>.
-readonly struct Slice
+struct Slice   // fields are readonly: an immutable view
 {
     private readonly string _text;
     public readonly int Start;

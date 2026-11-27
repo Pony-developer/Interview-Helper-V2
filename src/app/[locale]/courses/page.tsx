@@ -30,7 +30,7 @@ export default async function CoursesPage({ params }: PageProps<"/[locale]/cours
       <SiteHeader />
       <main id="main" tabIndex={-1} className="on-light focus:outline-none">
         <PageHero title={t("title")} intro={t("intro")} />
-        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:gap-10">
+        <div className="mx-auto grid max-w-7xl gap-6 px-5 py-12 sm:px-8 lg:grid-cols-2 lg:gap-8">
           {courses.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-paper-3 p-8 text-ink-muted lg:col-span-2">{t("empty")}</p>
           ) : (

@@ -1,6 +1,6 @@
 ## Task
 
-The practice runtime is an older Mono without `Span<T>`, so you'll build the core idea yourself: a `readonly struct Slice` that is a **view** (text + start + length) over a string. Creating, trimming and sub-slicing it never copies characters; only `ToString()` allocates.
+The practice runtime is an older Mono without `Span<T>`, so you'll build the core idea yourself: a `struct Slice` with readonly fields that is a **view** (text + start + length) over a string. Creating, trimming and sub-slicing it never copies characters; only `ToString()` allocates.
 
 1. **`Sub(start, length)`**: a narrower view relative to this slice. Throw `ArgumentOutOfRangeException` if it would go outside the slice.
 2. **`Trim()`**: move the start forward past spaces and the end backward past spaces; return the narrower view.

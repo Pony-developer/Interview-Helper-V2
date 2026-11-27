@@ -1,6 +1,6 @@
 ## Task
 
-Implement **`Pricing.Price(Item item)`** with a `switch` statement over **type patterns with `when` guards** (C# 7.3 style):
+Implement **`Pricing.Price(Item item)`** with a `switch` statement over **type patterns** (`case Book b:`), as in C# 7.0:
 
 | Item | Price |
 | --- | --- |
@@ -13,7 +13,7 @@ Implement **`Pricing.Price(Item item)`** with a `switch` statement over **type p
 | anything else (other gadgets, gift cards) | full price |
 | `null` | throw `ArgumentNullException` |
 
-Order the `case` labels carefully: the first matching case wins, so the more specific `when` guards must come before the general ones. `case null:` handles the null input.
+Inside each `case`, decide the price from the matched variable (`b.IsEbook`, `f.DaysToExpiry`, `g.Brand`). `case null:` handles the null input, and `default:` covers everything else. (The practice compiler is C# 7.0, which has no `when` guards on `case` labels; from C# 7.1 on you could write `case Food f when f.DaysToExpiry <= 0:`.)
 
 In modern C# you'd write the same thing as a switch expression with property patterns: `Food { DaysToExpiry: <= 0 } => 0m`. Here, practise the 7.3 form.
 

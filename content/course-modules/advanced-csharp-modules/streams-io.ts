@@ -58,7 +58,8 @@ const binarySolution = `        using (var w = new BinaryWriter(stream, Encoding
             return list;
         }`;
 
-const binaryMain = `        var data = new List<Reading>
+const binaryMain = `        Console.OutputEncoding = new UTF8Encoding(false);   // print non-ASCII text correctly
+        var data = new List<Reading>
         {
             new Reading { Sensor = "temp-1", Time = new DateTime(2024, 3, 5, 10, 0, 0), Value = 21.5, Alarm = false },
             new Reading { Sensor = "temp-2", Time = new DateTime(2024, 3, 5, 10, 0, 5), Value = 87.25, Alarm = true },
