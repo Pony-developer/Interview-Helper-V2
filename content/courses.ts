@@ -31,6 +31,26 @@ export const courses: CourseContent[] = [
     ],
   },
   {
+    slug: "advanced-csharp",
+    title: { en: "Advanced C#", uk: "Просунутий C#" },
+    summary: {
+      en: "A deep tour of C# 10 and .NET 6 for developers who already write C# every day: the type system in detail, delegates, records and patterns, collections and LINQ, garbage collection, async and threading, streams, networking, reflection, spans, interop and regular expressions. Every module ends with a quiz and a coding practice.",
+      uk: "Глибокий огляд C# 10 і .NET 6 для розробників, які вже щодня пишуть на C#: система типів у деталях, делегати, record і зіставлення зі зразком, колекції та LINQ, збирання сміття, async і потоки, потоки введення-виведення, мережа, рефлексія, Span, взаємодія з нативним кодом і регулярні вирази. Кожен модуль завершується квізом і практикою коду.",
+    },
+    topics: [
+      { en: "The .NET platform, the type system and creating types", uk: "Платформа .NET, система типів і створення типів" },
+      { en: "Delegates, events, lambdas, exceptions and iterators", uk: "Делегати, події, лямбди, винятки та ітератори" },
+      { en: "Nullability, tuples, records, patterns, attributes and dynamic", uk: "Nullable, кортежі, record, патерни, атрибути та dynamic" },
+      { en: "Strings, dates, formatting, equality and order comparison", uk: "Рядки, дати, форматування, порівняння на рівність і порядок" },
+      { en: "Collections, LINQ queries and operators, XML and JSON", uk: "Колекції, LINQ-запити та оператори, XML і JSON" },
+      { en: "Disposal, garbage collection and diagnostics", uk: "Звільнення ресурсів, збирання сміття та діагностика" },
+      { en: "Threads, tasks, async/await, locking and parallel programming", uk: "Потоки, задачі, async/await, блокування та паралельне програмування" },
+      { en: "Streams, I/O, networking and cryptography", uk: "Потоки даних, введення-виведення, мережа та криптографія" },
+      { en: "Assemblies, reflection, code generation and dynamic programming", uk: "Збірки, рефлексія, генерація коду та динамічне програмування" },
+      { en: "Span<T>, Memory<T>, native interop and regular expressions", uk: "Span<T>, Memory<T>, нативна взаємодія та регулярні вирази" },
+    ],
+  },
+  {
     slug: "javascript",
     title: { en: "JavaScript", uk: "JavaScript" },
     summary: {
@@ -63,6 +83,23 @@ export const courses: CourseContent[] = [
       { en: "Transactions, isolation levels and locking", uk: "Транзакції, рівні ізоляції та блокування" },
       { en: "Views, functions, triggers and JSON", uk: "Представлення, функції, тригери та JSON" },
       { en: "NoSQL with MongoDB, SQL vs NoSQL", uk: "NoSQL на прикладі MongoDB, SQL проти NoSQL" },
+    ],
+  },
+  {
+    slug: "design-patterns",
+    title: { en: "Design Patterns", uk: "Патерни проєктування" },
+    summary: {
+      en: "The classic design patterns explained in plain words: for each one a real-life picture, the problem it solves, a short C# example, when to use it and when not to. Then the patterns hiding in .NET and Dynamics 365 plug-ins, the anti-patterns, and how to talk about all of it in an interview, with a quiz and coding practice in every module.",
+      uk: "Класичні патерни проєктування простими словами: для кожного життєва аналогія, задача, яку він розв'язує, короткий приклад на C#, коли його застосовувати, а коли ні. Далі патерни, що ховаються в .NET і плагінах Dynamics 365, антипатерни та як говорити про все це на співбесіді, із квізом і практикою коду в кожному модулі.",
+    },
+    topics: [
+      { en: "What a pattern is: interfaces, composition and the three families", uk: "Що таке патерн: інтерфейси, композиція та три родини" },
+      { en: "Creational: Singleton, Factory Method, Abstract Factory, Builder, Prototype", uk: "Породжувальні: Singleton, Factory Method, Abstract Factory, Builder, Prototype" },
+      { en: "Structural: Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight", uk: "Структурні: Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight" },
+      { en: "Behavioral: Strategy, Observer, Command, Template Method, Chain of Responsibility", uk: "Поведінкові: Strategy, Observer, Command, Template Method, Chain of Responsibility" },
+      { en: "More behavioral: State, Iterator, Mediator, Memento, Visitor", uk: "Ще поведінкові: State, Iterator, Mediator, Memento, Visitor" },
+      { en: "Patterns in .NET: DI, Repository, Unit of Work, events, streams, LINQ", uk: "Патерни в .NET: DI, Repository, Unit of Work, події, потоки, LINQ" },
+      { en: "Patterns in Dynamics 365 plug-ins, anti-patterns and interview answers", uk: "Патерни в плагінах Dynamics 365, антипатерни та відповіді на співбесіді" },
     ],
   },
   {

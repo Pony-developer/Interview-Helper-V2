@@ -2,7 +2,7 @@
  * Runs every C# practice in the courses on Wandbox and checks that
  *   - the reference solution prints exactly `expectedOutput`, and
  *   - the starter code does NOT (otherwise the task is already solved).
- *   npx tsx scripts/verify-course-practice.ts
+ *   npx tsx scripts/verify-course-practice.ts [course-slug]
  * Sends only the authored starter and solution code to wandbox.org.
  */
 import { courseModules } from "@content/course-modules";
@@ -28,7 +28,9 @@ const normalize = (s: string) =>
 
 async function main() {
   let failures = 0;
+  const only = process.argv[2];
   for (const [course, modules] of Object.entries(courseModules)) {
+    if (only && course !== only) continue;
     for (const mod of modules) {
       for (const slide of mod.slides) {
         if (slide.kind !== "practice") continue;
