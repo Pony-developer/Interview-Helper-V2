@@ -120,7 +120,12 @@ export const courseTaskRules: CourseTaskRule[] = [
     ["junior-platform", 2, ["dotnet", "csharp"]],
     ["junior-types", 2, CS],
     ["junior-classes", 2, CS],
-    ["junior-async-db-tests", 2, ["csharp", w("dotnet-async")], { slides: { "employees-projects": { skills: ["sql"] } } }],
+    [
+      "junior-async-db-tests",
+      2,
+      ["csharp", w("dotnet-async")],
+      { slides: { "employees-projects": { skills: ["sql"] }, "course-enrollments": { skills: ["sql"] } } },
+    ],
     ["junior-practical", 2, CS],
     ["middle-general", 3, CS, { quizSkills: ["system-design", w("csharp")] }],
     [
@@ -152,6 +157,7 @@ export const courseTaskRules: CourseTaskRule[] = [
       CS,
       { slides: { "custom-linq": { skills: ["linq", w("csharp")], complexity: 5 }, "linq-filter": { skills: ["linq"] } } },
     ],
+    ["mock-interviews", 3, CS, { quizSkills: ["csharp", w("dotnet")] }],
   ]),
 
   // ── Design patterns (C# examples) ────────────────────────────────────────
