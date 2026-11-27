@@ -153,10 +153,8 @@ export const assembliesModule: ModuleDef = {
       ),
     ]),
     practice("resource-fallback-practice", "Culture fallback like a ResourceManager", "Відкат культур, як у ResourceManager", {
-      starter: PROGRAM_WITH(resourceTypes(TODO), resourceMain, "using System.Collections.Generic;\nusing System.Globalization;\nusing System.Reflection;
-using System.Text;"),
-      solution: PROGRAM_WITH(resourceTypes(resourceSolution), resourceMain, "using System.Collections.Generic;\nusing System.Globalization;\nusing System.Reflection;
-using System.Text;"),
+      starter: PROGRAM_WITH(resourceTypes(TODO), resourceMain, "using System.Collections.Generic;\nusing System.Globalization;\nusing System.Reflection;\nusing System.Text;"),
+      solution: PROGRAM_WITH(resourceTypes(resourceSolution), resourceMain, "using System.Collections.Generic;\nusing System.Globalization;\nusing System.Reflection;\nusing System.Text;"),
       expectedOutput:
         "uk-UA: Вітаємо / Кошик / Checkout / [Missing]\nuk: Привіт / Кошик / Checkout / [Missing]\nde-AT: Hello / Warenkorb / Checkout / [Missing]\nfr-FR: Hello / Cart / Checkout / [Missing]\nShop.Core 2.1.0.7 major=2 culture=''\n",
     }),

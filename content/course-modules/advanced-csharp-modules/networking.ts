@@ -233,10 +233,8 @@ export const networkingModule: ModuleDef = {
       ),
     ]),
     practice("query-string-practice", "Building and parsing query strings", "Побудова й розбір рядків запиту", {
-      starter: PROGRAM_WITH(queryTypes(`${TODO}@@${TODO}`), queryMain, "using System.Collections.Generic;
-using System.Text;"),
-      solution: PROGRAM_WITH(queryTypes(querySolution), queryMain, "using System.Collections.Generic;
-using System.Text;"),
+      starter: PROGRAM_WITH(queryTypes(`${TODO}@@${TODO}`), queryMain, "using System.Collections.Generic;\nusing System.Text;"),
+      solution: PROGRAM_WITH(queryTypes(querySolution), queryMain, "using System.Collections.Generic;\nusing System.Text;"),
       expectedOutput:
         "https://shop.test/search?q=C%23%20%26%20.NET&city=%D0%9A%D0%B8%D1%97%D0%B2&page=2\nhttps://shop.test/\nC# & .NET | Київ | 2 | 3\nsort=name flag=''\nshop.test /search https 443\n",
     }),
