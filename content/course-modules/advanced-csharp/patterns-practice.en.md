@@ -15,7 +15,7 @@ Implement **`Pricing.Price(Item item)`** with a `switch` statement over **type p
 
 Inside each `case`, decide the price from the matched variable (`b.IsEbook`, `f.DaysToExpiry`, `g.Brand`). `case null:` handles the null input, and `default:` covers everything else. (The practice compiler is C# 7.0, which has no `when` guards on `case` labels; from C# 7.1 on you could write `case Food f when f.DaysToExpiry <= 0:`.)
 
-In modern C# you'd write the same thing as a switch expression with property patterns: `Food { DaysToExpiry: <= 0 } => 0m`. Here, practise the 7.3 form.
+In modern C# you'd write the same thing as a switch expression with property patterns: `Food { DaysToExpiry: <= 0 } => 0m`. Here, practise the C# 7.0 form.
 
 Expected output:
 

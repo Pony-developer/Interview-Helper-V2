@@ -33,7 +33,7 @@ import type { ModuleDef } from "./types";
  * The "Advanced C#" course: C# 10 and .NET 6 in depth, one or two modules per topic area,
  * each with lectures, a quiz and a coding practice.
  * Lecture and task texts live in content/course-modules/advanced-csharp/<slide>.<en|uk>.md.
- * The C# practices run on Wandbox's Mono (C# 7.3) and are checked with:
+ * The C# practices run on Wandbox's Mono (C# 7.0) and are checked with:
  *   npx tsx scripts/verify-course-practice.ts advanced-csharp
  */
 export const advancedCsharpModules: ModuleDef[] = [

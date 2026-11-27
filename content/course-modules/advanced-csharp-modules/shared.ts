@@ -13,7 +13,7 @@ export const quiz = (slug: string, en: string, uk: string, questions: QuizQuesti
 
 /**
  * A C# practice slide titled "Practice: <topic>"; its task text lives in <slug>.<en|uk>.md.
- * Practices run on Wandbox's Mono compiler, so they stick to C# 7.3 without NuGet packages.
+ * Practices run on Wandbox's Mono compiler, so they stick to C# 7.0 without NuGet packages.
  */
 export const practice = (
   slug: string,
